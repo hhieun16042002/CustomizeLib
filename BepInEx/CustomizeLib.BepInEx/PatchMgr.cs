@@ -2931,7 +2931,7 @@ namespace CustomizeLib.BepInEx
             board.rowNum = levelData.RowCount;
             board.theMaxWave = levelData.WaveCount();
             board.theSun = levelData.Sun();
-            board.zombieHealthUpdater = levelData.ZombieHealthRate();
+            board.config.zombieHealthMultiplier = levelData.ZombieHealthRate();
             board.seedPool = levelData.SeedRainPlantTypes().ToIl2CppList();
             levelData.PostBoard(board);
             // 加载并实例化地图

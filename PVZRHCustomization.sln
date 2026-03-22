@@ -266,6 +266,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UltimateDoomSqualour.BepInE
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UltimateWinterLevel.BepInEx", "BepInEx\UltimateWinterLevel.BepInEx\UltimateWinterLevel.BepInEx.csproj", "{CBE03D11-3658-46D9-AA2B-E9A3A43CEE3E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UltimateCornFume.BepInEx", "BepInEx\UltimateCornFume.BepInEx\UltimateCornFume.BepInEx.csproj", "{27ACADB4-BBD8-2B67-FA69-5519FDF3B600}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -780,6 +782,10 @@ Global
 		{CBE03D11-3658-46D9-AA2B-E9A3A43CEE3E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{CBE03D11-3658-46D9-AA2B-E9A3A43CEE3E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{CBE03D11-3658-46D9-AA2B-E9A3A43CEE3E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{27ACADB4-BBD8-2B67-FA69-5519FDF3B600}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{27ACADB4-BBD8-2B67-FA69-5519FDF3B600}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{27ACADB4-BBD8-2B67-FA69-5519FDF3B600}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{27ACADB4-BBD8-2B67-FA69-5519FDF3B600}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
