@@ -11,9 +11,9 @@ using UnityEngine.Rendering;
 namespace FreezingCherry.BepInEx
 {
     [BepInPlugin("salmon.freezingcherry", "FreezingCherry", "1.0")]
-    public class Core : BasePlugin
+    public class Core : CorePlugin
     {
-        public override void Load()
+        public override void OnStart()
         {
             Tools.InitMod();
             var ab = CustomCore.GetAssetBundle(Tools.GetAssembly(), "freezingcherry");
@@ -47,9 +47,9 @@ namespace FreezingCherry.BepInEx
                     "<color=#3D1400>作为一名战地记者，寒霜樱桃始终奔赴在前线，跟随大部队的步伐，穿梭于僵尸和植物之间，他们从不害怕，“越是危险的地方，越能看清事件的本质，我们想要知道僵尸需要脑子的根本原因，如这将是我们停止战争的关键！”</color>");
                 CustomCore.TypeMgrExtra.IsIcePlant.Add(FreezingCherry.PlantID);
                 FreezingCherry.buff1 = CustomCore.RegisterCustomBuff("凝冰之力：寒霜樱桃获得的能量x2，进阶形态共享此效果", BuffType.AdvancedBuff, () => Board.Instance.ObjectExist<FreezingCherry>() || Board.Instance.ObjectExist<UltimateFreezingCherry>(),
-                    5000, "#000000", FreezingCherry.PlantID, bg: BuffBgType.Night);
+                    5000, FreezingCherry.PlantID, bg: BuffBgType.Night);
                 FreezingCherry.buff2 = CustomCore.RegisterCustomBuff("霜灭：寒霜樱桃生产的卡片持续时间减半，卡片消失后，造成寒冰樱桃爆炸和寒冰毁灭菇爆炸，进阶形态共享此效果", BuffType.AdvancedBuff, () => Board.Instance.ObjectExist<FreezingCherry>() || Board.Instance.ObjectExist<UltimateFreezingCherry>(),
-                    5000, "#000000", FreezingCherry.PlantID, bg: BuffBgType.Night);
+                    5000, FreezingCherry.PlantID, bg: BuffBgType.Night);
                 ab.GetAsset<GameObject>("IceDoomNoSprite").AddComponent<IceDoomNoSprite>();
                 CustomCore.RegisterCustomParticle(FreezingCherry.ParticleID, ab.GetAsset<GameObject>("IceDoomNoSprite"));
                 CustomCore.AddUltimatePlant(FreezingCherry.PlantID);
@@ -78,7 +78,7 @@ namespace FreezingCherry.BepInEx
                     "②火焰樱桃子弹，毁灭豌豆子弹，寄生樱桃子弹：回复2点能量\n" +
                     "③爆炸樱桃子弹，毁灭菇子弹及变种：回复10点能量\n" +
                     "④大毁灭菇子弹及变种：回复20点能量\n" +
-                    "<color=#3D1400>连携词条:</color><color=red>霜陨子母弹：手套抓取核爆樱桃及亚种点击究极寒霜樱桃时，双方将进行短暂融合裂变，对全屏僵尸造成毁灭性打击：对全场造成50倍究极寒霜樱桃的伤害并冻结10秒，对周围连续产生大量樱桃爆炸，爆出72颗一圈的寒霜核能樱桃子弹，并留下10秒的寒霜辐射区域，冻结5秒关卡</color>\n\n" +
+                    "<color=#3D1400>连携词条:</color><color=red>霜陨子母弹：手套抓取核爆樱桃及亚种点击究极寒霜樱桃时，双方将进行短暂融合裂变，对全屏僵尸造成毁灭性打击：对全场造成150倍究极寒霜樱桃的伤害并冻结10秒，对周围连续产生大量樱桃爆炸，爆出72颗一圈的寒霜核能樱桃子弹，并留下10秒的寒霜辐射区域，冻结10秒关卡</color>\n\n" +
                     "<color=#3D1400>究极寒霜樱桃毅然决然的投入到与僵尸的斗争中，只是一昧的搜集研究是无法找到解决方法的，究极寒霜樱桃始终顶在最前边，“我的身后不只是我的队友，更是万家灯火！”</color>");
                 CustomCore.TypeMgrExtra.IsIcePlant.Add(UltimateFreezingCherry.PlantID);
                 ab.GetAsset<GameObject>("Doom_nuclear2").AddComponent<IceDoomNoSprite>();
@@ -93,28 +93,28 @@ namespace FreezingCherry.BepInEx
                 CustomCore.RegisterCustomCherry(UltimateFreezingCherry.CherrySmallID, ab.GetAsset<GameObject>("BombCloudSmall"));
                 CustomCore.RegisterCustomClickCardOnPlantEvent(UltimateFreezingCherry.PlantID, PlantType.CherryBomb, (p) =>
                 {
-                    p.board.SetDoom(0, 0, false, true, p.axis.transform.position, 3600, fromType: p.thePlantType);
+                    p.board.boardAction.SetDoom(0, 0, false, true, p.axis.transform.position, 3600, fromType: p.thePlantType);
                     Action<Zombie> action = (z) =>
                     {
                         z.SetFreeze(10f);
                         z.SetCold(15f);
                         z.TakeDamage(DmgType.NormalAll, p.attackDamage / 2, p.thePlantType);
                     };
-                    p.board.CreateCherryExplode(p.axis.transform.position, p.thePlantRow, CherryBombType.IceCharry, p.attackDamage, p.thePlantType, action);
+                    p.board.boardAction.CreateCherryExplode(p.axis.transform.position, p.thePlantRow, CherryBombType.IceCharry, p.attackDamage, p.thePlantType, action);
                 }, onPlant: new CustomClickCardOnPlant
                 {
                     Trigger = CustomClickCardOnPlant.TriggerType.CardOnly
                 });
                 CustomCore.RegisterCustomClickCardOnPlantEvent(UltimateFreezingCherry.PlantID, PlantType.DoomShroom, (p) =>
                 {
-                    p.board.SetDoom(0, 0, false, true, p.axis.transform.position, 3600, fromType: p.thePlantType);
+                    p.board.boardAction.SetDoom(0, 0, false, true, p.axis.transform.position, 3600, fromType: p.thePlantType);
                     Action<Zombie> action = (z) =>
                     {
                         z.SetFreeze(10f);
                         z.SetCold(15f);
                         z.TakeDamage(DmgType.NormalAll, p.attackDamage / 2, p.thePlantType);
                     };
-                    p.board.CreateCherryExplode(p.axis.transform.position, p.thePlantRow, CherryBombType.IceCharry, p.attackDamage, p.thePlantType, action);
+                    p.board.boardAction.CreateCherryExplode(p.axis.transform.position, p.thePlantRow, CherryBombType.IceCharry, p.attackDamage, p.thePlantType, action);
                 }, onPlant: new CustomClickCardOnPlant
                 {
                     Trigger = CustomClickCardOnPlant.TriggerType.CardOnly
@@ -295,7 +295,7 @@ namespace FreezingCherry.BepInEx
         public void ChangeState()
         {
             plant.anim.SetInteger("cureentStatus", 2);
-            plant.board.SetDoom(0, 0, false, true, plant.axis.transform.position, 18000, existParticle: false, fromType: plant.thePlantType);
+            plant.board.boardAction.SetDoom(0, 0, false, true, plant.axis.transform.position, 18000, existParticle: false, fromType: plant.thePlantType);
             CreateParticle.SetParticle(IceDoomSprite, plant.axis.transform.position, 11);
             plant.StartCoroutine(CreateBomb());
         }
@@ -309,7 +309,7 @@ namespace FreezingCherry.BepInEx
                 if (zombie.isMindControlled) continue;
                 zombie.SetFreeze(10f);
                 zombie.SetCold(15f);
-                zombie.TakeDamage(DmgType.IceAll, plant.attackDamage * 50, plant.thePlantType);
+                zombie.TakeDamage(DmgType.IceAll, plant.attackDamage * 150, plant.thePlantType);
             }
             Vector3 position = plant.axis.position;
             for (int angle = 0; angle < 360; angle += 5)
@@ -319,12 +319,12 @@ namespace FreezingCherry.BepInEx
                 if (bullet != null)
                 {
                     bullet.transform.rotation = Quaternion.Euler(0, 0, angle);
-                    bullet.Damage = plant.attackDamage * 50;
+                    bullet.Damage = plant.attackDamage * 150;
                     bullet.fromType = UltimateFreezingCherry.PlantID;
                 }
             }
             Instantiate(IceRadiation, plant.axis.transform.position, Quaternion.identity, plant.board.transform);
-            plant.board.iceDoomFreezeTime += 5f;
+            plant.board.iceDoomFreezeTime += 10f;
             plant.board.StartCoroutine(CreateBomb());
             plant.Die(Plant.DieReason.BySelf);
         }
@@ -419,7 +419,7 @@ namespace FreezingCherry.BepInEx
                 {
                     z.SetFreeze(10f);
                     z.SetCold(15f);
-                    int damage = 3600;
+                    int damage = 7200;
                     if (z.freezeTimer > 0f)
                         damage *= 4;
                     z.TakeDamage(DmgType.NormalAll, damage, PlantID);
@@ -427,7 +427,7 @@ namespace FreezingCherry.BepInEx
                 int column = UnityEngine.Random.Range(0, Board.Instance.columnNum);
                 int row = UnityEngine.Random.Range(0, Board.Instance.rowNum);
                 var position = new Vector2(Mouse.Instance.GetBoxXFromColumn(column), Mouse.Instance.GetBoxYFromRow(row));
-                Board.Instance.CreateCherryExplode(position, row, CherryID, 3600, PlantID, action);
+                Board.Instance.boardAction.CreateCherryExplode(position, row, CherryID, 7200, PlantID, action);
             }
             catch (Exception e)
             {
@@ -471,7 +471,7 @@ namespace FreezingCherry.BepInEx
                 timer = 0.5f;
 
                 Vector3 position = transform.position;
-                float radius = transform.localScale.x * 0.5f;
+                float radius = transform.localScale.x * 2.5f / 3.7f;
 
                 Collider2D[] colliders = Physics2D.OverlapCircleAll(
                     new Vector2(position.x, position.y),
@@ -549,8 +549,8 @@ namespace FreezingCherry.BepInEx
                         damage *= 4;
                     z.TakeDamage(DmgType.NormalAll, damage, __instance.thePlantType);
                 };
-                __instance.board.CreateCherryExplode(__instance.axis.transform.position, __instance.thePlantRow, CherryBombType.IceCharry, __instance.attackDamage, __instance.thePlantType, action);
-                __instance.board.SetDoom(0, 0, false, true, __instance.axis.transform.position, 3600, fromType: __instance.thePlantType);
+                __instance.board.boardAction.CreateCherryExplode(__instance.axis.transform.position, __instance.thePlantRow, CherryBombType.IceCharry, __instance.attackDamage, __instance.thePlantType, action);
+                __instance.board.boardAction.SetDoom(0, 0, false, true, __instance.axis.transform.position, 3600, fromType: __instance.thePlantType);
                 if (__instance.TryGetComponent<UltimateFreezingCherry>(out var cherry) && cherry != null && !cherry.IsDestroyed())
                     __instance.StopAllCoroutines();
                 return false;
@@ -613,13 +613,13 @@ namespace FreezingCherry.BepInEx
                     };
                     var bomb = CoreTools.CreateCherryExplode(__instance.transform.position, Mouse.Instance.GetRowFromY(__instance.transform.position.x, __instance.transform.position.y), CherryBombType.IceCharry,
                         3600, __instance.GetData<PlantType>("FreezingCherry_FromType"), action).Item2;
-                    if (GameAPP.distablexplodeFlash)
+                    if (GameAPP.config.distablexplodeFlash)
                     {
                         bomb.GetComponent<ParticleSystem>().Simulate(0f, true);
                         bomb.GetComponent<ParticleSystemRenderer>().enabled = false;
                     }
-                    __instance.board.SetDoom(0, 0, false, true, __instance.transform.position - new Vector3(0f, 0.75f, 0f), 3600, existParticle: false, fromType: __instance.GetData<PlantType>("FreezingCherry_FromType"));
-                    if (!GameAPP.distablexplodeFlash)
+                    __instance.board.boardAction.SetDoom(0, 0, false, true, __instance.transform.position - new Vector3(0f, 0.75f, 0f), 3600, existParticle: false, fromType: __instance.GetData<PlantType>("FreezingCherry_FromType"));
+                    if (!GameAPP.config.distablexplodeFlash)
                         CreateParticle.SetParticle(FreezingCherry.ParticleID, __instance.transform.position, 11, true);
                     UnityEngine.Object.Destroy(__instance.gameObject);
                 }
@@ -652,10 +652,10 @@ namespace FreezingCherry.BepInEx
                     cherry.range = 1f;
                     cherry.fromType = __instance.fromType;
                     cherry.maxRow = 1;
-                    __instance.board.SetDoom(0, 0, false, true, __instance.transform.position, __instance.Damage, existParticle: false, fromType: __instance.GetData<PlantType>("FreezingCherry_FromType"));
+                    __instance.board.boardAction.SetDoom(0, 0, false, true, __instance.transform.position, __instance.Damage, existParticle: false, fromType: __instance.GetData<PlantType>("FreezingCherry_FromType"));
                     var position = __instance.transform.position;
                     position.y -= 0.75f;
-                    if (!GameAPP.distablexplodeFlash)
+                    if (!GameAPP.config.distablexplodeFlash)
                         CreateParticle.SetParticle(UltimateFreezingCherry.ParticleID, position, 11, true);
                     __instance.Die();
                 }
@@ -685,10 +685,10 @@ namespace FreezingCherry.BepInEx
                 cherry.fromType = __instance.fromType;
                 cherry.maxRow = 1;
                 cherry.zombieAction = action;
-                __instance.board.SetDoom(0, 0, false, true, __instance.transform.position, __instance.Damage, existParticle: false, fromType: __instance.GetData<PlantType>("FreezingCherry_FromType"));
+                __instance.board.boardAction.SetDoom(0, 0, false, true, __instance.transform.position, __instance.Damage, existParticle: false, fromType: __instance.GetData<PlantType>("FreezingCherry_FromType"));
                 var position = __instance.transform.position;
                 position.y -= 0.75f;
-                if (!GameAPP.distablexplodeFlash)
+                if (!GameAPP.config.distablexplodeFlash)
                     CreateParticle.SetParticle(UltimateFreezingCherry.ParticleID, position, 11, true);
                 __instance.Die();
                 return false;

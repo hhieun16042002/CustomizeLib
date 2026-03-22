@@ -262,6 +262,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThreePuffSuperHypnoGatling.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Mower.BepInEx", "BepInEx\Mower.BepInEx\Mower.BepInEx.csproj", "{1A1F68CA-C9C8-460A-8E3F-03D3584D480E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UltimateDoomSqualour.BepInEx", "BepInEx\UltimateDoomSqualour.BepInEx\UltimateDoomSqualour.BepInEx.csproj", "{0A9920E6-8554-4744-AEF1-226534F646BA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UltimateWinterLevel.BepInEx", "BepInEx\UltimateWinterLevel.BepInEx\UltimateWinterLevel.BepInEx.csproj", "{CBE03D11-3658-46D9-AA2B-E9A3A43CEE3E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -768,6 +772,14 @@ Global
 		{1A1F68CA-C9C8-460A-8E3F-03D3584D480E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1A1F68CA-C9C8-460A-8E3F-03D3584D480E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1A1F68CA-C9C8-460A-8E3F-03D3584D480E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0A9920E6-8554-4744-AEF1-226534F646BA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0A9920E6-8554-4744-AEF1-226534F646BA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0A9920E6-8554-4744-AEF1-226534F646BA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0A9920E6-8554-4744-AEF1-226534F646BA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CBE03D11-3658-46D9-AA2B-E9A3A43CEE3E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CBE03D11-3658-46D9-AA2B-E9A3A43CEE3E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CBE03D11-3658-46D9-AA2B-E9A3A43CEE3E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CBE03D11-3658-46D9-AA2B-E9A3A43CEE3E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

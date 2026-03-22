@@ -62,7 +62,7 @@ namespace SolarEclipseCabbage.BepInEx
             CustomCore.RegisterCustomParticle(SolarEclipseCabbage.ParticleType, ab.GetAsset<GameObject>("EclipseDoomParticle"));
             CustomCore.RegisterCustomParticle(SolarEclipseBomb.bombType, ab.GetAsset<GameObject>("EclipseBombParticle"));
             SolarEclipseCabbage.BuffID = CustomCore.RegisterCustomBuff("昼晦宵赤：当究级蚀日神卷心菜和究级血月神卷心菜同时在场时；日食的加成x3，所有魅惑僵尸属性大幅增强，且日食和血月的持续时间无限，持续召唤陨星", BuffType.AdvancedBuff, () =>
-            Board.Instance.ObjectExist<SolarEclipseCabbage>() && Board.Instance.ObjectExist<RedLunarCabbage>() && Lawnf.TravelUltimate((UltiBuff)22) && Lawnf.TravelUltimate((UltiBuff)23) && TravelStore.Instance != null, 15000, "#000000", PlantType.EndoFlame);
+            Board.Instance.ObjectExist<SolarEclipseCabbage>() && Board.Instance.ObjectExist<RedLunarCabbage>() && Lawnf.TravelUltimate((UltiBuff)22) && Lawnf.TravelUltimate((UltiBuff)23) && TravelStore.Instance != null, 15000, PlantType.EndoFlame);
             CustomCore.TypeMgrExtra.LevelPlants.Add(SolarEclipseCabbage.PlantID, CardLevel.Red);
             CustomCore.AddFusion((int)PlantType.UltimateCabbage, (int)SolarEclipseCabbage.PlantID, (int)PlantType.SunFlower);
             CustomCore.AddFusion((int)PlantType.UltimateCabbage, (int)PlantType.SunFlower, (int)SolarEclipseCabbage.PlantID);
@@ -166,7 +166,7 @@ namespace SolarEclipseCabbage.BepInEx
             if (board == null)
                 Destroy(gameObject);
 
-            if (GameAPP.disableSolarStarEffect)
+            if (GameAPP.config.disableSolarStarEffect)
             {
                 transform.GetChild(0).gameObject.SetActive(false);
                 transform.GetChild(1).gameObject.SetActive(false);
@@ -314,7 +314,7 @@ namespace SolarEclipseCabbage.BepInEx
 
         public void Awake()
         {
-            if (GameAPP.disableSolarStarEffect)
+            if (GameAPP.config.disableSolarStarEffect)
             {
                 transform.GetChild(0).gameObject.SetActive(false);
             }
@@ -611,7 +611,7 @@ namespace SolarEclipseCabbage.BepInEx
     public static class CreatePlant_CheckMix_Patch
     {
         [HarmonyPostfix]
-        public static void Postfix(CreatePlant __instance, ref GameObject __result)
+        public static void Postfix(CreatePlant __instance, ref Plant __result)
         {
             if (__result != null && __result.GetComponent<Plant>().thePlantType == PlantType.UltimateCabbage && UnityEngine.Random.Range(0, 100) <= 1)
             {

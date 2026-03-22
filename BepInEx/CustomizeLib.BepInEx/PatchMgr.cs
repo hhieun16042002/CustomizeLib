@@ -20,7 +20,6 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
-using static SingleBuffManager;
 using static UnityEngine.Object;
 
 ///
@@ -32,7 +31,7 @@ namespace CustomizeLib.BepInEx
     /// 注册融合洋芋配方
     /// </summary>
     [HarmonyPatch(typeof(MixBomb), nameof(MixBomb.AttributeEvent))]
-    public class MixBombPatch
+    public static class MixBombPatch
     {
         [HarmonyPrefix]
         public static bool Prefix(MixBomb __instance)
@@ -398,7 +397,6 @@ namespace CustomizeLib.BepInEx
             newSelect.GetComponent<UIButton>().clickEvent = unityEvent;
             newSelect.name = "LookCustom";
             newSelect.transform.FindChild("TextShadow").gameObject.GetComponent<TextMeshProUGUI>().text = "二创植物";
-            newSelect.transform.FindChild("TextShadow/Text").gameObject.GetComponent<TextMeshProUGUI>().text = "二创植物";
             newSelect.transform.localPosition = new Vector3(0f, -44f * newSelect.transform.childCount + 72f, 0f);
 
             var rect = __instance.filterMenu.FindChild("Scroll View/Viewport/Content").GetComponent<RectTransform>();
@@ -511,7 +509,7 @@ namespace CustomizeLib.BepInEx
     {
         [HarmonyPatch(nameof(CreatePlant.SetPlant))]
         [HarmonyPostfix]
-        public static void Postfix_SetPlant(CreatePlant __instance, ref int newColumn, ref int newRow, ref GameObject __result)
+        public static void Postfix_SetPlant(CreatePlant __instance, ref int newColumn, ref int newRow, ref Plant __result)
         {
             if (__result != null && __result.TryGetComponent<Plant>(out var plant) &&
                 CustomCore.CustomPlantTypes.Contains(plant.thePlantType))
@@ -913,7 +911,7 @@ namespace CustomizeLib.BepInEx
         [HarmonyPostfix]
         public static void PostfixStart(UIButton __instance)
         {
-            if (__instance.name == "LastPage" && Board.Instance != null && Board.Instance.isIZ)
+            if (__instance.name == "LastPage" && Board.Instance != null && Board.Instance.boardTag.isIZ)
             {
                 SelectCustomPlants.InitCustomCards_IZ();
             }
@@ -984,7 +982,7 @@ namespace CustomizeLib.BepInEx
         {
             if (GameAPP.theBoardType is not (LevelType)66) return;
             var levelData = CustomCore.CustomLevels[GameAPP.theBoardLevel];
-            var travelMgr = GameAPP.gameAPP.GetOrAddComponent<TravelMgr>();
+            var travelMgr = GameAPP.Instance.GetOrAddComponent<TravelMgr>();
             var data = travelMgr?.data;
             if (data == null) return;
             foreach (var a in levelData.AdvBuffs())
@@ -1022,7 +1020,7 @@ namespace CustomizeLib.BepInEx
             {
                 if (__instance.board != null)
                 {
-                    if (__instance.board.cardSelectable)
+                    if (!__instance.board.boardTag.disableSelectCard)
                     {
                         // 设置游戏状态
                         GameAPP.theGameStatus = GameStatus.Selecting;
@@ -1047,7 +1045,7 @@ namespace CustomizeLib.BepInEx
             {
                 if (__instance.board == null) return false;
 
-                if (!__instance.board.cardSelectable)
+                if (__instance.board.boardTag.disableSelectCard)
                 {
                     if (__instance.board.cardBank)
                     {
@@ -1319,6 +1317,14 @@ namespace CustomizeLib.BepInEx
     [HarmonyPatch(typeof(GameAPP))]
     public static class GameAPPPatch
     {
+        [HarmonyPatch(nameof(GameAPP.Start))]
+        [HarmonyPostfix]
+        public static void PostAwake(GameAPP __instance)
+        {
+            __instance.StartCoroutine(CoreTools.Init());
+            __instance.StartCoroutine(PatchMgr.RegisterSkin());
+        }
+
         [HarmonyPatch(nameof(GameAPP.LoadResources))]
         [HarmonyPrefix]
         public static void Prefix()
@@ -1341,34 +1347,6 @@ namespace CustomizeLib.BepInEx
                     Il2CppReferenceArray<Sprite> spritePrefab = new Il2CppReferenceArray<Sprite>(size_spritePrefab + 1);
                     GameAPP.spritePrefab = spritePrefab;
                 }
-
-                // 扩容data融合数组
-                if (CustomCore.CustomPlants.Count > 0 && ((long)CustomCore.CustomPlants.Keys.DefaultIfEmpty().Max() + 1 >= MixData.data.Cast<Il2CppSystem.Array>().GetLongLength(0) || (long)CustomCore.CustomPlants.Keys.Max() + 1 >= MixData.data.Cast<Il2CppSystem.Array>().GetLongLength(1)))
-                {
-                    var arr = MixData.data.Cast<Il2CppSystem.Array>();
-                    long max = (long)CustomCore.CustomPlants.Keys.DefaultIfEmpty().Max() + 1;
-                    var type = arr.GetValue(0, 0).GetIl2CppType();
-                    var result = Il2CppSystem.Array.CreateInstance(type, max, max);
-                    MixData.data = result;
-                }
-
-                // 扩容disMixDatas拆分数组
-                if (CustomCore.CustomPlants.Count > 0 && (int)CustomCore.CustomPlants.Keys.DefaultIfEmpty().Max() + 1 >= MixData.disMixDatas.Length)
-                {
-                    long size_disMixDatas = (int)CustomCore.CustomPlants.Keys.DefaultIfEmpty().Max();
-                    Il2CppReferenceArray<MixData.DisMixData> disMixDatas = new Il2CppReferenceArray<MixData.DisMixData>(size_disMixDatas + 1);
-                    MixData.disMixDatas = disMixDatas;
-                }
-
-                // 扩容randomData随机融合数组
-                if (CustomCore.CustomPlants.Count > 0 && ((long)CustomCore.CustomPlants.Keys.DefaultIfEmpty().Max() + 1 >= MixData.randomData.Cast<Il2CppSystem.Array>().GetLongLength(0) || (long)CustomCore.CustomPlants.Keys.Max() + 1 >= MixData.randomData.Cast<Il2CppSystem.Array>().GetLongLength(1)))
-                {
-                    var arr = MixData.randomData.Cast<Il2CppSystem.Array>();
-                    long max = (int)CustomCore.CustomPlants.Keys.DefaultIfEmpty().Max() + 1;
-                    var type = arr.GetValue(0, 0).GetIl2CppType();
-                    var result = Il2CppSystem.Array.CreateInstance(type, max, max);
-                    MixData.randomData = result;
-                }
                 #endregion
             }
             catch (InvalidOperationException) { }
@@ -1385,10 +1363,9 @@ namespace CustomizeLib.BepInEx
                 GameAPP.resourcesManager.plantPreviews[plant.Key] = plant.Value.Preview;//注册植物预览
                 GameAPP.resourcesManager.plantPreviews[plant.Key].tag = "Preview";//必修打tag
             }
-
             foreach (var f in CustomCore.CustomFusions)
             {
-                MixData.AddDataOredered((PlantType)f.Item2, (PlantType)f.Item3, (PlantType)f.Item1);
+                MixData.AddOrderedRecipe((PlantType)f.Item2, (PlantType)f.Item3, (PlantType)f.Item1);
             }
 
             foreach (var z in CustomCore.CustomZombies)//注册二创僵尸
@@ -1480,14 +1457,13 @@ namespace CustomizeLib.BepInEx
                     propertyInfo.SetValue(null, uncrashablePlants);
                 }
 
-                GameAPP.Instance.StartCoroutine(PatchMgr.RegisterSkin());
-
                 if (CustomCore.CustomZombieTypes.Count > 0 && ((long)CustomCore.CustomZombieTypes.DefaultIfEmpty().Max() + 1L) > InitZombieList.allow.Length)
                     InitZombieList.allow = new Il2CppStructArray<bool>((long)CustomCore.CustomZombieTypes.Max() + 1L);
 
-                GameAPP.Instance.StartCoroutine(PatchMgr.OnGameInit());
-
                 PatchMgr.Load = true;
+
+                foreach (var action in CorePlugin.OnGameInitAction)
+                    action.Invoke();
             }
             finally
             {
@@ -1730,8 +1706,12 @@ namespace CustomizeLib.BepInEx
             }
             return true;
         }
+    }
 
-        [HarmonyPatch(nameof(Board.CreateCherryExplode))]
+    [HarmonyPatch(typeof(BoardAction))]
+    public static class BoardActionPatch
+    {
+        [HarmonyPatch(nameof(BoardAction.CreateCherryExplode))]
         [HarmonyPrefix]
         public static bool PreCreateCherryExplode(Board __instance, ref Vector2 v, ref int theRow,
             ref CherryBombType bombType, ref int damage, ref PlantType fromType, ref Il2CppSystem.Action<Zombie> action, ref bool immediately, ref BombCherry __result)
@@ -1770,16 +1750,6 @@ namespace CustomizeLib.BepInEx
     [HarmonyPatch(typeof(TravelBuffOptionButton))]
     public static class TravelBuffOptionButtonPatch
     {
-        [HarmonyPatch(nameof(TravelBuffOptionButton.SetBuff))]
-        public static void PostSetBuff(TravelBuffOptionButton __instance, ref BuffType buffType, ref int buffIndex)
-        {
-            if (buffType is BuffType.AdvancedBuff && CustomCore.CustomAdvancedBuffs.ContainsKey(buffIndex)
-                && CustomCore.CustomAdvancedBuffs[buffIndex].Item5 is not null)
-            {
-                __instance.introduce.text = $"<color={CustomCore.CustomAdvancedBuffs[buffIndex].Item5}>{__instance.introduce.text}</color>";
-            }
-        }
-
         /// <summary>
         /// 强究词条显示植物修复
         /// </summary>
@@ -1844,9 +1814,6 @@ namespace CustomizeLib.BepInEx
         }
     }
 
-    /// <summary>
-    /// 二创词条文本染色
-    /// </summary>
     [HarmonyPatch(typeof(TravelLookBuff))]
     public static class TravelLookBuffPatch
     {
@@ -1854,10 +1821,11 @@ namespace CustomizeLib.BepInEx
         [HarmonyPostfix]
         public static void PostSetBuff(TravelLookBuff __instance, ref BuffType buffType, ref int buffIndex)
         {
-            if (buffType is BuffType.AdvancedBuff && CustomCore.CustomAdvancedBuffs.ContainsKey(buffIndex)
-                && CustomCore.CustomAdvancedBuffs[buffIndex].Item5 is not null)
+            if (CustomCore.CustomBuffIcon.ContainsKey((buffType, buffIndex)))
             {
-                __instance.introduce.text = $"<color={CustomCore.CustomAdvancedBuffs[buffIndex].Item5}>{__instance.introduce.text}</color>";
+                if (__instance.show != null)
+                    Destroy(__instance.show);
+                __instance.SetPlant(CustomCore.CustomBuffIcon[(buffType, buffIndex)]);
             }
 
             var result = Utils.IsMultiLevelBuff(__instance.buffType, __instance.buffIndex);
@@ -2077,17 +2045,13 @@ namespace CustomizeLib.BepInEx
             }
         }
 
-        /*[HarmonyPatch(nameof(TravelMgr.GetText))]
+        [HarmonyPatch(nameof(TravelMgr.GetText))]
         [HarmonyPostfix]
         public static void PostGetText(int type, int buff, ref string __result)
         {
-            // if (CustomCore.CustomBuffColor.ContainsKey(((BuffType)type, buff)) && CustomCore.CustomBuffColor[((BuffType)type, buff)] != null)
-            // {
-            //     __result = $"<color={CustomCore.CustomBuffColor[((BuffType)type, buff)]}>{__result}</color>";
-            // }
-            // if ((BuffType)type == BuffType.Debuff && CustomCore.CustomDebuffs.ContainsKey(buff))
-            //     __result = CustomCore.CustomDebuffs[buff].Item1;
-        }*/
+            if (CustomCore.CustomBuffText.ContainsKey(((BuffType)type, buff)))
+                __result = CustomCore.CustomBuffText[((BuffType)type, buff)];
+        }
     }
 
     [HarmonyPatch(typeof(TravelLookMenu))]
@@ -2168,6 +2132,12 @@ namespace CustomizeLib.BepInEx
             if (CustomCore.CustomBuffsBg.ContainsKey((buffType, index)))
             {
                 __instance.SetBackground(CustomCore.CustomBuffsBg[(buffType, index)]);
+            }
+            if (CustomCore.CustomBuffIcon.ContainsKey((buffType, index)))
+            {
+                if (__instance.show != null)
+                    Destroy(__instance.show);
+                __instance.SetPlant(CustomCore.CustomBuffIcon[(buffType, index)]);
             }
         }
     }
@@ -2938,10 +2908,10 @@ namespace CustomizeLib.BepInEx
             CamaraFollowMouse.Instance.ResetCamera();
 
             // 设置游戏速度
-            Time.timeScale = GameAPP.gameSpeed;
+            Time.timeScale = GameAPP.config.gameSpeed;
 
             // 设置当前关卡信息
-            GameAPP.theBoardType = (LevelType)levelType;
+            GameAPP.theBoardType = levelType;
             GameAPP.theBoardLevel = levelNumber;
 
             // 清理现有的Travel管理器
@@ -2955,10 +2925,11 @@ namespace CustomizeLib.BepInEx
             GameObject boardGO = new("Board");
             GameAPP.board = boardGO;
             Board board = boardGO.AddComponent<Board>();
-            board.boardTag = levelData.BoardTag;
+            var bt = levelData.BoardTag;
+            bt.disableSelectCard = !levelData.NeedSelectCard;
+            board.boardTag = bt;
             board.rowNum = levelData.RowCount;
             board.theMaxWave = levelData.WaveCount();
-            board.cardSelectable = levelData.NeedSelectCard;
             board.theSun = levelData.Sun();
             board.zombieHealthUpdater = levelData.ZombieHealthRate();
             board.seedPool = levelData.SeedRainPlantTypes().ToIl2CppList();
@@ -3272,27 +3243,6 @@ namespace CustomizeLib.BepInEx
             }
         }
 
-        public static void ReloadSkin()
-        {
-            if (SkinData._plantPrefabs == null) return;
-            if (SkinData._plantPreviews == null) return;
-            GameAPP.resourcesManager.plantSkinDic = SkinData.PlantSkinDic?.Clone();
-            GameAPP.resourcesManager._plantPrefabs = new Il2CppSystem.Collections.Generic.Dictionary<PlantType, Il2CppSystem.Collections.Generic.List<GameObject>>();
-            GameAPP.resourcesManager._plantPreviews = new Il2CppSystem.Collections.Generic.Dictionary<PlantType, Il2CppSystem.Collections.Generic.List<GameObject>>();
-            foreach (var (key, list) in SkinData._plantPrefabs)
-                GameAPP.resourcesManager._plantPrefabs.Add(key, list.CreateNewList());
-            foreach (var (key, list) in SkinData._plantPreviews)
-                GameAPP.resourcesManager._plantPreviews.Add(key, list.CreateNewList());
-            CustomCore.CustomPlantsSkinActive.InitWithValue(false);
-            CustomCore.CustomPlantSkinIndex.InitWithValue(new List<int>());
-            CustomCore.CustomBulletSkinReplace.InitWithValue(new Dictionary<BulletType, List<BulletType>>());
-            CustomCore.LoadedSkinAssetBundle = CustomCore.LoadedSkinAssetBundle.Where(ab => ab != null).ToList();
-            foreach (var ab in CustomCore.LoadedSkinAssetBundle)
-                ab.Unload(false);
-            RegisterSkin();
-            CustomCore.CLogger.LogInfo("皮肤已重新加载！");
-        }
-
         #region 注册皮肤
         public static IEnumerator RegisterSkin()
         {
@@ -3436,9 +3386,11 @@ namespace CustomizeLib.BepInEx
                                 }
                             }
                             catch { continue; }
-                            while (!PlantDataManager.PlantData_Default.ContainsKey(plantType)) yield return null;
-                            while (!GameAPP.resourcesManager.plantPrefabs.ContainsKey(plantType)) yield return null;
-                            while (!GameAPP.resourcesManager.plantPreviews.ContainsKey(plantType)) yield return null;
+
+                            while (!PlantDataManager.PlantData_Default.ContainsKey(plantType)) yield return new WaitForSeconds(0.1f);
+                            while (!GameAPP.resourcesManager.plantPrefabs.ContainsKey(plantType)) yield return new WaitForSeconds(0.1f);
+                            while (!GameAPP.resourcesManager.plantPreviews.ContainsKey(plantType)) yield return new WaitForSeconds(0.1f);
+
                             CustomPlantData data = new()
                             {
                                 ID = id,
@@ -3585,36 +3537,28 @@ namespace CustomizeLib.BepInEx
                     catch (JsonException) { }
                 }
             }
-            PatchMgr.UpdateSkin();
-            PatchMgr.SetEnableSkin();
+            UpdateSkin();
+            SetEnableSkin();
             {
-                if (PatchMgr.SkinData.PlantSkinDic == null)
-                    PatchMgr.SkinData.PlantSkinDic = GameAPP.resourcesManager.plantSkinDic.Clone();
-                if (PatchMgr.SkinData._plantPrefabs == null)
+                if (SkinData.PlantSkinDic == null)
+                    SkinData.PlantSkinDic = GameAPP.resourcesManager.plantSkinDic.Clone();
+                if (SkinData._plantPrefabs == null)
                 {
-                    PatchMgr.SkinData._plantPrefabs = new Dictionary<PlantType, Il2CppSystem.Collections.Generic.List<GameObject>>();
+                    SkinData._plantPrefabs = new Dictionary<PlantType, Il2CppSystem.Collections.Generic.List<GameObject>>();
                     foreach (var (key, list) in GameAPP.resourcesManager._plantPrefabs)
-                        PatchMgr.SkinData._plantPrefabs.Add(key, list);
+                        SkinData._plantPrefabs.Add(key, list);
                 }
-                if (PatchMgr.SkinData._plantPreviews == null)
+                if (SkinData._plantPreviews == null)
                 {
-                    PatchMgr.SkinData._plantPreviews = new Dictionary<PlantType, Il2CppSystem.Collections.Generic.List<GameObject>>();
+                    SkinData._plantPreviews = new Dictionary<PlantType, Il2CppSystem.Collections.Generic.List<GameObject>>();
                     foreach (var (key, list) in GameAPP.resourcesManager._plantPreviews)
-                        PatchMgr.SkinData._plantPreviews.Add(key, list);
+                        SkinData._plantPreviews.Add(key, list);
                 }
             }
             yield break;
         }
         #endregion
-
-        public static IEnumerator OnGameInit()
-        {
-            while (GameAPP.resourcesManager.plantPrefabs.Count < 400)
-                yield return null;
-            foreach (var action in CorePlugin.OnGameInitAction)
-                action.Invoke();
-            yield break;
-        }
+        
 
         public static void ShowCustomCards()
         {
@@ -3622,9 +3566,9 @@ namespace CustomizeLib.BepInEx
             List<PlantType> cardsOnSeedBank = new List<PlantType>();
             Dictionary<PlantType, List<bool>> cardsOnSeedBankExtra = new Dictionary<PlantType, List<bool>>();
             GameObject? seedGroup = null;
-            if (Board.Instance != null && !Board.Instance.isIZ)
+            if (Board.Instance != null && !Board.Instance.boardTag.isIZ)
                 seedGroup = InGameUI.Instance.SeedBank.transform.GetChild(0).gameObject;
-            else if (Board.Instance != null && Board.Instance.isIZ)
+            else if (Board.Instance != null && Board.Instance.boardTag.isIZ)
                 seedGroup = InGameUI_IZ.Instance.transform.FindChild("SeedBank/SeedGroup").gameObject;
             if (seedGroup == null)
                 return;
@@ -3642,7 +3586,7 @@ namespace CustomizeLib.BepInEx
             }
             if (MyColorfulCard == null)
                 return;
-            var isIZ = Board.Instance.isIZ;
+            var isIZ = Board.Instance.boardTag.isIZ;
             foreach (var (pt, (list, times)) in CustomCore.CustomCards)
             {
                 var repeat = isIZ ? times : times + 1;

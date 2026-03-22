@@ -140,9 +140,9 @@ public class CheckCardState : MonoBehaviour
         List<PlantType> cardsOnSeedBank = new List<PlantType>();
         Dictionary<PlantType, List<bool>> cardsOnSeedBankExtra = new Dictionary<PlantType, List<bool>>();
         GameObject? seedGroup = null;
-        if (Board.Instance != null && !Board.Instance.isIZ)
+        if (Board.Instance != null && !Board.Instance.boardTag.isIZ)
             seedGroup = InGameUI.Instance.SeedBank.transform.GetChild(0).gameObject;
-        else if (Board.Instance != null && Board.Instance.isIZ)
+        else if (Board.Instance != null && Board.Instance.boardTag.isIZ)
             seedGroup = InGameUI_IZ.Instance.transform.FindChild("SeedBank/SeedGroup").gameObject;
         if (seedGroup == null)
             return;

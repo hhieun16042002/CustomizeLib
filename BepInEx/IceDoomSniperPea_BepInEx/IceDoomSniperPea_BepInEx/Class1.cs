@@ -54,8 +54,8 @@ namespace IceDoomSniperPea.BepInEx
                 "<color=#3D1400>远方的僵尸缓缓逼近，声势浩大，所过之处寸草不生，乌鸦吱吱哇哇的叫着，像是在宣告僵尸大军的到来。冰毁狙击豌豆对准了最大的巨人僵尸，一发毙命，随后对其他植物说道“它们不是不可战胜的，我们同仇敌忾，我们团结一心，我们全力以赴，我们会前赴后继的拿下胜利！僵尸并不可怕，可怕的是我们会退缩，会害怕，但是兄弟们，一旦我们在这里畏手畏脚，在这里退缩在这里倒下，他们就会冲进庭院进行杀戮撕咬，为了我们的未来！为了守护的院落！绝不后退一步！”</color>");
             CustomCore.TypeMgrExtra.IsIcePlant.Add((PlantType)IceDoomSniperPea.PlantID);
             CustomCore.TypeMgrExtra.LevelPlants.Add((PlantType)IceDoomSniperPea.PlantID, CardLevel.Gold);
-            IceDoomSniperPea.buff1 = (AdvBuff)CustomCore.RegisterCustomBuff("精装炸弹：冰毁炸弹爆炸的伤害x3，冰毁炸弹引爆后会为附近的僵尸挂上冰毁炸弹。2级时，每次引爆都造成寒冰毁灭菇爆炸，引爆时有50%概率触发超级爆头，并附带10%韧性的伤害", BuffType.AdvancedBuff, () => Board.Instance.ObjectExist<IceDoomSniperPea>(), 5000, "#000000", (PlantType)IceDoomSniperPea.PlantID, 2, BuffBgType.Night);
-            IceDoomSniperPea.buff2 = (AdvBuff)CustomCore.RegisterCustomBuff("夜影暗袭：冰毁狙击射手每11发将锁定场上韧性上限最高的僵尸。每轮攻击有概率触发连狙", BuffType.AdvancedBuff, () => Board.Instance.ObjectExist<IceDoomSniperPea>(), 5000, "#000000", (PlantType)IceDoomSniperPea.PlantID, bg: BuffBgType.Night);
+            IceDoomSniperPea.buff1 = (AdvBuff)CustomCore.RegisterCustomBuff("精装炸弹：冰毁炸弹爆炸的伤害x3，冰毁炸弹引爆后会为附近的僵尸挂上冰毁炸弹。2级时，每次引爆都造成寒冰毁灭菇爆炸，引爆时有50%概率触发超级爆头，并附带10%韧性的伤害", BuffType.AdvancedBuff, () => Board.Instance.ObjectExist<IceDoomSniperPea>(), 5000, (PlantType)IceDoomSniperPea.PlantID, 2, BuffBgType.Night);
+            IceDoomSniperPea.buff2 = (AdvBuff)CustomCore.RegisterCustomBuff("夜影暗袭：冰毁狙击射手每11发将锁定场上韧性上限最高的僵尸。每轮攻击有概率触发连狙", BuffType.AdvancedBuff, () => Board.Instance.ObjectExist<IceDoomSniperPea>(), 5000, (PlantType)IceDoomSniperPea.PlantID, bg: BuffBgType.Night);
             CustomCore.AddUltimatePlant((PlantType)IceDoomSniperPea.PlantID);
         }
     }
@@ -270,7 +270,7 @@ namespace IceDoomSniperPea.BepInEx
                         if (z.freezeTimer > 0f)
                             z.TakeDamage(DmgType.Normal, dmg * 3);
                     };
-                    Board.Instance.CreateCherryExplode(transform.position, zombie.theZombieRow, CherryBombType.IceCharry, dmg, action: action, fromType: (PlantType)IceDoomSniperPea.PlantID);
+                    Board.Instance.boardAction.CreateCherryExplode(transform.position, zombie.theZombieRow, CherryBombType.IceCharry, dmg, action: action, fromType: (PlantType)IceDoomSniperPea.PlantID);
                     int totalHealth = zombie.theHealth + zombie.theFirstArmorHealth + zombie.theSecondArmorHealth;
                     if (Utils.TravelCustomBuffLevel(BuffType.AdvancedBuff, (int)IceDoomSniperPea.buff1) == 2)
                     {
@@ -345,7 +345,7 @@ namespace IceDoomSniperPea.BepInEx
                 return;
             }
 
-            board.CreateCherryExplode(gameObject.transform.position, zombie.theZombieRow, CherryBombType.IceCharry, dmg, action: action);
+            board.boardAction.CreateCherryExplode(gameObject.transform.position, zombie.theZombieRow, CherryBombType.IceCharry, dmg, action: action);
             int totalHealth = zombie.theHealth + zombie.theFirstArmorHealth + zombie.theSecondArmorHealth;
             if (Utils.TravelCustomBuffLevel(BuffType.AdvancedBuff, (int)IceDoomSniperPea.buff1) == 2)
             {
@@ -376,7 +376,7 @@ namespace IceDoomSniperPea.BepInEx
                 }
                 else
                     zombie.TakeDamage(DmgType.MaxDamage, int.MaxValue);
-                board.SetDoom(0, 0, false, true, zombie.axis.transform.position, (Lawnf.TravelAdvanced(IceDoomSniperPea.buff1) ? 21600 : 7200), fromType: (PlantType)IceDoomSniperPea.PlantID);
+                board.boardAction.SetDoom(0, 0, false, true, zombie.axis.transform.position, (Lawnf.TravelAdvanced(IceDoomSniperPea.buff1) ? 21600 : 7200), fromType: (PlantType)IceDoomSniperPea.PlantID);
                 iceDoom = true;
             }
 
@@ -394,7 +394,7 @@ namespace IceDoomSniperPea.BepInEx
                     else
                         zombie.TakeDamage(DmgType.MaxDamage, int.MaxValue, (PlantType)IceDoomSniperPea.PlantID);
                 }
-                board.SetDoom(0, 0, false, true, zombie.axis.transform.position, (Lawnf.TravelAdvanced(IceDoomSniperPea.buff1) ? 21600 : 7200), fromType: (PlantType)IceDoomSniperPea.PlantID);
+                board.boardAction.SetDoom(0, 0, false, true, zombie.axis.transform.position, (Lawnf.TravelAdvanced(IceDoomSniperPea.buff1) ? 21600 : 7200), fromType: (PlantType)IceDoomSniperPea.PlantID);
                 iceDoom = true;
             }
 

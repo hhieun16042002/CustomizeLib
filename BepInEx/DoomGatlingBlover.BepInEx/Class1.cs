@@ -10,12 +10,19 @@ using CustomizeLib.BepInEx;
 namespace DoomGatlingBlover.BepInEx
 {
     [BepInPlugin("salmon.doomgatlingblover", "DoomGatlingBlover", "1.0")]
-    public class Core : BasePlugin
+    public class Core : CorePlugin
     {
-        public override void Load()
+        public override void OnGameInit()
+        {
+            CustomCore.RegisterCustomBanMix(UltimateDoomGatlingBlover.PlantID,
+                () => (Lawnf.TravelAdvanced(CoreTools.GetAdvBuffByString("枕戈待旦")) && Lawnf.TravelAdvanced(CoreTools.GetAdvBuffByString("核能威慑")) && Utils.EnableTravelPlant()) || Utils.IsCheat());
+            UltimateDoomGatlingBlover.BuffID = CustomCore.RegisterCustomBuff("轰炸火力：究极浮空毁灭射手的子弹会寄生毁灭炸弹。究极樱桃射手的子弹附带究极浮空毁灭射手的追加效果，给予寄生毁灭炸弹的充能x5",
+                BuffType.AdvancedBuff, () => CoreTools.TravelAdvanced("枕戈待旦") && CoreTools.TravelAdvanced("核能威慑") && CoreTools.TravelUltimate("力大砖飞") && CoreTools.TravelUltimate("快速填装"), 15000, PlantType.EndoFlame);
+        }
+
+        public override void OnStart()
         {
             Console.OutputEncoding = System.Text.Encoding.UTF8;
-            Harmony.CreateAndPatchAll(Assembly.GetExecutingAssembly());
             ClassInjector.RegisterTypeInIl2Cpp<DoomGatlingBlover>();
             ClassInjector.RegisterTypeInIl2Cpp<UltimateDoomGatlingBlover>();
             ClassInjector.RegisterTypeInIl2Cpp<DoomBomb>();
@@ -66,14 +73,10 @@ namespace DoomGatlingBlover.BepInEx
                     "<color=#3D1400>余烬毁灭菇子弹：</color><color=red>施加余烬状态。能穿透二类防具。大型子弹会造成2次半径3格的范围伤害，仅第2次触发追击效果</color>\n" +
                     "<color=#3D1400>词条1:</color><color=red>枕戈待旦：攻击速度+100%</color>\n" +
                     "<color=#3D1400>词条2:</color><color=red>核能威慑：每4发必为大毁灭菇</color>\n" +
-                    "<color=#3D1400>连携词条:</color><color=red>究极浮空毁灭射手直击目标会挂上寄生毁灭炸弹。究极樱桃射手的子弹附带究极浮空毁灭射手的追加效果，给予寄生毁灭炸弹的充能x5</color>\n" +
-                    "<color=#3D1400>寄生毁灭炸弹：</color><color=red>持续5秒，期间受到究极樱桃射手和究极浮空毁灭射手的伤害将等额储存在内，随后引爆，对半径3.5格的目标造成伤害并施加余烬效果，若目标死亡时将提前引爆。双方的子弹击中时携带寄生毁灭炸弹的目标会产生半径0.5格基于10% 毁灭炸弹的伤害</color>\n\n" +
-                    "<color=#3D1400>点击不可输入宝开鱼</color>");
-                CustomCore.RegisterCustomBanMix(UltimateDoomGatlingBlover.PlantID, 
-                    () => (Lawnf.TravelAdvanced(CoreTools.GetAdvBuffByString("枕戈待旦")) && Lawnf.TravelAdvanced(CoreTools.GetAdvBuffByString("核能威慑")) && Utils.EnableTravelPlant()) || Utils.IsCheat());
+                    "<color=#3D1400>连携词条：</color><color=red>究极浮空毁灭射手直击目标会挂上寄生毁灭炸弹。究极樱桃射手的子弹附带究极浮空毁灭射手的追加效果，给予寄生毁灭炸弹的充能x5</color>\n" +
+                    "<color=#3D1400>寄生毁灭炸弹：</color><color=red>持续5秒，期间受到究极樱桃射手和究极浮空毁灭射手的伤害将等额储存在内，随后引爆，对半径3.5格的目标造成伤害并施加余烬效果，若目标死亡时将提前引爆。双方的子弹击中时携带寄生毁灭炸弹的目标会产生半径0.5格基于10%毁灭炸弹的伤害</color>\n\n" +
+                    "<color=#3D1400>究极浮空毁灭射手是植物界的大师，他一生都在研究“炁”，“不管是植物还是僵尸，他们的身上都有不同的‘炁’，我们可以根据‘炁’所散发的颜色来判断他们的状态，他们的心情，他们的过去和未来”究极浮空毁灭射手闭上了眼睛“我们透过眼睛只能看到事物的表面，真正的世界需要我们用心去看，去观察，有的时候，闭上眼睛，才能看到事物的本相”</color>");
                 CustomCore.TypeMgrExtra.FlyingPlants.Add(UltimateDoomGatlingBlover.PlantID);
-                UltimateDoomGatlingBlover.BuffID = CustomCore.RegisterCustomBuff("轰炸火力：究极浮空毁灭射手的子弹会寄生毁灭炸弹。究极樱桃射手的子弹附带究极浮空毁灭射手的追加效果，给予寄生毁灭炸弹的充能x5", 
-                    BuffType.AdvancedBuff, () => CoreTools.TravelAdvanced("枕戈待旦") && CoreTools.TravelAdvanced("核能威慑") && CoreTools.TravelUltimate("力大砖飞") && CoreTools.TravelUltimate("快速填装"), 15000);
                 DoomBomb.bomb = ab.GetAsset<GameObject>("DoomBomb");
                 DoomBomb.bomb.AddComponent<DoomBomb>();
                 ab.GetAsset<GameObject>("Doom").AddComponent<DoomDoom>();
@@ -194,7 +197,7 @@ namespace DoomGatlingBlover.BepInEx
                 if (!collider.gameObject.TryGetComponent<Zombie>(out var zombie) || zombie == null || zombie.IsDestroyed()) continue;
                 zombie.TakeDamage(DmgType.Carred, damage, UltimateDoomGatlingBlover.PlantID);
             }
-            if (!GameAPP.distablexplodeFlash)
+            if (!GameAPP.config.distablexplodeFlash)
                 CreateParticle.SetParticle(doomID, transform.position, 11);
             else
                 CreateParticle.SetParticle(doomSplatID, transform.position, 11);
@@ -252,10 +255,7 @@ namespace DoomGatlingBlover.BepInEx
                 if (blover.IsBigShoot())
                 {
                     bullet.theStatus = BulletStatus.Doom_big;
-                    if (__instance.thePlantType == UltimateDoomGatlingBlover.PlantID)
-                    {
-                        bullet.Damage *= 6;
-                    }    
+                    bullet.Damage *= 6;
                     __instance.attributeCount = 0;
                 }
 

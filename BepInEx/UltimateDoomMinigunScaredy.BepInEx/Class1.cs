@@ -111,7 +111,7 @@ namespace UltimateDoomMinigunScaredy.BepInEx
     public static class CreatePlant_CheckMix_Patch
     {
         [HarmonyPostfix]
-        public static void Postfix(CreatePlant __instance, ref GameObject __result)
+        public static void Postfix(CreatePlant __instance, ref Plant __result)
         {
             if (__result != null && __result.GetComponent<Plant>().thePlantType == PlantType.GatlingDoomScaredy && UnityEngine.Random.Range(0, 100) <= 1)
             {

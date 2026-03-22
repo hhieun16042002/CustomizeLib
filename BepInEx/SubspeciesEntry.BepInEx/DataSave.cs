@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Unity.VisualScripting;
 using UnityEngine;
 
 namespace SubspeciesEntry.BepInEx
@@ -34,5 +35,13 @@ namespace SubspeciesEntry.BepInEx
             else
                 SaveData[key] = value;
         }
+    }
+
+    public static class DataExtension
+    {
+        public static T GetData<T>(this Component comp, string key) => comp.gameObject.GetOrAddComponent<DataSave>().GetData<T>(key);
+        public static T GetData<T>(this GameObject go, string key) => go.GetOrAddComponent<DataSave>().GetData<T>(key);
+        public static void SetData(this Component comp, string key, object value) => comp.gameObject.GetOrAddComponent<DataSave>().SetData(key, value);
+        public static void SetData(this GameObject go, string key, object value) => go.GetOrAddComponent<DataSave>().SetData(key, value);
     }
 }

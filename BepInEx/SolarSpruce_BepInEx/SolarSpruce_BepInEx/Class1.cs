@@ -72,8 +72,7 @@ namespace SolarSpruce
                 y: shootPos.y,
                 theRow: plant.thePlantRow,
                 theBulletType: (BulletType)Bullet_shulkSolarSpruce.BulletID,
-                theMovingWay: BulletMoveWay.Convolute,
-                isZombieBullet: false
+                theMovingWay: BulletMoveWay.Convolute
             );
 
             int damage = plant.attackDamage;

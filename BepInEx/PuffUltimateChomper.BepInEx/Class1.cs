@@ -8,9 +8,9 @@ using UnityEngine;
 namespace PuffUltimateChomper.BepInEx
 {
     [BepInPlugin("salmon.puffultimatechomper", "PuffUltimateChomper", "1.0")]
-    public class Core : BasePlugin
+    public class Core : CorePlugin
     {
-        public override void Load()
+        public override void OnStart()
         {
             Console.OutputEncoding = System.Text.Encoding.UTF8;
             Harmony.CreateAndPatchAll(Tools.GetAssembly(), null);

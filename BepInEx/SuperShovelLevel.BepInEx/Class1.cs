@@ -80,7 +80,7 @@ namespace SuperShovelLevel.BepInEx
 
                 if (UnityEngine.Random.Range(0, 100) <= 2)
                 {
-                    var mgr = GameAPP.gameAPP.GetComponent<TravelMgr>();
+                    var mgr = GameAPP.Instance.GetComponent<TravelMgr>();
                     if (mgr == null)
                         return;
                     var data = mgr.data;

@@ -18,11 +18,11 @@ namespace CustomizeLib.BepInEx
                 // Destroy(MyPageParent);
                 // MyPageParent = null;
             }
-            if (Board.Instance != null && !Board.Instance.isIZ)
+            if (Board.Instance != null && !Board.Instance.boardTag.isIZ)
             {
-                InGameUI.Instance.SeedBank.transform.parent.FindChild("Bottom/SeedLibrary/Grid").GetChild(currentPage).gameObject.SetActive(true);
+                InGameUI.Instance.SeedBank.transform.parent.FindChild("Bottom/SeedLibrary/Grid/CardPagesContainer").GetChild(currentPage).gameObject.SetActive(true);
             }
-            else if (Board.Instance != null && Board.Instance.isIZ)
+            else if (Board.Instance != null && Board.Instance.boardTag.isIZ)
             {
                 IZBottomMenu.Instance.plantLibrary.transform.FindChild("Grid").GetChild(currentPage).gameObject.SetActive(true);
             }
@@ -37,7 +37,7 @@ namespace CustomizeLib.BepInEx
             Console.OutputEncoding = Encoding.UTF8;
             if (MyShowCustomPlantsButton != null) return;
             //用正常植物Button创建二创植物Button
-            if (Board.Instance is not null && !Board.Instance.isIZ)
+            if (Board.Instance is not null && !Board.Instance.boardTag.isIZ)
             {
                 MyShowCustomPlantsButton = Instantiate(
                     Resources.Load<GameObject>("ui/prefabs/InGameUI").transform.FindChild("Bottom/SeedLibrary/ShowLawn")
@@ -78,7 +78,7 @@ namespace CustomizeLib.BepInEx
             Console.OutputEncoding = Encoding.UTF8;
             if (MyShowCustomPlantsButton != null) return;
             //用正常植物Button创建二创植物Button
-            if (Board.Instance is not null && Board.Instance.isIZ)
+            if (Board.Instance is not null && Board.Instance.boardTag.isIZ)
             {
                 MyShowCustomPlantsButton = Instantiate(
                     IZBottomMenu.Instance.zombieLibary.transform.FindChild("LastPage").gameObject,
@@ -116,17 +116,17 @@ namespace CustomizeLib.BepInEx
         public void OpenCustomPlantCards()
         {
             //基础植物和彩色植物界面隐藏
-            if (Board.Instance != null && !Board.Instance.isIZ)
+            if (Board.Instance != null && !Board.Instance.boardTag.isIZ)
             {
                 for (int i = 0; i < 5; i++)
-                    if (InGameUI.Instance.SeedBank.transform.parent.FindChild("Bottom/SeedLibrary/Grid").GetChild(i).gameObject.activeSelf)
+                    if (InGameUI.Instance.SeedBank.transform.parent.FindChild("Bottom/SeedLibrary/Grid/CardPagesContainer").GetChild(i).gameObject.activeSelf)
                     {
                         currentPage = i;
-                        InGameUI.Instance.SeedBank.transform.parent.FindChild("Bottom/SeedLibrary/Grid").GetChild(i).gameObject.SetActive(false);
+                        InGameUI.Instance.SeedBank.transform.parent.FindChild("Bottom/SeedLibrary/Grid/CardPagesContainer").GetChild(i).gameObject.SetActive(false);
                         break;
                     }
             }
-            else if (Board.Instance != null && Board.Instance.isIZ)
+            else if (Board.Instance != null && Board.Instance.boardTag.isIZ)
             {
                 for (int i = 0; i < IZBottomMenu.Instance.plantLibrary.transform.FindChild("Grid").transform.GetChildCount(); i++)
                     if (IZBottomMenu.Instance.plantLibrary.transform.FindChild("Grid").GetChild(i).gameObject.activeSelf)
@@ -145,19 +145,19 @@ namespace CustomizeLib.BepInEx
             {
                 GameObject? MyPage = null;
                 GameObject? MyCard = null;
-                if (Board.Instance != null && !Board.Instance.isIZ)
+                if (Board.Instance != null && !Board.Instance.boardTag.isIZ)
                 {
                     MyPageParent = Instantiate(
-                        InGameUI.Instance.SeedBank.transform.parent.FindChild("Bottom/SeedLibrary/Grid/ColorfulCards")
+                        InGameUI.Instance.SeedBank.transform.parent.FindChild("Bottom/SeedLibrary/Grid/CardPagesContainer/ColorfulCards")
                             .gameObject
-                            .gameObject, InGameUI.Instance.SeedBank.transform.parent.FindChild("Bottom/SeedLibrary/Grid"));
+                            .gameObject, InGameUI.Instance.SeedBank.transform.parent.FindChild("Bottom/SeedLibrary/Grid/CardPagesContainer"));
                     MyPageParent.gameObject.SetActive(true);
                     MyPage = MyPageParent.transform.GetChild(0).gameObject;
                     MyPage.gameObject.SetActive(true);
                     MyCard = MyPage.transform.GetChild(0).gameObject;
                     MyCard.gameObject.SetActive(false);
                 }
-                else if (Board.Instance != null && Board.Instance.isIZ)
+                else if (Board.Instance != null && Board.Instance.boardTag.isIZ)
                 {
                     MyPageParent = Instantiate(
                         IZBottomMenu.Instance.plantLibrary.transform.FindChild("Grid/ColorfulCards").gameObject,
@@ -191,7 +191,7 @@ namespace CustomizeLib.BepInEx
                 }
 
                 List<PlantType> cardsOnSeedBank = new List<PlantType>();
-                if (Board.Instance != null && !Board.Instance.isIZ)
+                if (Board.Instance != null && !Board.Instance.boardTag.isIZ)
                 {
                     GameObject seedGroup = InGameUI.Instance.SeedBank.transform.GetChild(0).gameObject;
                     for (int i = 0; i < seedGroup.transform.childCount; i++)
@@ -201,7 +201,7 @@ namespace CustomizeLib.BepInEx
                             cardsOnSeedBank.Add(seed.transform.GetChild(0).GetComponent<CardUI>().thePlantType);
                     }
                 }
-                else if (Board.Instance != null && Board.Instance.isIZ)
+                else if (Board.Instance != null && Board.Instance.boardTag.isIZ)
                 {
                     GameObject seedGroup = InGameUI_IZ.Instance.transform.GetChild(0).GetChild(0).gameObject;
                     for (int i = 0; i < seedGroup.transform.childCount; i++)
@@ -251,7 +251,7 @@ namespace CustomizeLib.BepInEx
                         component.theSeedType = (int)plantTypes[i];
                         component.theSeedCost = PlantDataManager.PlantData_Default[plantTypes[i]].cost;
                         component.fullCD = PlantDataManager.PlantData_Default[plantTypes[i]].cd;
-                        if (Board.Instance != null && Board.Instance.isIZ)
+                        if (Board.Instance != null && Board.Instance.boardTag.isIZ)
                         {
                             component.theSeedCost = 0;
                             component.fullCD = 0f;
@@ -327,7 +327,7 @@ namespace CustomizeLib.BepInEx
 
         /*public static void GetCardGUI(ref GameObject MyPage, ref GameObject MyCard, ref int Index)
         {
-            if (Board.Instance != null && !Board.Instance.isIZ)
+            if (Board.Instance != null && !Board.Instance.boardTag.isIZ)
             {
                 GameObject grid = InGameUI.Instance.SeedBank.transform.parent.FindChild("Bottom/SeedLibrary/Grid").gameObject;
                 String wantName = "ColorfulCards"; // 原来的彩卡GameObject名
@@ -375,7 +375,7 @@ namespace CustomizeLib.BepInEx
                         continue;
                 }
             }
-            else if (Board.Instance != null && Board.Instance.isIZ)
+            else if (Board.Instance != null && Board.Instance.boardTag.isIZ)
             {
                 GameObject grid = IZBottomMenu.Instance.plantLibrary.transform.GetChild(0).gameObject;
                 String wantName = "ColorfulCards"; // 原来的彩卡GameObject名

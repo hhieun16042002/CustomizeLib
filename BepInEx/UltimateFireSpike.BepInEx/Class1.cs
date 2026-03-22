@@ -147,12 +147,12 @@ namespace UltimateFireSpike.BepInEx
                             {
                                 for (int i = 0; i < plant.board.rowNum; i++)
                                 {
-                                    Board.Instance.CreateFireLine(i, jalaDamage, fromType: PlantID);
+                                    Board.Instance.boardAction.CreateFireLine(i, jalaDamage, fromType: PlantID);
                                 }
                             }
                             else
                             {
-                                Board.Instance.CreateFireLine(row, jalaDamage, fromType: PlantID);
+                                Board.Instance.boardAction.CreateFireLine(row, jalaDamage, fromType: PlantID);
                             }
                         }
                     };
@@ -186,7 +186,7 @@ namespace UltimateFireSpike.BepInEx
         public static void Prefix(Plant __instance)
         {
             if (__instance.thePlantType == UltimateFireSpike.PlantID)
-                __instance.board.CreateFireLine(__instance.thePlantRow, fromType: __instance.thePlantType);
+                __instance.board.boardAction.CreateFireLine(__instance.thePlantRow, fromType: __instance.thePlantType);
         }
     }
 }

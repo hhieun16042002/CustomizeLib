@@ -37,9 +37,9 @@ namespace UltimateCherryTorch.BepInEx
                 "<color=#3D1400>词条2:</color><color=red>伽马射线：终极聚能压缩火炬的影响范围增加至5x5</color>\n\n" +
                 "<color=#3D1400>终极核爆火炬对于穿着有一套独特的见解，他的发型是熊熊燃烧的火焰，他的脸上是独特的熔岩面具，他经营着一家理发店，“你想拥有一套靓丽的时装么？你想拥有一种不拘一格的发型么？还在为自己的形象而困扰？《这个店长不太冷》理发店，时刻欢迎大家来改变自己！”终极核爆火炬的理发店生意火爆，据终极核爆火炬透露，预约的队伍已经排到明年年底，大部分客户都是小豌豆。</color>");
             UltimateCherryTorch.Buff1 = CustomCore.RegisterCustomBuff("高能辐射：终极聚能压缩火炬影响的子弹伤害x3", BuffType.AdvancedBuff, () => Board.Instance.ObjectExist<UltimateCherryTorch>(),
-                5000, "#000000", UltimateCherryTorch.PlantID);
+                5000, UltimateCherryTorch.PlantID);
             UltimateCherryTorch.Buff2 = CustomCore.RegisterCustomBuff("伽马射线：终极聚能压缩火炬的影响范围增加至5x5", BuffType.AdvancedBuff, () => Board.Instance.ObjectExist<UltimateCherryTorch>(),
-                5000, "#000000", UltimateCherryTorch.PlantID);
+                5000, UltimateCherryTorch.PlantID);
             CustomCore.TypeMgrExtra.IsFirePlant.Add(UltimateCherryTorch.PlantID);
             CustomCore.AddUltimatePlant(UltimateCherryTorch.PlantID);
         }
@@ -145,7 +145,7 @@ namespace UltimateCherryTorch.BepInEx
         {
             if (__instance.thePlantType == UltimateCherryTorch.PlantID)
             {
-                __instance.board.SetDoom(__instance.thePlantColumn, __instance.thePlantRow, false, false, default, __instance.attackDamage);
+                __instance.board.boardAction.SetDoom(__instance.thePlantColumn, __instance.thePlantRow, false, false, default, __instance.attackDamage);
 
                 Doom.SetDoom(__instance.board, __instance.axis.transform.position, DoomType.Nuclear);
 

@@ -770,10 +770,10 @@ namespace CustomizeLib.BepInEx
         /// <returns>卡牌GameObject，Child 0:PacketBg背景图，Child 1：默认展示，1有CardUI组件</returns>
         public static GameObject? GetColorfulCardGameObject()
         {
-            if (Board.Instance is not null && !Board.Instance.isIZ)
+            if (Board.Instance is not null && !Board.Instance.boardTag.isIZ)
             {
                 GameObject? MyCard = null;
-                MyCard = InGameUI.Instance.SeedBank.transform.parent.FindChild("Bottom/SeedLibrary/Grid/ColorfulCards/Page1/CattailGirl").gameObject;
+                MyCard = InGameUI.Instance.SeedBank.transform.parent.FindChild("Bottom/SeedLibrary/Grid/CardPagesContainer/ColorfulCards/Page1/CattailGirl").gameObject;
                 #region disable
                 /*int value = 0;
                 GameObject? MyPage = null;
@@ -791,7 +791,7 @@ namespace CustomizeLib.BepInEx
                 #endregion
                 return MyCard;
             }
-            else if (Board.Instance is not null && Board.Instance.isIZ)
+            else if (Board.Instance is not null && Board.Instance.boardTag.isIZ)
             {
 
                 GameObject? MyCard = null;
@@ -823,13 +823,13 @@ namespace CustomizeLib.BepInEx
         /// <returns>卡牌GameObject，Child 0:PacketBg背景图，Child 1:二次选卡，Child 2：默认展示，12均有CardUI组件</returns>
         public static GameObject? GetNormalCardGameObject()
         {
-            if (Board.Instance is not null && !Board.Instance.isIZ)
+            if (Board.Instance is not null && !Board.Instance.boardTag.isIZ)
             {
                 GameObject? MyCard = null;
-                MyCard = InGameUI.Instance.SeedBank.transform.parent.FindChild("Bottom/SeedLibrary/Grid/NormalCards/Page1/PeaShooter").gameObject;
+                MyCard = InGameUI.Instance.SeedBank.transform.parent.FindChild("Bottom/SeedLibrary/Grid/CardPagesContainer/NormalCards/Page1/PeaShooter").gameObject;
                 return MyCard;
             }
-            else if (Board.Instance is not null && Board.Instance.isIZ)
+            else if (Board.Instance is not null && Board.Instance.boardTag.isIZ)
             {
                 GameObject? MyCard = null;
                 MyCard = IZBottomMenu.Instance.plantLibrary.transform.FindChild("Grid/Main/Page1/PeaShooter").gameObject;
@@ -844,11 +844,11 @@ namespace CustomizeLib.BepInEx
         /// <returns></returns>
         public static Transform? GetColorfulCardParent()
         {
-            if (Board.Instance != null && !Board.Instance.isIZ)
+            if (Board.Instance != null && !Board.Instance.boardTag.isIZ)
             {
-                return InGameUI.Instance.SeedBank.transform.parent.FindChild("Bottom/SeedLibrary/Grid/ColorfulCards/Page1");
+                return InGameUI.Instance.SeedBank.transform.parent.FindChild("Bottom/SeedLibrary/Grid/CardPagesContainer/ColorfulCards/Page1");
             }
-            else if (Board.Instance != null && Board.Instance.isIZ)
+            else if (Board.Instance != null && Board.Instance.boardTag.isIZ)
             {
                 return IZBottomMenu.Instance.plantLibrary.transform.FindChild("Grid/ColorfulCards/Page1");
             }
@@ -859,13 +859,13 @@ namespace CustomizeLib.BepInEx
         {
             if (Board.Instance != null && Board.Instance.boardTag.isTowerDefence)
             {
-                return InGameUI.Instance.SeedBank.transform.parent.FindChild("Bottom/SeedLibrary/Grid/TowerCard/Page1");
+                return InGameUI.Instance.SeedBank.transform.parent.FindChild("Bottom/SeedLibrary/Grid/CardPagesContainer/TowerCard/Page1");
             }
-            else if (Board.Instance != null && !Board.Instance.isIZ)
+            else if (Board.Instance != null && !Board.Instance.boardTag.isIZ)
             {
-                return InGameUI.Instance.SeedBank.transform.parent.FindChild("Bottom/SeedLibrary/Grid/Pages/Page1");
+                return InGameUI.Instance.SeedBank.transform.parent.FindChild("Bottom/SeedLibrary/Grid/CardPagesContainer/Pages/Page1");
             }
-            else if (Board.Instance != null && Board.Instance.isIZ)
+            else if (Board.Instance != null && Board.Instance.boardTag.isIZ)
             {
                 return IZBottomMenu.Instance.plantLibrary.transform.FindChild("Grid/Pages/Page1");
             }

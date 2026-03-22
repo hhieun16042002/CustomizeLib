@@ -187,7 +187,7 @@ namespace UltimateWinterCabbagecannon.BepInEx
         {
             if (iceDoom)
             {
-                board?.SetDoom(0, 0, false, true, transform.position, 1800, fromType: plantType);
+                board?.boardAction.SetDoom(0, 0, false, true, transform.position, 1800, fromType: plantType);
             }
             else
             {
@@ -201,7 +201,7 @@ namespace UltimateWinterCabbagecannon.BepInEx
                     else
                         z.TakeDamage(DmgType.Carred, damage * 8, plantType);
                 };
-                var cherry = CoreTools.CreateCherryExplode(transform.position, row, CherryBombType.IceCharry, fromType: plantType, action: action, immediately: false).Item1;
+                var cherry = board?.boardAction.CreateCherryExplode(transform.position, row, CherryBombType.IceCharry, fromType: plantType, action: action, immediately: false);
                 if (cherry == null)
                 {
                     Destroy(gameObject);

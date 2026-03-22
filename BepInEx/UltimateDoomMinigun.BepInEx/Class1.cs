@@ -102,40 +102,27 @@ namespace UltimateDoomMinigun.BepInEx
         public UltimateMinigun plant => gameObject.GetComponent<UltimateMinigun>();
     }
 
-    [HarmonyPatch(typeof(Plant), nameof(Plant.Start))]
-    public static class Plant_Start_Patch
+    [HarmonyPatch(typeof(CreatePlant), nameof(CreatePlant.CheckMix))]
+    public static class CreatePlant_CheckMix_Patch
     {
         [HarmonyPostfix]
-        public static void Postfix(Plant __instance)
+        public static void Postfix(CreatePlant __instance, ref Plant __result)
         {
-            if (__instance != null && __instance.thePlantType == PlantType.DoomGatling && UnityEngine.Random.Range(0, 100) <= 2 &&
+            if (__result != null && __result.GetComponent<Plant>().thePlantType == PlantType.DoomGatling && UnityEngine.Random.Range(0, 100) <= 1 &&
                 GameAPP.theGameStatus == GameStatus.InGame)
             {
-                int column = __instance.thePlantColumn;
-                int row = __instance.thePlantRow;
-                PlantType firstParent = __instance.firstParent;
-                PlantType secondParent = __instance.secondParent;
-                __instance.Die();
-                var result = CreatePlant.Instance.SetPlant(column, row, (PlantType)UltimateDoomMinigun.PlantID, isFreeSet: true).GetComponent<Plant>();
-                result.firstParent = firstParent;
-                result.secondParent = secondParent;
+                var row = __result.thePlantRow;
+                var column = __result.thePlantColumn;
+                var first = __result.firstParent;
+                var second = __result.secondParent;
+                __result.Die(Plant.DieReason.ByShovel);
+                var plant = __instance.SetPlant(column, row, (PlantType)UltimateDoomMinigun.PlantID, null, default, true);
+                plant.firstParent = first;
+                plant.secondParent = second;
             }
         }
     }
 
-    [HarmonyPatch(typeof(UltimateMinigun), nameof(UltimateMinigun.Start))]
-    public static class UltimateMinigun_Start_Patch
-    {
-        [HarmonyPrefix]
-        public static bool Prefix(UltimateMinigun __instance)
-        {
-            if (__instance.thePlantType == (PlantType)UltimateDoomMinigun.PlantID)
-            {
-                return false;
-            }
-            return true;
-        }
-    }
     [HarmonyPatch(typeof(Plant), nameof(Plant.Shootable))]
     public static class Plant_Shootable_Patch
     {

@@ -3,6 +3,7 @@ using BepInEx.Logging;
 using BepInEx.Unity.IL2CPP;
 using BepInEx.Unity.IL2CPP.Utils;
 using HarmonyLib;
+using Il2CppInterop.Runtime;
 using Il2CppInterop.Runtime.Injection;
 using System;
 using System.Collections;
@@ -174,8 +175,23 @@ namespace CustomizeLib.BepInEx
         public static Dictionary<string, AdvBuff> AdvBuffPair = new();
         public static Dictionary<string, UltiBuff> UltiBuffPair = new();
 
-        public static void Init()
+        public static void InitBuffDic()
         {
+            TravelDictionary.advancedBuffsText = new();
+            TravelDictionary.AdvBuffPlantPairs = new();
+            TravelDictionary.allStrongUltimtePlant = new();
+            TravelDictionary.CurseBuffs = new();
+            TravelDictionary.debuffData = new();
+            TravelDictionary.PlantInfo = new();
+            TravelDictionary.RandomBuffs = new();
+            TravelDictionary.RogueBuffs = new();
+            TravelDictionary.ultimateBuffsText = new();
+            TravelDictionary.unlocksText = new();
+        }
+
+        public static IEnumerator Init()
+        {
+            while (TravelDictionary.advancedBuffsText.Count < Enum.GetValues<AdvBuff>().Length) yield return new WaitForSeconds(1f);
             foreach (var (buff, str) in TravelDictionary.advancedBuffsText)
             {
                 int index = str.IndexOf('：');
@@ -188,6 +204,7 @@ namespace CustomizeLib.BepInEx
                 }
             }
 
+            while (TravelDictionary.ultimateBuffsText.Count < Enum.GetValues<UltiBuff>().Length) yield return new WaitForSeconds(1f);
             foreach (var (buff, str) in TravelDictionary.ultimateBuffsText)
             {
                 int index = str.IndexOf('：');
@@ -199,8 +216,14 @@ namespace CustomizeLib.BepInEx
                         UltiBuffPair.Add(str.Substring(0, index), buff);
                 }
             }
+            yield break;
         }
 
+        /// <summary>
+        /// 根据词条名称获取普通词条,请在GameAPP实例化后调用
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
         public static AdvBuff GetAdvBuffByString(string name)
         {
             if (AdvBuffPair.ContainsKey(name))
@@ -208,6 +231,11 @@ namespace CustomizeLib.BepInEx
             return (AdvBuff)(-1);
         }
 
+        /// <summary>
+        /// 根据词条名称获取究极词条,请在GameAPP实例化后调用
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
         public static UltiBuff GetUltiBuffByString(string name)
         {
             if (UltiBuffPair.ContainsKey(name))
@@ -518,6 +546,7 @@ namespace CustomizeLib.BepInEx
         {
             if (Board.Instance == null || Board.Instance.IsDestroyed()) return (null, null);
             GameObject particle = null;
+
             if (CustomCore.CustomCherrys.ContainsKey(bombType))
             {
                 particle = CreateParticle.SetParticle(CustomCore.CustomCherryStartID + (int)bombType, v, 11);
@@ -527,22 +556,23 @@ namespace CustomizeLib.BepInEx
             {
                 if (bombType == CherryBombType.Sun)
                 {
-                    particle = ParticleManager.Instance.SetParticle(ParticleType.SunBombCloud, v, 11).gameObject;
+                    particle = CreateParticle.SetParticle((int)ParticleType.SunBombCloud, v, 11).gameObject;
                 }
                 else if (bombType == CherryBombType.Bullet || bombType == CherryBombType.BulletAll)
                 {
-                    particle = ParticleManager.Instance.SetParticle(ParticleType.BombCloudSmall, v, 11).gameObject;
+                    particle = CreateParticle.SetParticle((int)ParticleType.BombCloudSmall, v, 11).gameObject;
                 }
                 else if (bombType == CherryBombType.IceCharry)
                 {
-                    particle = ParticleManager.Instance.SetParticle(ParticleType.BombCloud_blue, v, 11).gameObject;
+                    particle = CreateParticle.SetParticle((int)ParticleType.BombCloud_blue, v, 11).gameObject;
                 }
                 else
                 {
-                    particle = ParticleManager.Instance.SetParticle(ParticleType.BombCloud, v, 11).gameObject;
+                    particle = CreateParticle.SetParticle((int)ParticleType.BombCloud, v, 11).gameObject;
                 }
                 GameAPP.PlaySound(soundID, volume, pitch);
             }
+
             if (shake)
                 ScreenShake.TriggerShake(0.15f);
 

@@ -174,7 +174,7 @@ namespace IceDoomGatlingBepInEx
                             (PlantType)IceDoomGatling.PlantID
                         );
 
-                        GameAPP.board.GetComponent<Board>().SetDoom(Mouse.Instance.GetColumnFromX(zombie.axis.transform.position.x), zombie.theZombieRow, false, true, zombie.axis.position, 1800, 0);
+                        GameAPP.board.GetComponent<Board>().boardAction.SetDoom(Mouse.Instance.GetColumnFromX(zombie.axis.transform.position.x), zombie.theZombieRow, false, true, zombie.axis.position, 1800, 0);
                     }
                     zombie.AddfreezeLevel(100);
 
@@ -202,7 +202,7 @@ namespace IceDoomGatlingBepInEx
                         int row = zombie.theZombieRow;
 
                         // 设置末日效果
-                        Board.Instance.SetDoom(
+                        Board.Instance.boardAction.SetDoom(
                             column,
                             row,
                             false,

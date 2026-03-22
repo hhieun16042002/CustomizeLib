@@ -60,7 +60,7 @@ namespace GoldImitater.BepInEx
             if (config.levelZombieInRandom) total += 2;
             if (config.strongUltiZombieInRandom) total += 2;
             if (config.leaderInRandom) total += 6;
-            if (GameAPP.theGameStatus == GameStatus.InGame && plant != null && UnityEngine.Random.Range(1, 101) <= total && (plant.board.boardTag.isSuperRandom || plant.board.isIZ))
+            if (GameAPP.theGameStatus == GameStatus.InGame && plant != null && UnityEngine.Random.Range(1, 101) <= total && (plant.board.boardTag.isSuperRandom || plant.board.boardTag.isIZ))
             {
                 plant.StarUp();
                 plant.starUp = true;
@@ -236,7 +236,7 @@ namespace GoldImitater.BepInEx
                     break;
                 case 2:
                     {
-                        var mgr = GameAPP.gameAPP.GetOrAddComponent<TravelMgr>();
+                        var mgr = GameAPP.Instance.GetOrAddComponent<TravelMgr>();
                         int value = UnityEngine.Random.Range(1, 101);
                         var data = mgr.data;
                         if (value <= 90)

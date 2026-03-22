@@ -168,19 +168,19 @@ namespace JalaSqualourBepInEx
                     case 0:
                         break;
                     case 1:
-                        board.CreateFireLine(__instance.thePlantRow, 1800, false, false, true, null);
+                        board.boardAction.CreateFireLine(__instance.thePlantRow, 1800, false, false, true, null);
                         break;
                     case 2:
-                        board.CreateFireLine(__instance.thePlantRow, 1800, false, false, true, null);
-                        board.CreateFireLine(__instance.thePlantRow, 1800, false, false, true, null);
+                        board.boardAction.CreateFireLine(__instance.thePlantRow, 1800, false, false, true, null);
+                        board.boardAction.CreateFireLine(__instance.thePlantRow, 1800, false, false, true, null);
                         break;
                     default:
-                        board.CreateFireLine(__instance.thePlantRow, 1800, false, false, true, null);
-                        board.CreateFireLine(__instance.thePlantRow, 1800, false, false, true, null);
+                        board.boardAction.CreateFireLine(__instance.thePlantRow, 1800, false, false, true, null);
+                        board.boardAction.CreateFireLine(__instance.thePlantRow, 1800, false, false, true, null);
                         if (__instance.thePlantRow - 1 >= 0 && __instance.thePlantRow - 1 < GameAPP.board.GetComponent<Board>().rowNum)
-                            board.CreateFireLine(__instance.thePlantRow - 1, 1800, false, false, true, null);
+                            board.boardAction.CreateFireLine(__instance.thePlantRow - 1, 1800, false, false, true, null);
                         if (__instance.thePlantRow + 1 >= 0 && __instance.thePlantRow + 1 < GameAPP.board.GetComponent<Board>().rowNum)
-                            board.CreateFireLine(__instance.thePlantRow + 1, 1800, false, false, true, null);
+                            board.boardAction.CreateFireLine(__instance.thePlantRow + 1, 1800, false, false, true, null);
                         break;
                 }
                 return false;

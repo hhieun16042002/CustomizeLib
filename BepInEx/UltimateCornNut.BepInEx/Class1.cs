@@ -116,18 +116,18 @@ namespace UltimateCornNut.BepInEx
         }
     }
 
-    [HarmonyPatch(typeof(Plant), nameof(Plant.Start))]
-    public static class Plant_Start_Patch
+    [HarmonyPatch(typeof(CreatePlant), nameof(CreatePlant.CheckMix))]
+    public static class CreatePlant_CheckMix_Patch
     {
-        [HarmonyPrefix]
-        public static void Prefix(Plant __instance)
+        [HarmonyPostfix]
+        public static void Postfix(CreatePlant __instance, ref Plant __result)
         {
-            if (__instance != null && __instance.thePlantType == PlantType.UltimatePortalNut && UnityEngine.Random.Range(0, 100) <= 1)
+            if (__result != null && __result.GetComponent<Plant>().thePlantType == PlantType.UltimatePortalNut && UnityEngine.Random.Range(0, 100) <= 1)
             {
-                var row = __instance.thePlantRow;
-                var column = __instance.thePlantColumn;
-                __instance.Die(Plant.DieReason.ByShovel);
-                CreatePlant.Instance.SetPlant(column, row, (PlantType)UltimateCornNut.PlantID, isFreeSet: true);
+                var row = __result.thePlantRow;
+                var column = __result.thePlantColumn;
+                __result.Die(Plant.DieReason.ByShovel);
+                __instance.SetPlant(column, row, (PlantType)UltimateCornNut.PlantID, null, default, true);
             }
         }
     }

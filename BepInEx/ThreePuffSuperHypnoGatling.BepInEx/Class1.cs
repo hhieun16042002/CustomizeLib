@@ -40,7 +40,7 @@ namespace ThreePuffSuperHypnoGatling.BepInEx
                 "<color=#3D1400>伤害：</color><color=red>（30x3）x6/1.5秒</color>\n" +
                 "<color=#3D1400>特点：</color><color=red>每次攻击有2%概率触发大招，5秒内，每0.02秒向3行发射1个伤害为3倍的魅惑小豌豆。</color>\n" +
                 "<color=#3D1400>融合配方：</color><color=red>小喷菇（底座）+魅惑三线超级机枪射手</color>\n\n" +
-                "<color=#3D1400>肘击若离！</color>"
+                "<color=#3D1400>三线超级魅惑机枪小喷菇是学校里著名的“风云人物”，如果有“学园捣蛋奖”的话，他是毋庸置疑的第一，“上幼儿园的第一天，其他学生都在哇哇大哭，知道为什么吗？我在老师的桌子里边放了个假的僵尸脑袋！”三线超级魅惑机枪小喷菇沾沾自喜的说。</color>"
             );
             CustomCore.TypeMgrExtra.IsPuff.Add((PlantType)ThreePuffHypnoSuperGatling.PlantID);
         }

@@ -226,7 +226,6 @@ namespace CrazySqualourBepInEx
                     __instance.RemoveFromList();  // 从植物列表中移除自身
 
 
-                    Vector3 axisPos = __instance.axis.transform.position;
                     Vector2 targetPoint = new Vector2(endoFlame.axis.transform.position.x, endoFlame.axis.transform.position.y + 1.75f);
                     __instance.startPos = __instance.axis.transform.position;
                     __instance.endPos = targetPoint;
