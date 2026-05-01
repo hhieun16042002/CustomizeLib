@@ -50,7 +50,6 @@ namespace UltimateDoomMinigun.BepInEx
                 plant.board.OnPlantCreate(plant);
             plant.UpdateText();
             plant.ReplaceSprite();
-            plant.FirstMeet();
         }
 
         public Bullet AnimShoot_Doom()

@@ -22,7 +22,8 @@
     </Reference>
     <Reference Include="Assembly-CSharp">
       <HintPath>..\..\..\lib\BepInEx\interop\Assembly-CSharp.dll</HintPath>
-    </Reference>
+    
+  <Private>False</Private></Reference>
     <Reference Include="BepInEx.Core">
       <HintPath>..\..\..\lib\BepInEx\core\BepInEx.Core.dll</HintPath>
       <Private>False</Private>
@@ -74,6 +75,6 @@
   </ItemGroup>
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
   <Exec Command="COPY &quot;$(TargetPath)&quot; &quot;$(BepResPath)&quot;" />
-  <Exec Command="COPY &quot;$(TargetPath)&quot; &quot;$(InnerPath)&quot;" />
+  <Exec Command="COPY &quot;$(TargetPath)&quot; &quot;$(PluginsPath)&quot;" />
 </Target>
 </Project>

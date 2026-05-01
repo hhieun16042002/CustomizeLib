@@ -69,7 +69,7 @@ namespace IceDoomGatlingBepInEx
 
     public class IceDoomGatling : MonoBehaviour
     {
-        public static int PlantID = 990;
+        public static int PlantID = 1912;
         public IceDoomGatling() : base(ClassInjector.DerivedConstructorPointer<IceDoomGatling>()) => ClassInjector.DerivedConstructorBody(this);
 
         public IceDoomGatling(IntPtr i) : base(i)
@@ -215,7 +215,7 @@ namespace IceDoomGatlingBepInEx
                 }
 
                 // 对僵尸造成伤害
-                if (zombie != null && zombie.freezeTimer > 0)
+                if (zombie != null && zombie.GetAttrTimers().freezeTimer > 0)
                 {
                     zombie.TakeDamage(DmgType.IceAll, __instance.Damage * 4);
                 }

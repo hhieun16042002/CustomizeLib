@@ -12,26 +12,12 @@ namespace CustomizeLib.BepInEx
         public static Dictionary<Type, Dictionary<String, object>> staticData { get; set; } = [];
         public static Dictionary<Type, Dictionary<object, Dictionary<String, object>>> instanceData { get; set; } = [];
 
-        /// <summary>
-        /// 获取扩展数据
-        /// </summary>
-        /// <param name="component"></param>
-        /// <param name="name">数据名</param>
-        /// <returns>数据值</returns>
         public static object GetData(this Component component, String name)
         {
             if (component == null)
                 return null;
             return component.gameObject.GetData(name);
         }
-
-        /// <summary>
-        /// 获取扩展数据
-        /// </summary>
-        /// <typeparam name="T">返回类型</typeparam>
-        /// <param name="component"></param>
-        /// <param name="name">数据名</param>
-        /// <returns>数据值</returns>
         public static T GetData<T>(this Component component, String name)
         {
             if (component == null)
@@ -52,13 +38,6 @@ namespace CustomizeLib.BepInEx
                 return default;
             }
         }
-
-        /// <summary>
-        /// 设置扩展数据
-        /// </summary>
-        /// <param name="component"></param>
-        /// <param name="name">数据名</param>
-        /// <param name="data">数据值</param>
         public static void SetData(this Component component, String name, object data)
         {
             if (component == null)
@@ -66,12 +45,6 @@ namespace CustomizeLib.BepInEx
             component.gameObject.SetData(name, data);
         }
 
-        /// <summary>
-        /// 获取扩展数据
-        /// </summary>
-        /// <param name="gameObject"></param>
-        /// <param name="name">数据名</param>
-        /// <returns>数据值</returns>
         public static object GetData(this GameObject gameObject, String name)
         {
             if (gameObject == null)
@@ -84,13 +57,26 @@ namespace CustomizeLib.BepInEx
                 return null;
             }
         }
-
-        /// <summary>
-        /// 设置扩展数据
-        /// </summary>
-        /// <param name="gameObject"></param>
-        /// <param name="name">数据名</param>
-        /// <param name="data">数据值</param>
+        public static T GetData<T>(this GameObject gameObject, String name)
+        {
+            if (gameObject == null)
+                return default;
+            try
+            {
+                if (gameObject.GetData(name) == null)
+                    return default;
+                return (T)gameObject.GetData(name);
+            }
+            catch (Exception e)
+            {
+                CustomCore.CLogger.LogInfo(
+                    "Error on convert type (at Get Extension Data), \n" +
+                    $"Message   : {e.Message}\n" +
+                    $"StackTrace: {e.StackTrace}\n"
+                    );
+                return default;
+            }
+        }
         public static void SetData(this GameObject gameObject, String name, object data)
         {
             if (gameObject == null)
@@ -104,20 +90,29 @@ namespace CustomizeLib.BepInEx
             }
         }
 
-        /// <summary>
-        /// 设置类扩展数据
-        /// </summary>
-        /// <typeparam name="T">类型</typeparam>
-        /// <param name="name">数据名</param>
-        /// <param name="data">数据值</param>
+        public static object GetData<T>(String name) => GetData(typeof(T), name);
+        public static TData GetData<TClass, TData>(String name) => GetData<TData>(typeof(TClass), name);
+        public static object GetData(Type type, String name)
+        {
+            if (staticData.ContainsKey(type))
+                if (staticData[type].ContainsKey(name))
+                    return staticData[type][name];
+                else
+                    return null;
+            else
+                return null;
+        }
+        public static TData GetData<TData>(Type type, String name)
+        {
+            if (staticData.ContainsKey(type))
+                if (staticData[type].ContainsKey(name))
+                    return (TData)staticData[type][name];
+                else
+                    return default;
+            else
+                return default;
+        }
         public static void SetData<T>(String name, object data) => SetData(typeof(T), name, data);
-
-        /// <summary>
-        /// 设置类扩展数据
-        /// </summary>
-        /// <param name="type">类型</param>
-        /// <param name="name">数据名</param>
-        /// <param name="data">数据值</param>
         public static void SetData(Type type, String name, object data)
         {
             if (staticData.ContainsKey(type))
@@ -129,38 +124,26 @@ namespace CustomizeLib.BepInEx
                 staticData.Add(type, new Dictionary<String, object>() { { name, data } });
         }
 
-        /// <summary>
-        /// 获取类扩展数据
-        /// </summary>
-        /// <typeparam name="T">类型</typeparam>
-        /// <param name="name">数据名</param>
-        /// <returns>数据值</returns>
-        public static object GetData<T>(String name) => GetData(typeof(T), name);
-
-        /// <summary>
-        /// 获取类扩展数据
-        /// </summary>
-        /// <param name="type">类型</param>
-        /// <param name="name">数据名</param>
-        /// <returns>数据值</returns>
-        /// <exception cref="ArgumentException"></exception>
-        public static object GetData(Type type, String name)
+        public static object GetData(this object obj, String name)
         {
-            if (staticData.ContainsKey(type))
-                if (staticData[type].ContainsKey(name))
-                    return staticData[type][name];
-                else
-                    return null;
-            else
+            if (obj == null)
                 return null;
+            if (instanceData.ContainsKey(obj.GetType()))
+                if (instanceData[obj.GetType()].ContainsKey(obj))
+                    if (instanceData[obj.GetType()][obj].ContainsKey(name))
+                        return instanceData[obj.GetType()][obj][name];
+            return null;
         }
-
-        /// <summary>
-        /// 获取实例扩展数据
-        /// </summary>
-        /// <param name="obj">实例</param>
-        /// <param name="name">数据名</param>
-        /// <param name="data">数据值</param>
+        public static T GetData<T>(this object obj, String name)
+        {
+            if (obj == null)
+                return default;
+            if (instanceData.ContainsKey(obj.GetType()))
+                if (instanceData[obj.GetType()].ContainsKey(obj))
+                    if (instanceData[obj.GetType()][obj].ContainsKey(name))
+                        return (T)instanceData[obj.GetType()][obj][name];
+            return default;
+        }
         public static void SetData(this object obj, String name, object data)
         {
             if (obj == null)
@@ -177,23 +160,10 @@ namespace CustomizeLib.BepInEx
                 instanceData.Add(obj.GetType(), new Dictionary<object, Dictionary<String, object>>() { { obj, new Dictionary<String, object>() { { name, data } } } });
         }
 
-        /// <summary>
-        /// 获取实例扩展数据
-        /// </summary>
-        /// <param name="obj">实例</param>
-        /// <param name="name">数据名</param>
-        /// <returns>数据值</returns>
-        /// <exception cref="ArgumentException"></exception>
-        public static object GetData(this object obj, String name)
-        {
-            if (obj == null)
-                return null;
-            if (instanceData.ContainsKey(obj.GetType()))
-                if (instanceData[obj.GetType()].ContainsKey(obj))
-                    if (instanceData[obj.GetType()][obj].ContainsKey(name))
-                        return instanceData[obj.GetType()][obj][name];
-            return null;
-        }
+        public static void WriteMethod<T>(this T comp, String name, Action<T> action) where T : Component => comp.SetData(name, action);
+        public static void InvokeMethod<T>(this T comp, String name) where T : Component => comp.GetData<Action<T>>(name).Invoke(comp);
+        public static void WriteMethod(this GameObject comp, String name, Action<GameObject> action) => comp.SetData(name, action);
+        public static void InvokeMethod(this GameObject comp, String name) => comp.GetData<Action<GameObject>>(name).Invoke(comp);
     }
 
     public class ExtensionDataComponent : MonoBehaviour

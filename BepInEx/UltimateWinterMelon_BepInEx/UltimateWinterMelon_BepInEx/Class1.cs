@@ -48,6 +48,7 @@ namespace UltimateWinterMelonBepInEx
                 CustomCore.AddUltimatePlant((PlantType)UltimateWinterMelon.PlantID);
                 UltimateWinterMelon.Buff1 = CustomCore.RegisterCustomBuff("凛冬将至：究极超时空西瓜对命中的僵尸附带1层极冻值。", BuffType.AdvancedBuff, () => Board.Instance.ObjectExist<UltimateWinterMelon>(), 5000, (PlantType)UltimateWinterMelon.PlantID);
                 UltimateWinterMelon.Buff2 = CustomCore.RegisterCustomBuff("白洞：开大时有10%概率让本行所有僵尸移到本行最右侧，大招的子弹伤害×2。", BuffType.AdvancedBuff, () => Lawnf.TravelAdvanced(UltimateWinterMelon.Buff1), 5000, (PlantType)UltimateWinterMelon.PlantID);
+                CustomCore.AddUltimatePlant((PlantType)UltimateWinterMelon.PlantID);
             }
             catch (Exception) { }
         }
@@ -55,7 +56,7 @@ namespace UltimateWinterMelonBepInEx
 
     public class UltimateWinterMelon : MonoBehaviour
     {
-        public static int PlantID = 991;
+        public static int PlantID = 1934;
         public static BuffID Buff1 = -1;
         public static BuffID Buff2 = -1;
 
@@ -89,17 +90,6 @@ namespace UltimateWinterMelonBepInEx
                 {
                     superShootText.gameObject.SetActive(plant.healthSlider.gameObject.active);
                     superShootTextShadow.gameObject.SetActive(plant.healthSlider.gameObject.active);
-                }
-                try
-                {
-                    if (AlmanacMenu.Instance.currentShowCtrl.localShowPlant.name == this.plant.gameObject.name)
-                    {
-                        superShootText.gameObject.SetActive(false);
-                        superShootTextShadow.gameObject.SetActive(false);
-                    }
-                }
-                catch (Exception)
-                {
                 }
             }
             catch (Exception)
@@ -215,7 +205,7 @@ namespace UltimateWinterMelonBepInEx
                             (__instance.theBulletRow == z.theZombieRow || z.theZombieRow == __instance.theBulletRow + 1 || z.theZombieRow == __instance.theBulletRow - 1))
                         {
                             int damage = __instance.Damage;
-                            if (z.freezeTimer > 0)
+                            if (z.TryGetEffect<ColdEffect>(EffectType.Cold, out var cold) && cold.duration > 0)
                                 damage *= 4;
                             if (z.theFirstArmorHealth > 0)
                                 damage *= 3;
@@ -303,7 +293,7 @@ namespace UltimateWinterMelonBepInEx
                             (__instance.theBulletRow == z.theZombieRow || z.theZombieRow == __instance.theBulletRow + 1 || z.theZombieRow == __instance.theBulletRow - 1))
                         {
                             int damage = __instance.Damage;
-                            if (z.freezeTimer > 0)
+                            if (z.TryGetEffect<ColdEffect>(EffectType.Cold, out var cold) && cold.duration > 0)
                                 damage *= 4;
                             if (z.theFirstArmorHealth > 0)
                                 damage *= 3;
@@ -326,13 +316,11 @@ namespace UltimateWinterMelonBepInEx
                             if (Lawnf.TravelAdvanced(UltimateWinterMelon.Buff1) && iceLevel >= 75)
                                 damage += (int)((z.theHealth + z.theFirstArmorHealth + z.theSecondArmorHealth) * 0.15f);
 
-                            if (((z.theHealth + z.theFirstArmorHealth + z.theSecondArmorHealth) < z.portaledTimer * 30) && Lawnf.TravelAdvanced(UltimateWinterMelon.Buff2))
+                            if (((z.theHealth + z.theFirstArmorHealth + z.theSecondArmorHealth) < z.GetAttrTimers().portaledTimer * 30) && Lawnf.TravelAdvanced(UltimateWinterMelon.Buff2))
                             {
                                 if (!z.TryGetComponent<LegionZombie>(out var legion) && !TypeMgr.IsBossZombie(z.theZombieType))
                                 {
-                                    z.portaledTimer = 0f;
-                                    z.isStopped = false;
-                                    z.UnPortaled();
+                                    z.GetAttrTimers().portaledTimer = 0f;
                                     z.Die();
                                 }
                                 else
@@ -344,10 +332,12 @@ namespace UltimateWinterMelonBepInEx
                             {
                                 if (TypeMgr.IsBossZombie(z.theZombieType) || z.TryGetComponent<LegionZombie>(out var legion))
                                     damage *= 4;
-                                else if (!z.isPortaled && z.theFirstArmorHealth <= 0)
+                                else if (!z.GetAttrTimers().isPortaled && z.theFirstArmorHealth <= 0)
                                     z.SetPortaled(__instance.Damage / 5);
-                                else if (z.isPortaled && z.theFirstArmorHealth <= 0)
-                                    z.portaledTimer += __instance.Damage / 5;
+                                else if (z.GetAttrTimers(out var timer).isPortaled && z.theFirstArmorHealth <= 0)
+                                {
+                                    timer.portaledTimer += __instance.Damage / 5;
+                                }
                             }
 
                             z.TakeDamage(DmgType.IceAll, damage);
@@ -517,13 +507,13 @@ namespace UltimateWinterMelonBepInEx
         {
             try
             {
-                if (parent != null && (parent.coldTimer > 0 || parent.freezeTimer > 0) && iceLevel > 0)
+                if (parent != null && (parent.GetAttrTimers().coldTimer > 0 || parent.GetAttrTimers().freezeTimer > 0) && iceLevel > 0)
                 {
                     coldSpeed = (float)Math.Pow(0.95, iceLevel);
                     coldSpeed = coldSpeed < 0.3f ? 0.3f : coldSpeed;
                     coldSpeed = coldSpeed > 0.5f ? 0.5f : coldSpeed;
                 }
-                else if (parent != null && (parent.coldTimer <= 0 || parent.freezeTimer <= 0))
+                else if (parent != null && (parent.GetAttrTimers().coldTimer <= 0 || parent.GetAttrTimers().freezeTimer <= 0))
                 {
                     iceLevel = 0;
                 }

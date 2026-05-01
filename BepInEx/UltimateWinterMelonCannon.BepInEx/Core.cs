@@ -39,7 +39,7 @@ namespace UltimateWinterMelonCannon.BepInEx
                 GameAPP.PlaySound(UnityEngine.Random.RandomRangeInt(104, 106));
                 if (Lawnf.TravelAdvanced(UltimateWinterMelonCannon.Buff2))
                 {
-                    Board.Instance.SetDoom(Mouse.Instance.GetColumnFromX(__instance.transform.position.x), __instance.theBulletRow, false, true, default, 3600);
+                    Board.Instance.boardAction.SetDoom(Mouse.Instance.GetColumnFromX(__instance.transform.position.x), __instance.theBulletRow, false, true, default, 3600);
                 }
                 __instance.Die();
                 return false;

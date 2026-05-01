@@ -101,7 +101,7 @@ namespace GarlicSuperGatling.BepInEx
                 int r = UnityEngine.Random.Range(0, 10);
                 if (Lawnf.TravelUltimate((UltiBuff)13))
                     r = UnityEngine.Random.Range(0, 4);
-                if (zombie.poisonTimer > 0 && r == 2)
+                if (zombie.GetAttrTimers().poisonTimer > 0 && r == 2)
                 {
                     Vector3 position = __instance.transform.position;
 

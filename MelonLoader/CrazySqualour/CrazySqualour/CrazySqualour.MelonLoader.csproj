@@ -315,6 +315,10 @@
 	<ItemGroup>
 	  <EmbeddedResource Include="icon" />
 	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\..\..\BepInEx\CustomizeLib.BepInEx\CustomizeLib.BepInEx.csproj" />
+	</ItemGroup>
 	
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
 		<Exec Command="COPY &quot;$(TargetPath)&quot; &quot;..\..\..\res\MelonLoader\Mods&quot;" />

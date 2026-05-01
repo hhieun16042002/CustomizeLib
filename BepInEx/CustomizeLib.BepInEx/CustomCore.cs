@@ -6,6 +6,7 @@ using BepInEx.Unity.IL2CPP;
 using HarmonyLib;
 using Il2CppInterop.Runtime;
 using Il2CppInterop.Runtime.Injection;
+using Il2CppInterop.Runtime.InteropTypes;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Text.RegularExpressions;
@@ -147,9 +148,39 @@ namespace CustomizeLib.BepInEx
             String iName = name;
             if (!Regex.Match(name, @"\(\d+\)$").Success)
                 iName = $"{name}({id})";
-            PlantsAlmanac.Add((PlantType)id, (iName, description));
+            PlantsAlmanac.Add((PlantType)id, new PlantAlmanac()
+            {
+                name = iName,
+                info = description,
+                plantType = (PlantType)id
+            });
             var str = Regex.Replace(name, @"[\(（].*[\)）]", "");
             CustomPlantNames.Add((PlantType)id, str);
+        }
+
+        /// <summary>
+        /// 添加植物图鉴
+        /// </summary>
+        /// <param name="plantType">植物id</param>
+        /// <param name="name">植物名称</param>
+        /// <param name="info">植物介绍</param>
+        /// <param name="introduce">植物介绍</param>
+        /// <param name="cost">植物价格</param>
+        public static void AddPlantAlmanacStrings(PlantType plantType, string name, string info, string introduce, int cost)
+        {
+            String iName = name;
+            if (!Regex.Match(name, @"\(\d+\)$").Success)
+                iName = $"{name}({(int)plantType})";
+            PlantsAlmanac.Add(plantType, new PlantAlmanac()
+            {
+                name = iName,
+                info = info,
+                introduce = introduce,
+                cost = cost.ToString(),
+                plantType = plantType
+            });
+            var str = Regex.Replace(name, @"[\(（].*[\)）]", "");
+            CustomPlantNames.Add(plantType, str);
         }
 
         /// <summary>
@@ -277,8 +308,8 @@ namespace CustomizeLib.BepInEx
         /// <param name="level">等级</param>
         /// <param name="bg">背景</param>
         /// <returns></returns>
-        public static int RegisterCustomDebuff(string text, ZombieType zombieType = ZombieType.NormalZombie, int level = 1, BuffBgType bg = default) =>
-            RegisterCustomBuff(text, BuffType.Debuff, () => true, 0, PlantType.Nothing, level: level, bgType: bg, zombieType);
+        public static int RegisterCustomDebuff(string text, Func<bool> unlock = null, ZombieType zombieType = ZombieType.NormalZombie, int level = 1, BuffBgType bg = default) =>
+            RegisterCustomBuff(text, BuffType.Debuff, unlock, 0, PlantType.Nothing, level: level, bgType: bg, zombieType);
 
         /// <summary>
         /// 注册自定义词条
@@ -321,13 +352,14 @@ namespace CustomizeLib.BepInEx
                 case BuffType.Debuff:
                     i = CustomBuffStartID + CustomDebuffs.Count;
                     if (buffID != -1) i = buffID;
-                    CustomDebuffs.Add(i, (text, zombieType));
+                    CustomDebuffs.Add(i, (text, zombieType, canUnlock));
                     TravelDictionary.debuffData.Add((TravelDebuff)i, new Il2CppSystem.ValueTuple<string, ZombieType>(
                         text, zombieType));
+                    TravelHelper.LeaderAppear.Add((TravelDebuff)i);
                     break;
                 case BuffType.UnlockPlant:
                     i = CustomBuffStartID + CustomUnlockBuffs.Count;
-                    if (buffID != -1) i = buffID;
+                    if (buffID == -1) i = buffID;
                     CustomUnlockBuffs.Add(i, (icon, text, cost));
                     TravelDictionary.unlocksText.Add((TravelUnlocks)i, text);
                     break;
@@ -341,7 +373,8 @@ namespace CustomizeLib.BepInEx
             }
             CustomBuffCost.Add((buffType, i), cost);
             CustomBuffText.Add((buffType, i), text);
-            CustomBuffIcon.Add((buffType, i), icon);
+            if (buffType != BuffType.Debuff)
+                CustomBuffIcon.Add((buffType, i), icon);
             if (buffID != -1 && !CustomBuffIDMapping.ContainsKey((buffType, buffID)))
                 CustomBuffIDMapping.Add((buffType, i), buffID);
             if (level != 1)
@@ -355,57 +388,6 @@ namespace CustomizeLib.BepInEx
                 else
                     CustomPlantInfo.Add(plantType, new List<(BuffType, int)> { (buffType, i) });
             }
-            /*var valueTuple = new Il2CppSystem.ValueTuple<Il2CppSystem.Nullable<PlantType>, Il2CppSystem.Object, Il2CppSystem.Object, bool>();
-            var buffObject = new Il2CppSystem.Object();
-            {
-                var type = new Il2CppSystem.Type();
-                switch (buffType)
-                {
-                    case BuffType.AdvancedBuff:
-                        type = Il2CppType.From(typeof(AdvBuff));
-                        break;
-                    case BuffType.UltimateBuff:
-                        type = Il2CppType.From(typeof(UltiBuff));
-                        break;
-                    case BuffType.Debuff:
-                        type = Il2CppType.From(typeof(TravelDebuff));
-                        break;
-                    case BuffType.InvestmentBuff:
-                        type = Il2CppType.From(typeof(InvestBuff));
-                        break;
-                }
-                buffObject = Il2CppSystem.Enum.Parse(type, i.ToString());
-            }
-            valueTuple.Item1 = new Il2CppSystem.Nullable<PlantType>(plantType);
-            valueTuple.Item4 = false;
-            if (!TravelDictionary.PlantInfo.ContainsKey(plantType))
-            {
-                valueTuple.Item2 = buffObject;
-                TravelDictionary.PlantInfo.Add(plantType, valueTuple);
-            }
-            else
-            {
-                if (TravelDictionary.PlantInfo[plantType] == null)
-                {
-                    valueTuple.Item2 = buffObject;
-                    TravelDictionary.PlantInfo.Add(plantType, valueTuple);
-                }
-                else
-                {
-                    valueTuple = TravelDictionary.PlantInfo[plantType];
-                    if (TravelDictionary.PlantInfo[plantType].Item2 == null)
-                        valueTuple.Item2 = buffObject;
-                    else if (TravelDictionary.PlantInfo[plantType].Item3 == null)
-                        valueTuple.Item3 = buffObject;
-                    if (TravelDictionary.PlantInfo[plantType].Item1 == null)
-                        valueTuple.Item1 = new Il2CppSystem.Nullable<PlantType>(plantType);
-                }
-            }
-            var index = PlantInfoCache.FindIndex(item => item.Item1 == plantType);
-            if (index != -1)
-                PlantInfoCache[index] = (plantType, valueTuple);
-            else
-                PlantInfoCache.Add((plantType, valueTuple));*/
             return i;
         }
 
@@ -1333,7 +1315,6 @@ namespace CustomizeLib.BepInEx
             ClassInjector.RegisterTypeInIl2Cpp<ExtensionDataComponent>();
             ClassInjector.RegisterTypeInIl2Cpp<CoreBehaviour>();
             ClassInjector.RegisterTypeInIl2Cpp<PositionRecorder>();
-
             Harmony.CreateAndPatchAll(Assembly.GetExecutingAssembly());
             Instance = new(this);
             CLogger = Log;
@@ -1350,7 +1331,7 @@ namespace CustomizeLib.BepInEx
         /// <summary>
         /// 自定义僵尸词条列表
         /// </summary>
-        public static Dictionary<int, (string, ZombieType)> CustomDebuffs { get; set; } = [];
+        public static Dictionary<int, (string, ZombieType, Func<bool>)> CustomDebuffs { get; set; } = [];
         public static List<(int, int, int)> CustomFusions { get; set; } = [];
         public static List<CustomLevelData> CustomLevels { get; set; } = [];
         public static Dictionary<ParticleType, GameObject> CustomParticles { get; set; } = [];
@@ -1399,7 +1380,7 @@ namespace CustomizeLib.BepInEx
 
         public static Lazy<CustomCore> Instance { get; set; } = new();
 
-        public static Dictionary<PlantType, (string, string)> PlantsAlmanac { get; set; } = [];
+        public static Dictionary<PlantType, PlantAlmanac> PlantsAlmanac { get; set; } = [];
 
         /// <summary>
         /// 皮肤图鉴

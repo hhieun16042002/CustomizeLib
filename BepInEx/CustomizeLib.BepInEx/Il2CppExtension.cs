@@ -40,5 +40,8 @@ namespace CustomizeLib.BepInEx
 
         public static Il2CppSystem.Array ToArray<T>(this Il2CppReferenceArray<T> array) where T : Il2CppInterop.Runtime.InteropTypes.Il2CppObjectBase
             => array.Cast<Il2CppSystem.Array>();
+
+        public static bool IsTypeOf(this Il2CppSystem.Object obj, Type type) => obj.GetIl2CppType() == Il2CppType.From(type);
+        public static bool IsTypeOf<T>(this Il2CppSystem.Object obj) => obj.GetIl2CppType() == Il2CppType.From(typeof(T));
     }
 }

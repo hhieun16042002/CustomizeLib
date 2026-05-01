@@ -152,7 +152,7 @@ namespace IceSqualourBepInEx
                             if ((zombieCol == col || zombieCol == col - 1 || zombieCol == col + 1) && (zombieRow == row || zombieRow == row + 1 || zombieRow == row - 1))
                             {
                                 int damage = 900;
-                                if (zombie.freezeTimer > 0f)
+                                if (zombie.GetAttrTimers().freezeTimer > 0f)
                                     damage *= 4;
                                 zombie.TakeDamage(DmgType.IceAll, damage);
                                 zombie.SetFreeze(4f);
@@ -180,7 +180,7 @@ namespace IceSqualourBepInEx
                                 if (zombie != null)
                                 {
                                     int damage = 900;
-                                    if (zombie.freezeTimer > 0f)
+                                    if (zombie.GetAttrTimers().freezeTimer > 0f)
                                         damage *= 4;
                                     zombie.TakeDamage(DmgType.IceAll, damage);
                                     zombie.SetFreeze(4f);
@@ -196,7 +196,7 @@ namespace IceSqualourBepInEx
                                 if (zombie != null)
                                 {
                                     int damage = 1800;
-                                    if (zombie.freezeTimer > 0f)
+                                    if (zombie.GetAttrTimers().freezeTimer > 0f)
                                         damage *= 4;
                                     zombie.TakeDamage(DmgType.IceAll, damage);
                                     zombie.SetFreeze(4f);

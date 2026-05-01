@@ -143,6 +143,214 @@ namespace CustomizeLib.BepInEx
         public static implicit operator BuffBgType(TravelStoreWindow.BgType bgType) => new BuffBgType(bgType);
     }
 
+    public class ZombieAttrTimers
+    {
+        public Zombie zombie;
+
+        #region 黄油
+        public float butterTimer
+        {
+            get => zombie.TryGetEffect<ButterEffect>(EffectType.Butter, out var effect) ? effect.duration : -1f;
+            set
+            {
+                if (zombie.TryGetEffect<ButterEffect>(EffectType.Butter, out var effect))
+                    effect.duration = value;
+            }
+        }
+        public bool isButter => butterTimer > 0f;
+        #endregion
+        #region 寒冷
+        public float coldTimer
+        {
+            get => zombie.TryGetEffect<ColdEffect>(EffectType.Cold, out var effect) ? effect.duration : -1f;
+            set
+            {
+                if (zombie.TryGetEffect<ColdEffect>(EffectType.Cold, out var effect))
+                    effect.duration = value;
+            }
+        }
+        public bool isCold => coldTimer > 0f;
+        #endregion
+        #region 冻结
+        public float freezeTimer
+        {
+            get => zombie.TryGetEffect<FreezeEffect>(EffectType.Freeze, out var effect) ? effect.duration : -1f;
+            set
+            {
+                if (zombie.TryGetEffect<FreezeEffect>(EffectType.Freeze, out var effect))
+                    effect.duration = value;
+            }
+        }
+        public bool isFreeze => freezeTimer > 0f;
+        #endregion
+        #region 免疫
+        public float immuneTimer
+        {
+            get => zombie.TryGetEffect<ImmuneEffect>(EffectType.Immune, out var effect) ? effect.duration : -1f;
+            set
+            {
+                if (zombie.TryGetEffect<ImmuneEffect>(EffectType.Immune, out var effect))
+                    effect.duration = value;
+            }
+        }
+        public bool isImmune => immuneTimer > 0f;
+        #endregion
+        #region 水草
+        public float kelpTimer
+        {
+            get => zombie.TryGetEffect<KelpEffect>(EffectType.Kelp, out var effect) ? effect.duration : -1f;
+            set
+            {
+                if (zombie.TryGetEffect<KelpEffect>(EffectType.Kelp, out var effect))
+                    effect.duration = value;
+            }
+        }
+        public bool isKelp => kelpTimer > 0f;
+        #endregion
+        #region 毒
+        public float poisonTimer
+        {
+            get => zombie.TryGetEffect<PoisonEffect>(EffectType.Poison, out var effect) ? effect.duration : -1f;
+            set
+            {
+                if (zombie.TryGetEffect<PoisonEffect>(EffectType.Poison, out var effect))
+                    effect.duration = value;
+            }
+        }
+        public bool isPoison => poisonTimer > 0f;
+        #endregion
+        #region 超时空
+        public float portaledTimer
+        {
+            get => zombie.TryGetEffect<PortalEffect>(EffectType.Portal, out var effect) ? effect.duration : -1f;
+            set
+            {
+                if (zombie.TryGetEffect<PortalEffect>(EffectType.Portal, out var effect))
+                    effect.duration = value;
+            }
+        }
+        public bool isPortaled => portaledTimer > 0f;
+        #endregion
+        #region 红温
+        public bool isJalaed => zombie.TryGetEffect<JalaEffect>(EffectType.Jala, out var _);
+        #endregion
+        #region 余烬
+        public bool isEmbered => zombie.TryGetEffect<EmberEffect>(EffectType.Ember, out var _);
+        #endregion
+    }
+
+    public struct PlantAlmanac
+    {
+        public string info = "";
+        public string cost = "";
+        public string introduce = "";
+        public string name = "";
+        public PlantType plantType = PlantType.Nothing;
+        public PlantAlmanac() { }
+    }
+
+    public static class ZombieExtensions
+    {
+        public static void UnCold(this Zombie zombie) => zombie.GetAttrTimers().coldTimer = 0f;
+    }
+
+    public static class TravelExtensions
+    {
+        public const string BUFF_TYPEDATA = "CustomizeLib_BuffOptionType";
+        public const string BUFF_IDDATA = "CustomizeLib_BuffOptionID";
+
+        /// <summary>
+        /// 获取TravelBuffOptionButton的类型和ID信息
+        /// </summary>
+        /// <param name="option"></param>
+        /// <returns>(类型, ID)</returns>
+        /// <exception cref="InvalidOperationException">TravelBuffOptionButton实例未被设置类型及ID信息</exception>
+        public static (BuffType, int) TryGetTypeAndID(this TravelBuffOptionButton option)
+        {
+            if (option.GetData(BUFF_TYPEDATA) != null && option.GetData(BUFF_IDDATA) != null)
+                return (option.GetData<BuffType>(BUFF_TYPEDATA), option.GetData<int>(BUFF_IDDATA));
+            throw new InvalidOperationException("Option data is not exist");
+        }
+
+        /// <summary>
+        /// 设置TravelBuffOptionButton的类型和ID信息，仅为TryGetData提供数据
+        /// </summary>
+        /// <param name="option"></param>
+        /// <param name="type">类型</param>
+        /// <param name="id">ID</param>
+        public static void SetTypeAndID(this TravelBuffOptionButton option, BuffType type, int id)
+        {
+            option.SetData(BUFF_TYPEDATA, type);
+            option.SetData(BUFF_IDDATA, id);
+        }
+
+        /// <summary>
+        /// 获取TravelStoreWindow的类型和ID信息
+        /// </summary>
+        /// <param name="option"></param>
+        /// <returns>(类型, ID)</returns>
+        /// <exception cref="InvalidOperationException">TravelStoreWindow实例未被设置类型及ID信息</exception>
+        public static (BuffType, int) TryGetTypeAndID(this TravelStoreWindow option)
+        {
+            if (option.GetData(BUFF_TYPEDATA) != null && option.GetData(BUFF_IDDATA) != null)
+                return (option.GetData<BuffType>(BUFF_TYPEDATA), option.GetData<int>(BUFF_IDDATA));
+            throw new InvalidOperationException("Option data is not exist");
+        }
+
+        /// <summary>
+        /// 设置TravelStoreWindow的类型和ID信息，仅为TryGetData提供数据
+        /// </summary>
+        /// <param name="option"></param>
+        /// <param name="type">类型</param>
+        /// <param name="id">ID</param>
+        public static void SetTypeAndID(this TravelStoreWindow option, BuffType type, int id)
+        {
+            option.SetData(BUFF_TYPEDATA, type);
+            option.SetData(BUFF_IDDATA, id);
+        }
+
+        public static (BuffType, int) GetTypeAndID(Il2CppSystem.Object buff)
+        {
+            BuffType buffType = (BuffType)(-1);
+            int id = -1;
+            if (buff.IsTypeOf<AdvBuff>())
+            {
+                buffType = BuffType.AdvancedBuff;
+                id = (int)buff.Unbox<AdvBuff>();
+            }
+            else if (buff.IsTypeOf<UltiBuff>())
+            {
+                buffType = BuffType.UltimateBuff;
+                id = (int)buff.Unbox<UltiBuff>();
+            }
+            else if (buff.IsTypeOf<TravelDebuff>())
+            {
+                buffType = BuffType.Debuff;
+                id = (int)buff.Unbox<TravelDebuff>();
+            }
+            else if (buff.IsTypeOf<InvestBuff>())
+            {
+                buffType = BuffType.InvestmentBuff;
+                id = (int)buff.Unbox<InvestBuff>();
+            }
+            return (buffType, id);
+        }
+
+        public static (BuffType, int) GeneralSet(this TravelBuffOptionButton option, Il2CppSystem.Object buff)
+        {
+            var tuple = GetTypeAndID(buff);
+            option.SetTypeAndID(tuple.Item1, tuple.Item2);
+            return tuple;
+        }
+
+        public static (BuffType, int) GeneralSet(this TravelStoreWindow window, Il2CppSystem.Object buff)
+        {
+            var tuple = GetTypeAndID(buff);
+            window.SetTypeAndID(tuple.Item1, tuple.Item2);
+            return tuple;
+        }
+    }
+
     public static class Extensions
     {
         public static void AddValueToTypeMgrExtraSkinBackup(this CustomTypeMgrExtraSkin typeMgrExtraSkinFromJson, PlantType plantType)
@@ -252,6 +460,48 @@ namespace CustomizeLib.BepInEx
                 assetNames.Add(asset.name);
             }
             return assetNames;
+        }
+
+        public static void AddLayer(this Transform transform, int level)
+        {
+            for (int i = 0; i < transform.childCount; i++)
+            {
+                if (transform.GetChild(i).IsObjExist() && transform.GetChild(i).GetComponent<SpriteRenderer>() != null)
+                {
+                    transform.GetChild(i).GetComponent<SpriteRenderer>().sortingOrder += level;
+                    AddLayer(transform.GetChild(i), level);
+                }
+            }
+        }
+
+        public static ZombieAttrTimers GetAttrTimers(this Zombie zombie)
+        {
+            if (zombie.GetData("CustomizeLib_AttrTimers") == null) // 如果尚未被获取过
+            {
+                var timer = new ZombieAttrTimers
+                {
+                    zombie = zombie
+                };
+                zombie.SetData("CustomizeLib_AttrTimers", timer);
+                return timer;
+            }
+            return zombie.GetData<ZombieAttrTimers>("CustomizeLib_AttrTimers"); // 如果获取过就直接返回
+        }
+
+        public static ZombieAttrTimers GetAttrTimers(this Zombie zombie, out ZombieAttrTimers timers)
+        {
+            if (zombie.GetData("CustomizeLib_AttrTimers") == null) // 如果尚未被获取过
+            {
+                var timer = new ZombieAttrTimers
+                {
+                    zombie = zombie
+                };
+                zombie.SetData("CustomizeLib_AttrTimers", timer);
+                timers = timer;
+                return timer;
+            }
+            timers = zombie.GetData<ZombieAttrTimers>("CustomizeLib_AttrTimers"); // 如果获取过就直接返回
+            return zombie.GetData<ZombieAttrTimers>("CustomizeLib_AttrTimers");
         }
 
         public static void SwapTypeMgrExtraSkinAndBackup(PlantType plantType)

@@ -17,73 +17,95 @@
   <ItemGroup>
     <Reference Include="0Harmony">
       <HintPath>..\..\lib\BepInEx\core\0Harmony.dll</HintPath>
-    </Reference>
+    
+  <Private>False</Private></Reference>
     <Reference Include="Assembly-CSharp">
       <HintPath>..\..\lib\BepInEx\interop\Assembly-CSharp.dll</HintPath>
-    </Reference>
+    
+  <Private>False</Private></Reference>
     <Reference Include="BepInEx.Core">
       <HintPath>..\..\lib\BepInEx\core\BepInEx.Core.dll</HintPath>
-    </Reference>
+    
+  <Private>False</Private></Reference>
     <Reference Include="BepInEx.Unity.Common">
       <HintPath>..\..\lib\BepInEx\core\BepInEx.Unity.Common.dll</HintPath>
-    </Reference>
+    
+  <Private>False</Private></Reference>
     <Reference Include="BepInEx.Unity.IL2CPP">
       <HintPath>..\..\lib\BepInEx\core\BepInEx.Unity.IL2CPP.dll</HintPath>
-    </Reference>
+    
+  <Private>False</Private></Reference>
     <Reference Include="Cpp2IL.Core">
       <HintPath>..\..\lib\BepInEx\core\Cpp2IL.Core.dll</HintPath>
-    </Reference>
+    
+  <Private>False</Private></Reference>
     <Reference Include="Il2CppInterop.Generator">
       <HintPath>..\..\lib\BepInEx\core\Il2CppInterop.Generator.dll</HintPath>
-    </Reference>
+    
+  <Private>False</Private></Reference>
     <Reference Include="Il2CppInterop.Runtime">
       <HintPath>..\..\lib\BepInEx\core\Il2CppInterop.Runtime.dll</HintPath>
-    </Reference>
+    
+  <Private>False</Private></Reference>
     <Reference Include="Il2Cppmscorlib">
       <HintPath>..\..\lib\BepInEx\interop\Il2Cppmscorlib.dll</HintPath>
-    </Reference>
+    
+  <Private>False</Private></Reference>
     <Reference Include="Il2CppSystem">
       <HintPath>..\..\lib\BepInEx\interop\Il2CppSystem.dll</HintPath>
-    </Reference>
+    
+  <Private>False</Private></Reference>
     <Reference Include="Il2CppSystem.Core">
       <HintPath>..\..\lib\BepInEx\interop\Il2CppSystem.Core.dll</HintPath>
-    </Reference>
+    
+  <Private>False</Private></Reference>
     <Reference Include="Unity.TextMeshPro">
       <HintPath>..\..\lib\BepInEx\interop\Unity.TextMeshPro.dll</HintPath>
-    </Reference>
+    
+  <Private>False</Private></Reference>
     <Reference Include="Unity.VisualScripting.Core">
       <HintPath>..\..\lib\BepInEx\interop\Unity.VisualScripting.Core.dll</HintPath>
-    </Reference>
+    
+  <Private>False</Private></Reference>
     <Reference Include="UnityEngine">
       <HintPath>..\..\lib\BepInEx\interop\UnityEngine.dll</HintPath>
-    </Reference>
+    
+  <Private>False</Private></Reference>
     <Reference Include="UnityEngine.AssetBundleModule">
       <HintPath>..\..\lib\BepInEx\interop\UnityEngine.AssetBundleModule.dll</HintPath>
-    </Reference>
+    
+  <Private>False</Private></Reference>
     <Reference Include="UnityEngine.AudioModule">
       <HintPath>..\..\lib\BepInEx\interop\UnityEngine.AudioModule.dll</HintPath>
-    </Reference>
+    
+  <Private>False</Private></Reference>
     <Reference Include="UnityEngine.CoreModule">
       <HintPath>..\..\lib\BepInEx\interop\UnityEngine.CoreModule.dll</HintPath>
-    </Reference>
+    
+  <Private>False</Private></Reference>
     <Reference Include="UnityEngine.ImageConversionModule">
       <HintPath>..\..\lib\BepInEx\interop\UnityEngine.ImageConversionModule.dll</HintPath>
-    </Reference>
+    
+  <Private>False</Private></Reference>
     <Reference Include="UnityEngine.InputLegacyModule">
       <HintPath>..\..\lib\BepInEx\interop\UnityEngine.InputLegacyModule.dll</HintPath>
-    </Reference>
+    
+  <Private>False</Private></Reference>
     <Reference Include="UnityEngine.Physics2DModule">
       <HintPath>..\..\lib\BepInEx\interop\UnityEngine.Physics2DModule.dll</HintPath>
-    </Reference>
+    
+  <Private>False</Private></Reference>
     <Reference Include="UnityEngine.UI">
       <HintPath>..\..\lib\BepInEx\interop\UnityEngine.UI.dll</HintPath>
-    </Reference>
+    
+  <Private>False</Private></Reference>
     <Reference Include="UnityEngine.UIModule">
       <HintPath>..\..\lib\BepInEx\interop\UnityEngine.UIModule.dll</HintPath>
-    </Reference>
+    
+  <Private>False</Private></Reference>
   </ItemGroup>
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
   <Exec Command="COPY &quot;$(TargetPath)&quot; &quot;$(BepResPath)&quot;" />
-  <Exec Command="COPY &quot;$(TargetPath)&quot; &quot;$(InnerPath)&quot;" />
+  <Exec Command="COPY &quot;$(TargetPath)&quot; &quot;$(PluginsPath)&quot;" />
 </Target>
 </Project>

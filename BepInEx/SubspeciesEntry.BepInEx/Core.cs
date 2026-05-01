@@ -1,7 +1,9 @@
-﻿using BepInEx;
+﻿using AlmanacData;
+using BepInEx;
 using BepInEx.Unity.IL2CPP;
 using BepInEx.Unity.IL2CPP.Utils;
 using HarmonyLib;
+using Il2CppInterop.Runtime;
 using Il2CppInterop.Runtime.Injection;
 using System.Collections;
 using System.Diagnostics;
@@ -9,6 +11,7 @@ using System.Reflection;
 using System.Runtime.InteropServices;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.Rendering;
 using Debug = UnityEngine.Debug;
 
 namespace SubspeciesEntry.BepInEx
@@ -43,6 +46,7 @@ namespace SubspeciesEntry.BepInEx
             InitAlmanacText();
             InitCardClick();
             InitDataExtra();
+            InitLevelBuff();
         }
 
         public static void InitBuffText()
@@ -103,11 +107,31 @@ namespace SubspeciesEntry.BepInEx
                 // 深渊巨口
                 ReplaceText.ReplaceBuff(BuffType.UltimateBuff, (int)CoreTools.GetUltiBuffByString("深渊巨口"),
                     "深渊巨口：提高究极大嘴花的攻击距离",
-                    "深渊巨口：究极灯笼巨嘴花对于不可吞食的僵尸，对其造成僵尸韧性的（25+65x范围僵尸总血量/范围僵尸总血量+10^7）%的伤害，该效果会使最终消化时间改为60秒");
+                    "深渊巨口：究极灯笼大嘴花对于不可吞食的僵尸，对其造成僵尸韧性的（25+65x范围僵尸总血量/ 范围僵尸总血量+10^6）%无视90%护甲系数的伤害，该效果会使最终消化时间改为90秒");
                 // 光芒四射
                 ReplaceText.ReplaceBuff(BuffType.UltimateBuff, (int)CoreTools.GetUltiBuffByString("光芒四射"),
                     "光芒四射：究极灯笼巨嘴咀嚼期间为5x5范围提供2级光照",
-                    "光芒四射：究极灯笼巨嘴花吞食后，为自身半径3.7格范围的植物提供（1+吞噬僵尸数量x0.25）点的光照等级，持续15秒");
+                    "光芒四射：究极灯笼大嘴花吞食后，为自身半径3.7格的植物提供（1+此次吞食僵尸数量）的光照等级，至多10点");
+            }
+            #endregion
+            #region 珞
+            {
+                // 我是梦珞
+                ReplaceText.ReplaceBuff(BuffType.AdvancedBuff, (int)CoreTools.GetAdvBuffByString("我是梦珞"),
+                    "我是梦珞：魔法浮游炮伤害×3。魔法兔耳葱协助召唤的浮游炮会发射60发平射子弹",
+                    "我是梦珞：魔法浮游炮伤害增加（击杀僵尸韧性x10%）点。魔法兔耳葱协助召唤的浮游炮会发射15发子弹");
+                // 我也是梦珞
+                ReplaceText.ReplaceBuff(BuffType.AdvancedBuff, (int)CoreTools.GetAdvBuffByString("我也是梦珞"),
+                    "我也是梦珞：解锁亚种魔法兔耳葱。魔法猫尾草的追踪子弹伤害×5。魔法兔耳葱造成的伤害×3",
+                    "我也是梦珞：解锁亚种魔法兔耳葱。击杀场上僵尸需要的僵尸数降低至40。魔法兔耳葱造成的伤害x3");
+            }
+            #endregion
+            #region 牢樱
+            {
+                // 力大砖飞
+                ReplaceText.ReplaceBuff(BuffType.UltimateBuff, (int)CoreTools.GetUltiBuffByString("力大砖飞"),
+                    "力大砖飞：植物方造成的樱桃爆炸伤害x3",
+                    "力大砖飞：植物方造成的樱桃爆炸效果x3，二级时植物方造成的樱桃爆炸效果x10，且伤害不低于300");
             }
             #endregion
         }
@@ -161,11 +185,38 @@ namespace SubspeciesEntry.BepInEx
                 // 深渊巨口
                 ReplaceText.ReplaceAlmanac(PlantType.UltimateBigChomper,
                     "深渊巨口：究极灯笼巨嘴花的攻击距离增加1.5格",
-                    "深渊巨口：究极灯笼巨嘴花对于不可吞食的僵尸，对其造成僵尸韧性的（25+65x范围僵尸总血量/范围僵尸总血量+10^7）%的伤害，该效果会使最终消化时间改为60秒");
+                    "深渊巨口：究极灯笼大嘴花对于不可吞食的僵尸，对其造成僵尸韧性的（25+65x范围僵尸总血量/ 范围僵尸总血量+10^6）%无视90%护甲系数的伤害，该效果会使最终消化时间改为90秒");
                 // 光芒四射
                 ReplaceText.ReplaceAlmanac(PlantType.UltimateBigChomper,
                     "光芒四射：消化时间内会为5x5范围提供2点光照等级",
-                    "光芒四射：究极灯笼巨嘴花吞食后，为自身半径3.7格范围的植物提供（1+吞噬僵尸数量x0.25）点的光照等级，持续15秒");
+                    "光芒四射：究极灯笼大嘴花吞食后，为自身半径3.7格的植物提供（1+此次吞食僵尸数量）的光照等级，至多10点");
+            }
+            #endregion
+            #region 珞
+            {
+                // 基础特性
+                ReplaceText.ReplaceAlmanac(PlantType.CattailLour,
+                    "每击杀1个僵尸，召唤1台浮游炮。浮游炮在3秒内发射60发平射子弹（无法对空，160伤害），随后离场",
+                    "每击杀1个僵尸，召唤1台浮游炮。浮游炮在3秒内发射30发子弹（伤害为本体伤害2倍），可对空，随后离场，如果本体已有一个浮游炮，则改为为已存在的浮游炮增加伤害");
+                ReplaceText.ReplaceAlmanac(PlantType.CattailLour,
+                   "<color=#3D1400>③</color><color=red>浮游炮击杀僵尸后也会召唤浮游炮</color>",
+                   "<color=#3D1400>③</color><color=red>当满足以下任意一个条件时，将召唤浮游炮：\n" +
+                   "①浮游炮击杀僵尸后\n" +
+                   "②场上击杀60个僵尸后\n" +
+                   "③出场及出场后每15秒</color>");
+                // 我是梦珞
+                ReplaceText.ReplaceAlmanac(PlantType.CattailLour,
+                    "我是梦珞：浮游炮伤害×3。魔法兔耳葱协助召唤的浮游炮会发射60发平射子弹",
+                    "我是梦珞：魔法浮游炮伤害增加（击杀僵尸韧性x10%）点。魔法兔耳葱协助召唤的浮游炮会发射12发子弹");
+                // 我也是梦珞
+                ReplaceText.ReplaceAlmanac(PlantType.CattailLour,
+                    "我也是梦珞：解锁亚种魔法兔耳葱。魔法猫尾草的追踪子弹伤害×5。魔法兔耳葱造成的伤害×3",
+                    "我也是梦珞：解锁亚种魔法兔耳葱。击杀场上僵尸需要的僵尸数降低至40。魔法兔耳葱造成的伤害x3");
+
+                // 亚种图鉴修改
+                ReplaceText.ReplaceAlmanac(PlantType.PinkOnion,
+                    "传递的电流击杀僵尸时，使场上随机一株魔法猫尾草召唤一台只会发射20发平射子弹的浮游炮",
+                    "传递的电流击杀僵尸时，使场上随机一株魔法猫尾草召唤一台只会发射12发平射子弹的浮游炮");
             }
             #endregion
         }
@@ -180,7 +231,11 @@ namespace SubspeciesEntry.BepInEx
                 }, () => CoreTools.TravelUltimate("万籁俱寂"));
                 CardClickMgr.AddCardClickOnPlant(PlantType.DoomShroom, PlantType.UltimatePlantern, (plant) =>
                 {
-                    plant.GetComponent<UltimatePlantern>().DieEvent();
+                    var lantern = plant.GetComponent<UltimatePlantern>();
+                    var light = UnityEngine.Object.Instantiate(lantern.lanternLight, lantern.lanternLight.transform.position, 
+                        Quaternion.identity, lantern.lanternLight.transform.parent);
+                    lantern.DieEvent();
+                    lantern.lanternLight = light;
                 }, () => CoreTools.TravelUltimate("万籁俱寂"));
             }
             #endregion
@@ -194,6 +249,16 @@ namespace SubspeciesEntry.BepInEx
                     (p) => p.GetOrAddComponent<DataSave>().GetData<int>("UltimateGloom_TotalDamage"));
                 PlantDataMenuExtra.AddExtra(PlantType.UltimatePlantern, "储存伤害：{0}", () => CoreTools.TravelUltimate("以爆制爆"),
                     (p) => p.GetOrAddComponent<DataSave>().GetData<int>("UltimatePlantern_TotalDamage"));
+            }
+            #endregion
+        }
+
+        public static void InitLevelBuff()
+        {
+            #region 牢樱
+            {
+                // 力大砖飞
+                BuffMgr.SetCustomLevelBuff(CoreTools.GetUltiBuffByString("力大砖飞"));
             }
             #endregion
         }
@@ -237,10 +302,10 @@ namespace SubspeciesEntry.BepInEx
         {
             foreach (var (almanacType, origin, replace) in ReplaceAlmanacStrings)
             {
-                var almanac = AlmanacPlantMenu.PlantAlmanacData[almanacType];
+                var almanac = AlmanacDataLoader.plantDatas[almanacType];
                 var newStr = almanac.info.Replace(origin, replace);
                 almanac.info = newStr;
-                AlmanacPlantMenu.PlantAlmanacData[almanacType] = almanac;
+                AlmanacDataLoader.plantDatas[almanacType] = almanac;
             }
         }
 
@@ -273,9 +338,9 @@ namespace SubspeciesEntry.BepInEx
             }
             foreach (var (type, str) in AlmanacStrings)
             {
-                var almanac = AlmanacPlantMenu.PlantAlmanacData[type];
+                var almanac = AlmanacDataLoader.plantDatas[type];
                 almanac.info = str;
-                AlmanacPlantMenu.PlantAlmanacData[type] = almanac;
+                AlmanacDataLoader.plantDatas[type] = almanac;
             }
         }
 
@@ -322,13 +387,22 @@ namespace SubspeciesEntry.BepInEx
     }
     #endregion
 
-    #region 基础
-    [HarmonyPatch(typeof(AlmanacPlantMenu))]
-    public static class AlmanacPlantMenuPatch
+    #region 二级词条
+    public static class BuffMgr
     {
-        [HarmonyPatch(nameof(AlmanacPlantMenu.InitNameAndInfoFromJson))]
+        public static List<UltiBuff> LevelBuffs = new();
+
+        public static void SetCustomLevelBuff(UltiBuff id) => LevelBuffs.Add(id);
+    }
+    #endregion
+
+    #region 基础
+    [HarmonyPatch(typeof(AlmanacDataLoader))]
+    public static class AlmanacDataLoaderPatch
+    {
+        [HarmonyPatch(nameof(AlmanacDataLoader.LoadPlantData))]
         [HarmonyPostfix]
-        public static void PostInitNameAndInfoFromJson()
+        public static void PostLoadPlantData()
         {
             ReplaceText.InitAlmanac();
         }
@@ -424,579 +498,49 @@ namespace SubspeciesEntry.BepInEx
         public static void PostStart(GameAPP __instance)
         {
             __instance.StartCoroutine(Core.Init());
+            __instance.AddComponent<GameInfo>();
         }
     }
-    #endregion
 
-    #region 大帝伴侣
-    [HarmonyPatch(typeof(UltimateStarBlover))]
-    public static class UltimateStarBloverPatch
+    [HarmonyPatch(typeof(TravelLookBuff))]
+    public static class TravelLookBuffPatch
     {
-        [HarmonyPatch(nameof(UltimateStarBlover.StarsUpdate))]
+        [HarmonyPatch(nameof(TravelLookBuff.OnMouseUpAsButton))]
         [HarmonyPrefix]
-        public static void PreStarsUpdate(UltimateStarBlover __instance)
+        public static bool PreOnMouseUpAsButton(TravelLookBuff __instance)
         {
-            if (CoreTools.TravelUltimate("流星雨"))
-                __instance.radius = 1.2f;
-            if (CoreTools.TravelUltimate("众星之力"))
-                __instance.maxBullets = int.MaxValue;
-            if (__instance.starBullets == null) return;
-            if (CoreTools.TravelUltimate("流星雨"))
+            if (TravelLookMenu.Instance != null && !TravelLookMenu.Instance.showAll)
             {
-                for (int i = 0; i < __instance.starBullets.Length; i++)
+                if (__instance.buff.GetIl2CppType() == Il2CppType.From(typeof(UltiBuff)))
                 {
-                    var star = __instance.starBullets[i];
-                    if (star == null || star.IsDestroyed()) continue;
-                    star.accelerateTime += Time.deltaTime * 2;
-                }
-            }
-        }
-
-        [HarmonyPatch(nameof(UltimateStarBlover.StarsUpdate))]
-        [HarmonyPostfix]
-        public static void PostStarsUpdate(UltimateStarBlover __instance)
-        {
-            if (CoreTools.TravelUltimate("斗转星移") && CoreTools.TravelUltimate("众星之力"))
-            {
-                for (int i = 0; i < __instance.board.plantStatistics.Count; i++)
-                {
-                    var plant = __instance.board.plantStatistics[i];
-                    if (plant.thePlantType == PlantType.StarPumpkin)
+                    var buff = __instance.buff.Unbox<UltiBuff>();
+                    if (BuffMgr.LevelBuffs.Contains(buff) && CoreTools.TravelAdvanced("升级") && __instance.manager.data.GetBuffLevel(buff) < 2)
                     {
-                        __instance.maxBullets = 360 + 10 * Lawnf.GetPlantCount(PlantType.UltimateStar, __instance.board);
-                        return;
+                        __instance.manager.GetUltiBuff(buff, true);
+                        __instance.manager.data.advBuffs.Remove(CoreTools.GetAdvBuffByString("升级"));
+                        __instance.SetText("已满级");
+                        return false;
                     }
                 }
-                __instance.maxBullets = 90 + 10 * Lawnf.GetPlantCount(PlantType.UltimateStar, __instance.board);
-            }
-        }
-    }
-
-    [HarmonyPatch(typeof(StarBlover))]
-    public static class StarBloverPatch
-    {
-        [HarmonyPatch(nameof(StarBlover.RemoveNode))]
-        [HarmonyPostfix]
-        public static void PostRemoveNode(StarBlover __instance, ref Bullet_star starBullet)
-        {
-            if (__instance.thePlantType == PlantType.UltimateBlover)
-            {
-                if (CoreTools.TravelUltimate("众星之力"))
-                {
-                    starBullet.Damage *= (CoreTools.TravelUltimateLevel("众星之力") == 2) ? 3 : 2;
-                }
-            }
-        }
-
-        [HarmonyPatch(nameof(StarBlover.StarsUpdate))]
-        [HarmonyPostfix]
-        public static void PostStarsUpdate(StarBlover __instance)
-        {
-            if (Lawnf.TravelAdvanced((AdvBuff)19))
-            {
-                for (int i = 0; i < __instance.board.plantStatistics.Count; i++)
-                {
-                    var plant = __instance.board.plantStatistics[i];
-                    if (plant.thePlantType == PlantType.StarPumpkin)
-                    {
-                        __instance.maxBullets = 120 + 10 * Lawnf.GetPlantCount(PlantType.UltimateStar, __instance.board);
-                        return;
-                    }
-                }
-                __instance.maxBullets = 30 + 10 * Lawnf.GetPlantCount(PlantType.UltimateStar, __instance.board);
-            }
-        }
-    }
-    #endregion
-
-    #region 金蛋
-    [HarmonyPatch(typeof(UltimatePortalNut))]
-    public static class UltimatePortalNutPatch
-    {
-        [HarmonyPatch(nameof(UltimatePortalNut.Revive))]
-        [HarmonyPostfix]
-        public static void PostRevive(UltimatePortalNut __instance)
-        {
-            if (__instance == null) return;
-
-            if (CoreTools.TravelUltimate("万劫不复"))
-            {
-                __instance.StartCoroutine(ClearDebuff(__instance));
-            }
-        }
-        
-        public static IEnumerator ClearDebuff(UltimatePortalNut __instance)
-        {
-            float startTime = Time.time;
-            while (Time.time - startTime <= 0.1f)
-            {
-                try
-                {
-                    if (__instance == null) yield break;
-                    __instance.TryBeActive();
-                    if (GameAPP.Instance.GetComponent<DelayAction>() == null) yield break;
-                    if (GameAPP.Instance.GetComponent<DelayAction>().actions == null) yield break;
-                    for (int i = GameAPP.Instance.GetComponent<DelayAction>().actions.Count - 1; i >= 0; i--)
-                    {
-                        if (GameAPP.Instance.GetComponent<DelayAction>().actions.Count <= 0 || i < 0)
-                            break;
-                        if (i >= GameAPP.Instance.GetComponent<DelayAction>().actions.Count)
-                            continue;
-                        var action = GameAPP.Instance.GetComponent<DelayAction>().actions[i];
-                        if (action == null) continue;
-                        var target = action.action.Target.TryCast<Bullet_doom_ulti.__c__DisplayClass3_0>();
-                        if (target != null && target.plant == __instance)
-                        {
-                            action.active = false;
-                            action.action = null;
-                        }
-                    }
-                    if (Lawnf.GetAllZombies().Count > 0)
-                    {
-                        foreach (Zombie zombie in Lawnf.GetAllZombies())
-                        {
-                            if (zombie != null)
-                            {
-                                if (zombie.theZombieType == ZombieType.UltimateHorse)
-                                {
-                                    var horse = zombie.GetComponent<UltimateHorse>();
-                                    if (horse != null && horse.cursedPlants.Contains(__instance))
-                                    {
-                                        while (horse.cursedPlants.Contains(__instance))
-                                            horse.cursedPlants[horse.cursedPlants.IndexOf(__instance)] = null;
-                                        if (!horse.cursedPlants.Contains(__instance))
-                                            __instance.SetColor(new Color(1f, 1f, 1f));
-                                    }
-                                }
-                                if (zombie.theZombieType == ZombieType.SuperLadderZombie)
-                                {
-                                    var ladder = zombie.transform.GetComponent<SuperLadderZombie>();
-                                    if (ladder != null && ladder.ladder != null && ladder.ladder.theItemRow == __instance.thePlantRow && ladder.ladder.theItemColumn == __instance.thePlantColumn)
-                                    {
-                                        ladder.ladder.Die();
-                                    }
-                                }
-                            }
-                        }
-                        foreach (var zombie in Lawnf.GetAllZombies())
-                        {
-                            if (zombie.theZombieType == ZombieType.UltimateHorse)
-                            {
-                                var horse = zombie.GetComponent<UltimateHorse>();
-                                if (horse != null && horse.cursedPlants.Contains(__instance))
-                                {
-                                    if (horse.cursedPlants.Contains(__instance))
-                                    {
-                                        __instance.SetColor(new Color(1f, 0f, 0f, 1f));
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-                catch (ArgumentOutOfRangeException) { }
-                yield return null;
-            }
-        }
-    }
-
-    [HarmonyPatch(typeof(Plant))]
-    public static class Plant_UltimatePortalNut_Patch
-    {
-        [HarmonyPatch(nameof(Plant.Awake))]
-        [HarmonyPostfix]
-        public static void PostAwake(Plant __instance)
-        {
-            if (__instance.thePlantType == PlantType.UltimatePortalNut)
-            {
-                __instance.attributeCountdown = 30f;
-            }
-        }
-
-        [HarmonyPatch(nameof(Plant.Update))]
-        [HarmonyPostfix]
-        public static void PostUpdate(Plant __instance)
-        {
-            if (__instance.thePlantType == PlantType.UltimatePortalNut)
-            {
-                if (__instance.attributeCountdown - Time.deltaTime <= 0f)
-                {
-                    if (CoreTools.TravelUltimate("无尽贪婪"))
-                    {
-                        __instance.GetComponent<UltimatePortalNut>().Revive();
-                        __instance.thePlantHealth += 2000;
-                        __instance.thePlantHealth = Mathf.Min(__instance.thePlantMaxHealth, __instance.thePlantHealth);
-                        __instance.UpdateText();
-                    }
-                    __instance.attributeCountdown = 30f;
-                }
-                if (__instance.GetComponent<UltimatePortalNut>().invincibleTimer > 0f)
-                {
-                    var list = __instance.board.GetComponentsInChildren<UltimateHorse>().ToArray();
-                    if (list.Length > 0)
-                    {
-                        foreach (var zombie in list)
-                        {
-                            if (zombie.cursedPlants.Contains(__instance))
-                                __instance.SetColor(new Color(1f, 0f, 0f, 1f));
-                        }
-                    }
-                }
-            }
-        }
-    }
-    #endregion
-
-    #region 血月
-    [HarmonyPatch(typeof(Lunar))]
-    public static class LunarPatch
-    {
-        [HarmonyPatch(nameof(Lunar.SummonUpdate))]
-        [HarmonyPrefix]
-        public static void PreSummonUpdate(Lunar __instance)
-        {
-            if (CoreTools.TravelUltimate("人造太阳"))
-                __instance.summonTimer -= 2 * Time.deltaTime;
-        }
-
-        [HarmonyPatch(nameof(Lunar.Init))]
-        [HarmonyPostfix]
-        public static void PostInit(Lunar __instance)
-        {
-            if (CoreTools.TravelUltimate("人造太阳"))
-                __instance.lifeTimer *= 3;
-        }
-    }
-
-    [HarmonyPatch(typeof(Lawnf))]
-    public static class LawnfPatch
-    {
-        [HarmonyPatch(nameof(Lawnf.GetPlantCount), new Type[] { typeof(PlantType), typeof(Board) })]
-        [HarmonyPostfix]
-        public static void PostGetPlantCount(ref PlantType theSeedType, ref int __result)
-        {
-            var callByUpdate = false;
-            for (int i = 0; i < new StackTrace()?.FrameCount; i++)
-            {
-                if (new StackTrace()?.GetFrame(i)?.GetMethod()?.Name == "DMD<Lunar::Update>" && new StackTrace()?.GetFrame(i)?.GetMethod()?.GetParameters().Length == 1)
-                    callByUpdate = true;
-            }
-            if (CoreTools.TravelUltimate("金光闪闪") && theSeedType == PlantType.UltimateRedLunar && callByUpdate)
-            {
-                var maxLevel = Lawnf.GetAllPlants().ToArray().ToList().Where(plant => plant.thePlantType == PlantType.UltimateRedLunar).Max(plant => plant.currentLightLevel);
-                maxLevel = Mathf.Min(maxLevel, 20);
-                __result += maxLevel;
-            }
-        }
-    }
-    #endregion
-
-    #region 曾哥&牢灯
-    // 曾哥part
-    [HarmonyPatch(typeof(IceDoomGloom))]
-    public static class IceDoomGloomPatch
-    {
-        [HarmonyPatch(nameof(IceDoomGloom.DieEvent))]
-        [HarmonyPrefix]
-        public static bool PostDieEvent(IceDoomGloom __instance, Plant.DieReason reason)
-        {
-            if (CoreTools.TravelUltimate("万籁俱寂") && reason != Plant.DieReason.ByMix)
-            {
-                __instance.board.boardAction.SetDoom(__instance.thePlantColumn, __instance.thePlantRow, false, true, damage: 1000_0000, effect: 3, fromType: __instance.thePlantType);
-                foreach (var zombie in Lawnf.GetAllZombies())
-                {
-                    if (zombie == null || zombie.IsDestroyed() || zombie.gameObject == null || zombie.gameObject.IsDestroyed()) continue;
-                    zombie.TakeDamage(DmgType.Carred, (int)(zombie.CurrentAllHealth * 0.5f), PlantType.UltimateGloom);
-                }
-                return false;
             }
             return true;
         }
 
-        [HarmonyPatch(nameof(IceDoomGloom.TakeDamage))]
-        [HarmonyPrefix]
-        public static bool PreTakeDamage(IceDoomGloom __instance, ref int damageType, ref int damage)
-        {
-            if (CoreTools.TravelUltimate("以爆制爆"))
-            {
-                __instance.power += damage;
-                var data = __instance.GetOrAddComponent<DataSave>();
-                data.SetData("UltimateGloom_TotalDamage", data.GetData<int>("UltimateGloom_TotalDamage") + damage);
-                if (__instance.power >= 10000)
-                {
-                    __instance.board.boardAction.SetDoom(__instance.thePlantColumn, __instance.thePlantRow,
-                        false, false, damage: (int)(data.GetData<int>("UltimateGloom_TotalDamage") / 3.8f), fromType: __instance.thePlantType);
-
-                    __instance.power = 0;
-                }
-
-                if ((Plant.DamageType)damageType != Plant.DamageType.Default)
-                    return false;
-            }
-            return true;
-        }
-    }
-
-    // 牢灯part
-    [HarmonyPatch(typeof(UltimatePlantern))]
-    public static class UltimatePlanternPatch
-    {
-        [HarmonyPatch(nameof(UltimatePlantern.DieEvent))]
+        [HarmonyPatch(nameof(TravelLookBuff.SetBuff))]
         [HarmonyPostfix]
-        public static void PostDieEvent(UltimatePlantern __instance, Plant.DieReason reason)
+        public static void PostSetBuff(TravelLookBuff __instance, Il2CppSystem.Object buff)
         {
-            if (CoreTools.TravelUltimate("万籁俱寂") && reason != Plant.DieReason.ByMix)
+            if (TravelLookMenu.Instance != null && !TravelLookMenu.Instance.showAll)
             {
-                foreach (var zombie in Lawnf.GetAllZombies())
+                if (__instance.buff.GetIl2CppType() == Il2CppType.From(typeof(UltiBuff)))
                 {
-                    if (zombie == null || zombie.IsDestroyed() || zombie.gameObject == null || zombie.gameObject.IsDestroyed()) continue;
-                    zombie.freezeMaxLevel = 100;
-                }
-            }
-        }
-
-        [HarmonyPatch(nameof(UltimatePlantern.TakeDamage))]
-        [HarmonyPrefix]
-        public static bool PreTakeDamage(UltimatePlantern __instance, ref int damageType, ref int damage)
-        {
-            if (CoreTools.TravelUltimate("以爆制爆"))
-            {
-                __instance.attributeCount += damage;
-                var data = __instance.GetOrAddComponent<DataSave>();
-                data.SetData("UltimatePlantern_TotalDamage", data.GetData<int>("UltimatePlantern_TotalDamage") + damage);
-                if (__instance.attributeCount >= 10000)
-                {
-                    __instance.board.boardAction.SetDoom(__instance.thePlantColumn, __instance.thePlantRow,
-                        false, false, damage: (int)(data.GetData<int>("UltimatePlantern_TotalDamage") / 3.8f), fromType: __instance.thePlantType);
-
-                    __instance.attributeCount = 0;
-                }
-
-                if ((Plant.DamageType)damageType != Plant.DamageType.Default)
-                    return false;
-            }
-            return true;
-        }
-    }
-    #endregion
-
-    #region 鮟鱇鱼
-    [HarmonyPatch(typeof(UltimateBigChomper))]
-    public static class UltimateBigChomperPatch
-    {
-        [HarmonyPatch(nameof(UltimateBigChomper.Awake))]
-        [HarmonyPostfix]
-        public static void PostAwake(UltimateBigChomper __instance)
-        {
-            __instance.attributeFloat = 5f;
-        }
-
-        [HarmonyPatch(nameof(UltimateBigChomper.Chomp))]
-        [HarmonyPrefix]
-        public static void PreChomp(UltimateBigChomper __instance, ref Zombie zombie, out (int, int) __state)
-        {
-            var center = __instance.axis.transform.position;
-            center.x += __instance.centerOffset.x;
-            center.y += __instance.centerOffset.y;
-            Collider2D[] colliders = Physics2D.OverlapBoxAll(center, new Vector2(__instance.range.x + __instance.attributeFloat, __instance.range.y), 0f, LayerMask.GetMask("Zombie"));
-            var boxZombies = 0;
-            var totalHealth = 0;
-            foreach (var collider in colliders)
-            {
-                if (collider.TryGetComponent<Zombie>(out var z) && z.IsObjExist())
-                {
-                    if (z.theZombieRow == __instance.thePlantRow)
-                    {
-                        if (!TypeMgr.IsBossZombie(z.theZombieType) && __instance.CheckZombie(z))
-                            boxZombies++;
-                        totalHealth += z.CurrentAllHealth;
-                    }
-                }
-            }
-            __state = (boxZombies, totalHealth);
-        }
-
-        [HarmonyPatch(nameof(UltimateBigChomper.Chomp))]
-        [HarmonyPostfix]
-        public static void PostChomp(UltimateBigChomper __instance, ref Zombie zombie, (int, int) __state)
-        {
-            if (CoreTools.TravelUltimate("光芒四射"))
-            {
-                CreatePlant.Instance.AdjustLightLevel(__instance.thePlantColumn, __instance.thePlantRow, -2, 2); // 抵消原来的
-
-                __instance.add = true;
-                var boxZombies = __state.Item1;
-                var light = new Light(__instance.axis.transform.position, 1 + (int)(boxZombies * 0.25f), PlantTools.ColumnX * 3.7f);
-                __instance.GetOrAddComponent<Timer>().AddTimer(15f, () =>
-                {
-                    light.Die();
-                    __instance.add = false;
-                });
-                __instance.SetData("UltimateBigChomper_Light", light);
-            }
-            if (CoreTools.TravelUltimate("深渊巨口"))
-            {
-                Collider2D[] colliders = Physics2D.OverlapBoxAll(__instance.axis.transform.position, new Vector2(__instance.range.x + __instance.attributeFloat, __instance.range.y), 0f, LayerMask.GetMask("Zombie"));
-                var zombies = new List<Zombie>();
-                foreach (var collider in colliders)
-                    if (collider.TryGetComponent<Zombie>(out var z) && z.IsObjExist() && z.theZombieRow == __instance.thePlantRow)
-                        zombies.Add(z);
-                if (zombies.Count <= 0)
-                    return;
-                var totalHealth = __state.Item2;
-                var timer = 0.25f + 0.65f * totalHealth / (totalHealth + Mathf.Pow(10, 7));
-                foreach (var z in zombies)
-                {
-                    z.TakeDamage(DmgType.Normal, (int)(z.TotalAllHealth * timer), PlantType.UltimateBigChomper);
-                }
-                __instance.canToChew = true;
-
-                __instance.anim.ResetTrigger("back");
-                __instance.attributeCountdown = 60f;
-                var runner = __instance.GetOrAddComponent<ComponentRunner>();
-                runner.OnUpdate = () =>
-                {
-                    if (__instance.anim.speed != 0f)
-                    {
-                        if (__instance.attributeCountdown > 0f)
-                        {
-                            var t = __instance.attributeCountdown;
-                            __instance.attributeCountdown += Time.deltaTime * (__instance.attributeSpeed - 1); // 抵消受attributeSpeed影响的countdown
-                        }
+                    var id = __instance.buff.Unbox<UltiBuff>();
+                    if (BuffMgr.LevelBuffs.Contains(id))
+                        if (__instance.manager.data.GetBuffLevel(id) < 2)
+                            __instance.SetText($"{__instance.manager.data.GetBuffLevel(id)}级");
                         else
-                        {
-                            UnityEngine.Object.Destroy(runner);
-                        }
-                    }
-                };
-            }
-        }
-
-        [HarmonyPatch(nameof(UltimateBigChomper.OnMove))]
-        [HarmonyPostfix]
-        public static void PostOnMove(UltimateBigChomper __instance, int originalColumn, int originalRow, int newColumn, int newRow)
-        {
-            if (__instance.add)
-            {
-                // 抵消原来的效果
-                CreatePlant.Instance.AdjustLightLevel(originalColumn, originalRow, 2, 2);
-                CreatePlant.Instance.AdjustLightLevel(newColumn, newRow, -2, 2);
-
-                // 新内容
-                __instance.GetOrAddComponent<Timer>().AddTimer(0.01f, () =>
-                {
-                    __instance.GetData<Light>("UltimateBigChomper_Light").MoveTo(__instance.axis.transform.position);
-                });
-            }
-        }
-
-        [HarmonyPatch(nameof(UltimateBigChomper.TakeDamage))]
-        [HarmonyPrefix]
-        public static void PreTakeDamage(ref int damage)
-        {
-            if (damage > 2000)
-                damage = 2000;
-        }
-    }
-
-    [HarmonyPatch(typeof(UltimateFootballZombie))]
-    public static class UltimateFootBallZombiePatch
-    {
-        [HarmonyPatch(nameof(UltimateFootballZombie.AttackEffect))]
-        [HarmonyPrefix]
-        public static void PreAttackEffect(ref Plant plant, out (bool, Plant.PlantTag) __state)
-        {
-            if (plant.IsObjExist() && plant.thePlantType is PlantType.UltimateBigChomper)
-            {
-                __state = (true, plant.plantTag);
-                var tag = plant.plantTag;
-                tag.nutPlant = true;
-                plant.plantTag = tag;
-            }
-            __state = (false, default);
-        }
-
-        [HarmonyPatch(nameof(UltimateFootballZombie.AttackEffect))]
-        [HarmonyPostfix]
-        public static void PostAttackEffect(ref Plant plant, (bool, Plant.PlantTag) __state)
-        {
-            if (__state.Item1)
-            {
-                plant.plantTag = __state.Item2;
-            }
-        }
-    }
-
-    [HarmonyPatch(typeof(Chomper))]
-    public static class ChomperPatch
-    {
-        [HarmonyPatch(nameof(Chomper.ChompBack))]
-        [HarmonyPrefix]
-        public static void PreChompBack(Chomper __instance, out (bool, int) __state)
-        {
-            if (__instance.thePlantType is PlantType.UltimateBigChomper && CoreTools.TravelUltimate("深渊巨口"))
-            {
-                var center = __instance.axis.transform.position;
-                center.x += __instance.centerOffset.x;
-                center.y += __instance.centerOffset.y;
-                Collider2D[] colliders = Physics2D.OverlapBoxAll(center, new Vector2(__instance.range.x + __instance.attributeFloat, __instance.range.y), 0f, LayerMask.GetMask("Zombie"));
-                var totalHealth = 0;
-                foreach (var collider in colliders)
-                {
-                    if (collider.TryGetComponent<Zombie>(out var z) && z.IsObjExist())
-                    {
-                        if (z.theZombieRow == __instance.thePlantRow)
-                        {
-                            totalHealth += z.CurrentAllHealth;
-                        }
-                    }
+                            __instance.SetText("已满级");
                 }
-                __state = (true, totalHealth);
-                return;
-            }
-            __state = (false, 0);
-        }
-
-        [HarmonyPatch(nameof(Chomper.ChompBack))]
-        [HarmonyPostfix]
-        public static void PostChompBack(Chomper __instance, (bool, int) __state)
-        {
-            if (__state.Item1)
-            {
-                Collider2D[] colliders = Physics2D.OverlapBoxAll(__instance.axis.transform.position, new Vector2(__instance.range.x + __instance.attributeFloat, __instance.range.y), 0f, LayerMask.GetMask("Zombie"));
-                var zombies = new List<Zombie>();
-                foreach (var collider in colliders)
-                    if (collider.TryGetComponent<Zombie>(out var z) && z.IsObjExist() && z.theZombieRow == __instance.thePlantRow)
-                        zombies.Add(z);
-                if (zombies.Count <= 0)
-                    return;
-                var totalHealth = __state.Item2;
-                var timer = 0.25f + 0.65f * totalHealth / (totalHealth + Mathf.Pow(10, 7));
-                foreach (var z in zombies)
-                {
-                    z.TakeDamage(DmgType.Normal, (int)(z.TotalAllHealth * timer), PlantType.UltimateBigChomper);
-                }
-                __instance.canToChew = true;
-
-                __instance.anim.ResetTrigger("back");
-                __instance.attributeCountdown = 60f;
-                var runner = __instance.GetOrAddComponent<ComponentRunner>();
-                runner.OnUpdate = () =>
-                {
-                    if (__instance.anim.speed != 0f)
-                    {
-                        if (__instance.attributeCountdown > 0f)
-                        {
-                            var t = __instance.attributeCountdown;
-                            __instance.attributeCountdown += Time.deltaTime * (__instance.attributeSpeed - 1); // 抵消受attributeSpeed影响的countdown
-                        }
-                        else
-                        {
-                            UnityEngine.Object.Destroy(runner);
-                        }
-                    }
-                };
             }
         }
     }

@@ -250,7 +250,7 @@ namespace GoldImitater.BepInEx
                                             if (!data.advBuffs.Contains(id) && !data.advBuffs_lv2.Contains(id))
                                                 list.Add(id);
                                         var advBuff = list[UnityEngine.Random.Range(0, list.Count)];
-                                        data.advBuffs.Add(advBuff);
+                                        TravelMgr.Instance.GetNormalBuff(advBuff);
                                         InGameText.Instance.ShowText($"抽到普通词条：{TravelDictionary.advancedBuffsText[advBuff]}", 5f);
                                     }
                                     break;
@@ -261,7 +261,7 @@ namespace GoldImitater.BepInEx
                                             if (!data.ultiBuffs.Contains(id) && !data.ultiBuffs.Contains(id))
                                                 list.Add(id);
                                         var ultiBuff = list[UnityEngine.Random.Range(0, list.Count)];
-                                        data.ultiBuffs.Add(ultiBuff);
+                                        TravelMgr.Instance.GetUltiBuff(ultiBuff);
                                         InGameText.Instance.ShowText($"抽到强究词条：{TravelDictionary.ultimateBuffsText[ultiBuff]}", 5f);
                                     }
                                     break;
@@ -276,7 +276,7 @@ namespace GoldImitater.BepInEx
                                     list.Add(kvp.Key);
                             }
                             var debuff = list[UnityEngine.Random.Range(0, list.Count)];
-                            data.travelDebuffs.Add(debuff);
+                            TravelMgr.Instance.GetDebuff(debuff);
                             InGameText.Instance.ShowText($"抽到僵尸词条：{TravelDictionary.debuffData[debuff].Item1}", 5f);
                         }
                     }
@@ -316,15 +316,13 @@ namespace GoldImitater.BepInEx
             if (zombie != null && !zombie.IsDestroyed())
             {
                 zombie.freezeLevel = 0;
-                if (zombie.coldTimer > 0f)
+                if (zombie.TryGetEffect<ColdEffect>(EffectType.Cold, out var cold) && cold.duration > 0f)
                 {
-                    zombie.UnCold();
-                    zombie.coldTimer = 0f;
+                    cold.duration = 0f;
                 }
-                if (zombie.freezeTimer > 0f)
+                if (zombie.TryGetEffect<FreezeEffect>(EffectType.Freeze, out var freeze) && freeze.duration > 0f)
                 {
-                    zombie.freezeTimer = 0f;
-                    zombie.Unfreezing();
+                    freeze.duration = 0f;
                 }
             }
         }
@@ -383,6 +381,17 @@ namespace GoldImitater.BepInEx
             {
                 __result = Mathf.Min(__result, 5000);
             }
+        }
+    }
+
+    [HarmonyPatch(typeof(GameAPP), nameof(GameAPP.Awake))]
+    public static class GameAPPPatch
+    {
+        [HarmonyPostfix]
+        public static void Postfix(GameAPP __instance)
+        {
+            __instance.SetData("GoldImitater_set", true);
+            __instance.SetData("GoldImitater_buffID", GoldImitater.buff);
         }
     }
 }

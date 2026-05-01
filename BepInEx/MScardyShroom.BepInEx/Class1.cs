@@ -91,7 +91,7 @@ namespace MScardyShroom.BepInEx
     public class CreateZombie_SetZombie_Patch
     {
         [HarmonyPostfix]
-        public static void Postfix(ref GameObject __result)
+        public static void Postfix(ref Zombie __result)
         {
             if (__result == null) return;
             foreach (var ms in MScardyShroom.ms)
@@ -103,7 +103,7 @@ namespace MScardyShroom.BepInEx
     public class CreateZombie_SetZombieWithMindCtrl_Patch
     {
         [HarmonyPostfix]
-        public static void Postfix(ref GameObject __result)
+        public static void Postfix(ref Zombie __result)
         {
             if (__result == null) return;
             foreach (var ms in MScardyShroom.ms)

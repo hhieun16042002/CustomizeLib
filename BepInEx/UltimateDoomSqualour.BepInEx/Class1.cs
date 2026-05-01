@@ -1,8 +1,10 @@
 ﻿using BepInEx;
 using CustomizeLib.BepInEx;
 using HarmonyLib;
+using System.Collections;
 using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.UIElements.Internal;
 
 namespace UltimateDoomSqualour.BepInEx
 {
@@ -21,22 +23,24 @@ namespace UltimateDoomSqualour.BepInEx
                 {
                     ((int)PlantType.NuclearDoomCherry, (int)PlantType.Squalour)
                 },
-                0f, 0f, 1800, 300, 0f, 250
+                0f, 0f, 1800, 300, 7.5f, 425
             );
             CustomCore.AddPlantAlmanacStrings((int)UltimateDoomSqualour.PlantID,
-                $"聚爆猫瓜({(int)UltimateDoomSqualour.PlantID})",
+                $"核爆猫瓜({(int)UltimateDoomSqualour.PlantID})",
                 "蕴含着核能力量的红温猫瓜，可千万不要招惹她…\n" +
                 "<color=#0000FF>核爆樱桃同人亚种</color>\n\n" +
                 "<color=#3D1400>贴图作者：@林秋-AutumnLin</color>\n" +
                 "<color=#3D1400>转化配方：</color><color=red>樱桃炸弹←→猫瓜</color>\n" +
-                "<color=#3D1400>伤害：</color><color=red>3600</color>\n" +
-                "<color=#3D1400>特点：</color><color=red>①每碾压1个僵尸，聚爆核爆的基础威力增加1200，最多7200\n" +
-                "②碾压火红莲造成7200的毁灭菇爆炸，不留坑，并返还卡片\n" +
-                "③碾压僵尸火红莲造成等同于核爆樱桃的爆炸，不留坑，并返还卡片</color>\n\n" +
-                "<color=#3D1400>窝红温辣</color>"
+                "<color=#3D1400>伤害：</color><color=red>1800（压扁）</color>\n" +
+                "<color=#3D1400>索敌范围：</color><color=red>左侧2格～右侧3格</color>\n" +
+                "<color=#3D1400>特点：</color><color=red>①落地后，每碾压1个僵尸，威力增加1800，至多7200\n" +
+                "②落地压到僵尸后，释放伤害等同于自身攻击力的毁灭菇效果，生成一片半径5.4格的辐射区域，其持续时间为（6+压到僵尸数量）秒，至多10秒。最后在全屏释放18次毁灭菇爆炸\n" +
+                "③右侧一格有火红莲时，碾压火红莲并造成7200的毁灭菇爆炸，不留坑，并返还卡片\n" +
+                "④右侧一格有僵尸火红莲时，碾压僵尸火红莲并造成等同于核爆樱桃的爆炸，但是不生成子弹，不留坑，并返还卡片\n" +
+                "⑤若未压到僵尸，则返还卡片</color>\n\n" +
+                "<color=#3D1400>核爆猫瓜超级暴躁，最好不要招惹她，至于原因嘛，或许是看见了僵尸火红莲？</color>"
             );
             CustomCore.AddFusion((int)PlantType.NuclearDoomCherry, (int)UltimateDoomSqualour.PlantID, (int)PlantType.CherryBomb);
-            CustomCore.AddFusion((int)PlantType.NuclearDoomCherry, (int)PlantType.CherryBomb, (int)UltimateDoomSqualour.PlantID);
         }
     }
 
@@ -61,8 +65,10 @@ namespace UltimateDoomSqualour.BepInEx
         [HarmonyPrefix]
         public static bool Prefix(Squalour __instance)
         {
-            if (__instance.thePlantType == UltimateDoomSqualour.PlantID)
+            if (__instance.thePlantType == UltimateDoomSqualour.PlantID && !__instance.squashed)
             {
+                Lawnf.SetDroppedCard(__instance.axis.transform.position, __instance.thePlantType);
+                __instance.Die();
                 return false;
             }
             return true;
@@ -76,7 +82,6 @@ namespace UltimateDoomSqualour.BepInEx
             {
                 if (zombie == null) return false;
                 zombie.TakeDamage(DmgType.Squash, 1800);
-                zombie.TakeDamage(DmgType.Carred, 3600);
                 __instance.squashCount++;
                 __instance.squashed = true;
                 return false;
@@ -88,6 +93,18 @@ namespace UltimateDoomSqualour.BepInEx
     [HarmonyPatch(typeof(Squash))]
     public class SquashPatch
     {
+        [HarmonyPatch(nameof(Squash.Range), MethodType.Getter)]
+        [HarmonyPrefix]
+        public static bool PreGetRange(Squash __instance, ref Vector2 __result)
+        {
+            if (__instance.thePlantType == UltimateDoomSqualour.PlantID)
+            {
+                __result = new Vector2(CoreTools.ColumnX * 6f, CoreTools.ColumnX * 6f);
+                return false;
+            }
+            return true;
+        }
+
         [HarmonyPatch(nameof(Squash.AttackZombie))]
         [HarmonyPrefix]
         public static bool Prefix(Squash __instance)
@@ -98,7 +115,6 @@ namespace UltimateDoomSqualour.BepInEx
                     Vector3 position = __instance.axis.position;
                     Vector2 centerPos = new Vector2(position.x, position.y);
 
-                    // 检测区域内的僵尸
                     int zombieLayer = LayerMask.GetMask("Zombie");
                     Collider2D[] colliders = Physics2D.OverlapBoxAll(
                         centerPos,
@@ -111,13 +127,10 @@ namespace UltimateDoomSqualour.BepInEx
                     {
                         foreach (var collider in colliders)
                         {
-                            Zombie zombie;
-                            if (collider.TryGetComponent<Zombie>(out zombie))
+                            if (collider.TryGetComponent<Zombie>(out var zombie))
                             {
-                                // 尝试攻击僵尸
                                 bool attacked = __instance.AttackLandZombie(zombie);
 
-                                // 检查是否符合特殊攻击条件
                                 if (attacked && (zombie.theZombieRow == __instance.thePlantRow || zombie.theZombieType == ZombieType.DancePolZombie2))
                                 {
                                     __instance.ActionOnZombie(zombie);
@@ -126,7 +139,6 @@ namespace UltimateDoomSqualour.BepInEx
                         }
                     }
 
-                    // 检查当前位置的格子类型
                     int col = Lawnf.GetColumnFromX(position.x);
                     int row = __instance.thePlantRow;
 
@@ -135,9 +147,8 @@ namespace UltimateDoomSqualour.BepInEx
                         GameAPP.PlaySound(74, 0.5f, 1f);
                         ScreenShake.shakeDuration = 0.05f;
                     }
-                    else // 正常格子
+                    else
                     {
-                        // 创建特效
                         GameObject effectPrefab = Resources.Load<GameObject>("Particle/Anim/Water/WaterSplashPrefab");
                         Vector3 spawnPos = new Vector3(position.x, position.y - 1.75f, 0f);
                         Transform boardTransform = __instance.board.transform;
@@ -147,34 +158,81 @@ namespace UltimateDoomSqualour.BepInEx
                         __instance.Die();
                     }
                 }
-
-                if (__instance.TryGetComponent<EndoFlameSaver>(out var saver) && saver != null && !saver.IsDestroyed() && saver.endoFlame != null &&
-                    saver.endoFlame.thePlantType == PlantType.EndoFlame)
+                var mouse = Mouse.Instance;
+                if (__instance.TryGetComponent<EndoFlameSaver>(out var saver_p) && saver_p != null && !saver_p.IsDestroyed() && saver_p.endoFlame != null &&
+                    saver_p.endoFlame.thePlantType is PlantType.EndoFlame) // 普通飘飘
                 {
-                    __instance.board.SetDoom(__instance.thePlantColumn, __instance.thePlantRow, false, false, __instance.axis.transform.position, 7200);
+                    var endoFlame = saver_p.endoFlame;
+                    __instance.board.boardAction.SetDoom(endoFlame.thePlantColumn, endoFlame.thePlantRow, false, false, damage: 7200, existParticle: false, 
+                        fromType: __instance.thePlantType);
+                    float x = mouse.GetBoxXFromColumn(endoFlame.thePlantColumn), y = mouse.GetBoxYFromRow(endoFlame.thePlantRow);
+                    Doom.SetDoom(__instance.board, new Vector2(x, y), DoomType.Nuclear2);
+                    Lawnf.SetDroppedCard(__instance.axis.transform.position, UltimateDoomSqualour.PlantID, 0);
+                    endoFlame.Crashed();
+                    __instance.Die();
+                }
+                else if (__instance.TryGetComponent<EndoFlameSaver>(out var saver_z) && saver_z != null && !saver_z.IsDestroyed() && saver_z.endoFlame != null &&
+                    saver_z.endoFlame.thePlantType is PlantType.ZombieEndoFlame) // 僵飘飘
+                {
+                    var endoFlame = saver_z.endoFlame;
+                    __instance.board.boardAction.SetDoom(endoFlame.thePlantColumn, endoFlame.thePlantRow, false, damage: 3600, 
+                        fromType: __instance.thePlantType, existParticle: false);
+                    float x = mouse.GetBoxXFromColumn(endoFlame.thePlantColumn), y = mouse.GetBoxYFromRow(endoFlame.thePlantRow);
+                    Doom.SetDoom(__instance.board, new Vector2(x, y), DoomType.Nuclear);
+
+                    UnityEngine.Object.Instantiate(
+                        Resources.Load<GameObject>("plants/cherrybomb/nucleardoomcherry/Radiation"),
+                        __instance.axis.transform.position,
+                        Quaternion.identity,
+                        __instance.board.transform
+                    ).GetComponent<Radiation>().damage = 3600;
+
+                    saver_z.endoFlame.Crashed();
                     Lawnf.SetDroppedCard(__instance.axis.transform.position, UltimateDoomSqualour.PlantID, 0);
                     __instance.Die();
                 }
-                else
+                else if (__instance.GetComponent<Squalour>().squashed) // 正常
                 {
-                    int damage = 3600 + 1200 * Mathf.Min(__instance.GetComponent<Squalour>().squashCount, 3);
+                    int damage = 1800 + 1800 * Mathf.Min(__instance.GetComponent<Squalour>().squashCount, 3);
                     var position = __instance.axis.transform.position;
-                    position.y -= 0.5f;
-                    __instance.board.SetDoom(__instance.thePlantColumn, __instance.thePlantRow, false, false, position, damage);
-
-                    Doom.SetDoom(__instance.board, __instance.axis.transform.position, DoomType.Nuclear);
-
+                    position.y += 0.65f;
+                    int column = mouse.GetColumnFromX(__instance.axis.transform.position.x), 
+                        row = mouse.GetRowFromY(__instance.axis.transform.position.x, __instance.axis.transform.position.y + 0.5f);
+                    if (row != 0)
+                        row++;
+                    __instance.board.boardAction.SetDoom(column, row, false, false, damage: damage, existParticle: false, fromType: __instance.thePlantType);
+                    if (!CoreTools.TravelAdvanced("可控核聚变"))
+                        __instance.board.boardAction.SetPit(column, row);
+                    __instance.board.StartCoroutine(CreateDoom(damage, __instance.board));
+                    Doom.SetDoom(__instance.board, new Vector2(mouse.GetBoxXFromColumn(column), mouse.GetBoxYFromRow(row)), DoomType.Nuclear);
                     var radiation = UnityEngine.Object.Instantiate(
                         Resources.Load<GameObject>("plants/cherrybomb/nucleardoomcherry/Radiation"),
-                        __instance.axis.transform.position,
+                        position,
                         Quaternion.identity, __instance.board.transform).GetComponent<Radiation>();
                     radiation.damage = damage;
-                    // 调用死亡方法
+                    radiation.transform.localScale = new Vector3(CoreTools.ColumnX * 5.4f / 0.5f, CoreTools.ColumnX * 5.4f / 0.5f);
+                    radiation.lifeTimer = Mathf.Min(10, 6 + __instance.GetComponent<Squalour>().squashCount);
                     __instance.Die();
                 }
                 return false;
             }
             return true;
+        }
+
+        public static IEnumerator CreateDoom(int damage, Board board)
+        {
+            for (int i = 0; i < 18; i++)
+            {
+                if (board == null)
+                {
+                    yield break;
+                }
+                int column = UnityEngine.Random.Range(0, board.columnNum), row = UnityEngine.Random.Range(0, board.rowNum);
+                board.boardAction.SetDoom(column, row, false, damage: damage, existParticle: false, fromType: UltimateDoomSqualour.PlantID);
+                Doom.SetDoom(board, new Vector2(Mouse.Instance.GetBoxXFromColumn(column), Mouse.Instance.GetBoxYFromRow(row)), DoomType.Nuclear2);
+                yield return new WaitForSeconds(0.05f);
+            }
+            yield break;
         }
     }
 
@@ -191,9 +249,8 @@ namespace UltimateDoomSqualour.BepInEx
 
                 foreach (Plant plant in nearPlant)
                 {
-                    if (plant != null && plant.thePlantType == PlantType.EndoFlame || plant.thePlantType == PlantType.ZombieEndoFlame)
+                    if (plant != null && (plant.thePlantType == PlantType.EndoFlame || plant.thePlantType == PlantType.ZombieEndoFlame))
                     {
-                        Plant endoFlame = plant;
                         bool success = __instance.TryGetComponent<EndoFlameSaver>(out var component);
                         if (success)
                         {
@@ -212,7 +269,11 @@ namespace UltimateDoomSqualour.BepInEx
                             __instance.startTime = Time.time;
 
                             // 保存目标位置
-                            __instance.endPos = plant.axis.transform.position;
+                            var position = plant.axis.transform.position;
+                            position.y -= 0.5f;
+                            __instance.endPos = position;
+                            __instance.startJumpPos = position;
+
                             __instance.targetZombie = null;
 
                             // 执行攻击动作

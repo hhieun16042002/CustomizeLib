@@ -10,6 +10,7 @@ using static UnityEngine.RuleTile.TilingRuleOutput;
 using System.Collections;
 using CustomizeLib.MelonLoader;
 using static Il2CppSystem.Linq.Enumerable;
+using CustomizeLib.BepInEx;
 
 [assembly: MelonInfo(typeof(CrazySqualour.Core), "CrazySqualour", "1.0.0", "Salmon", null)]
 [assembly: MelonGame("LanPiaoPiao", "PlantsVsZombiesRH")]

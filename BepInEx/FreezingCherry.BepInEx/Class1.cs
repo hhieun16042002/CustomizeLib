@@ -420,7 +420,7 @@ namespace FreezingCherry.BepInEx
                     z.SetFreeze(10f);
                     z.SetCold(15f);
                     int damage = 7200;
-                    if (z.freezeTimer > 0f)
+                    if (z.GetAttrTimers().freezeTimer > 0f)
                         damage *= 4;
                     z.TakeDamage(DmgType.NormalAll, damage, PlantID);
                 };
@@ -545,7 +545,7 @@ namespace FreezingCherry.BepInEx
                     z.SetFreeze(10f);
                     z.SetCold(15f);
                     int damage = __instance.attackDamage;
-                    if (z.freezeTimer > 0f)
+                    if (z.GetAttrTimers().freezeTimer > 0f)
                         damage *= 4;
                     z.TakeDamage(DmgType.NormalAll, damage, __instance.thePlantType);
                 };
@@ -607,7 +607,7 @@ namespace FreezingCherry.BepInEx
                         z.SetFreeze(10f);
                         z.SetCold(15f);
                         int damage = 3600;
-                        if (z.freezeTimer > 0f)
+                        if (z.GetAttrTimers().freezeTimer > 0f)
                             damage *= 4;
                         z.TakeDamage(DmgType.NormalAll, damage, __instance.GetData<PlantType>("FreezingCherry_FromType"));
                     };
@@ -642,7 +642,7 @@ namespace FreezingCherry.BepInEx
                     {
                         z.SetCold(10f);
                         z.AddfreezeLevel(25);
-                        if (z.freezeTimer > 0f)
+                        if (z.GetAttrTimers().freezeTimer > 0f)
                             z.TakeDamage(DmgType.NormalAll, __instance.Damage * 4, __instance.fromType);
                         else
                             z.TakeDamage(DmgType.NormalAll, __instance.Damage, __instance.fromType);
@@ -674,7 +674,7 @@ namespace FreezingCherry.BepInEx
                 {
                     z.SetCold(10f);
                     z.AddfreezeLevel(25);
-                    if (z.freezeTimer > 0f)
+                    if (z.GetAttrTimers().freezeTimer > 0f)
                         z.TakeDamage(DmgType.NormalAll, __instance.Damage * 4, __instance.fromType);
                     else
                         z.TakeDamage(DmgType.NormalAll, __instance.Damage, __instance.fromType);

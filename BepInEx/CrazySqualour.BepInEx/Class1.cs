@@ -74,11 +74,11 @@ namespace CrazySqualourBepInEx
             int oringinalDIff = 0;
             customLevelData.PreInitBoard = () =>
             {
-                oringinalDIff = GameAPP.difficulty;
+                oringinalDIff = GameAPP.config.difficulty;
             };
             customLevelData.PostInitBoard = (board) =>
             {
-                GameAPP.difficulty = oringinalDIff;
+                GameAPP.config.difficulty = oringinalDIff;
                 ShowTextPatch.showed = false;
             };
             CustomLevelData customLevelData1 = customLevelData;
@@ -270,9 +270,9 @@ namespace CrazySqualourBepInEx
                 if (GameAPP.theBoardLevel == Core.levelID && (int)GameAPP.theBoardType == 66)
                     GetRandomEvent(__instance);
                 if ((int)__instance.thePlantType == 1913)
-                    GameAPP.board.GetComponent<Board>().CreateFireLine(__instance.GetComponent<Plant>().thePlantRow, 1800, false, false, true, null);
+                    GameAPP.board.GetComponent<Board>().boardAction.CreateFireLine(__instance.GetComponent<Plant>().thePlantRow, 1800, false, false, true, null);
                 if ((int)__instance.thePlantType == 1914)
-                    GameAPP.board.GetComponent<Board>().CreateFreeze(Vector2.zero);
+                    GameAPP.board.GetComponent<Board>().boardAction.CreateFreeze(Vector2.zero);
                 __instance.GetComponent<Squalour>().LourDie();
             }
         }

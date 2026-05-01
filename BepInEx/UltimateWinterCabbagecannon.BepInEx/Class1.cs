@@ -196,7 +196,7 @@ namespace UltimateWinterCabbagecannon.BepInEx
                     z.SetFreeze(5f);
                     z.SetCold(10f);
                     z.AddfreezeLevel(25);
-                    if (z.freezeTimer > 0f)
+                    if (z.GetAttrTimers().freezeTimer > 0f)
                         z.TakeDamage(DmgType.Carred, damage * 4, plantType);
                     else
                         z.TakeDamage(DmgType.Carred, damage * 8, plantType);
@@ -408,7 +408,7 @@ namespace UltimateWinterCabbagecannon.BepInEx
                     {
                         z.SetCold(10f);
                         z.AddfreezeLevel(25);
-                        if (z.freezeTimer > 0f)
+                        if (z.GetAttrTimers().freezeTimer > 0f)
                         {
                             z.TakeDamage(DmgType.NormalAll, damage * 4, __instance.fromType);
                         }
@@ -446,7 +446,7 @@ namespace UltimateWinterCabbagecannon.BepInEx
                 {
                     z.SetCold(10f);
                     z.AddfreezeLevel(25);
-                    if (z.freezeTimer > 0f)
+                    if (z.GetAttrTimers().freezeTimer > 0f)
                         z.TakeDamage(DmgType.NormalAll, damage * 4, __instance.fromType);
                     else
                         z.TakeDamage(DmgType.NormalAll, damage, __instance.fromType);

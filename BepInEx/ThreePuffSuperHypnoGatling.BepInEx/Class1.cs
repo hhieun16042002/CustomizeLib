@@ -219,9 +219,9 @@ namespace ThreePuffSuperHypnoGatling.BepInEx
                 // 创建命中粒子特效
                 CreateParticle.SetParticle(33, __instance.transform.position, __instance.theBulletRow);
                 __instance.Die();
-                if (zombie.freezeTimer > 0f)
+                if (zombie.GetAttrTimers().freezeTimer > 0f)
                     zombie.Unfreezing();
-                if (zombie.coldTimer > 0f)
+                if (zombie.GetAttrTimers().coldTimer > 0f)
                     zombie.Warm();
                 if (CoreTools.TravelAdvanced("怒火攻心"))
                     zombie.SetJalaed();

@@ -14,6 +14,7 @@ namespace SubspeciesEntry.BepInEx
         public static void Init()
         {
             ClassInjector.RegisterTypeInIl2Cpp<DataSave>();
+            ClassInjector.RegisterTypeInIl2Cpp<GameInfo>();
         }
     }
 
@@ -43,5 +44,9 @@ namespace SubspeciesEntry.BepInEx
         public static T GetData<T>(this GameObject go, string key) => go.GetOrAddComponent<DataSave>().GetData<T>(key);
         public static void SetData(this Component comp, string key, object value) => comp.gameObject.GetOrAddComponent<DataSave>().SetData(key, value);
         public static void SetData(this GameObject go, string key, object value) => go.GetOrAddComponent<DataSave>().SetData(key, value);
+        public static void WriteMethod<T>(this T comp, string key, Action<T> method) where T : Component => comp.SetData(key, method);
+        public static void InvokeMethod<T>(this T comp, string key) where T : Component => comp.GetData<Action<T>>(key).Invoke(comp);
+        public static void WriteMethod(this GameObject go, string key, Action<GameObject> method) => go.SetData(key, method);
+        public static void InvokeMethod(this GameObject go, string key) => go.GetData<Action<GameObject>>(key).Invoke(go);
     }
 }

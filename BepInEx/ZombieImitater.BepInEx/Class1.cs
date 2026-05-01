@@ -229,14 +229,14 @@ namespace ZombieImitater.BepInEx
             if (zombie != null && !zombie.IsDestroyed())
             {
                 zombie.freezeLevel = 0;
-                if (zombie.coldTimer > 0f)
+                if (zombie.GetAttrTimers().coldTimer > 0f)
                 {
                     zombie.UnCold();
-                    zombie.coldTimer = 0f;
+                    zombie.GetAttrTimers().coldTimer = 0f;
                 }
-                if (zombie.freezeTimer > 0f)
+                if (zombie.GetAttrTimers().freezeTimer > 0f)
                 {
-                    zombie.freezeTimer = 0f;
+                    zombie.GetAttrTimers().freezeTimer = 0f;
                     zombie.Unfreezing();
                 }
             }

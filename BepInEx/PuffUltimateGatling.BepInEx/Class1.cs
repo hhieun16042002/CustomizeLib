@@ -203,11 +203,11 @@ namespace DoomGatlingBlover.BepInEx
         }
     }
 
-    [HarmonyPatch(typeof(UltimateGatling._Shooting_d__4), nameof(UltimateGatling._Shooting_d__4.MoveNext))]
+    [HarmonyPatch(typeof(UltimateGatling._Shooting_d__3), nameof(UltimateGatling._Shooting_d__3.MoveNext))]
     public static class StarPatch
     {
         [HarmonyPrefix]
-        public static bool Prefix(UltimateGatling._Shooting_d__4 __instance, ref bool __result)
+        public static bool Prefix(UltimateGatling._Shooting_d__3 __instance, ref bool __result)
         {
             if (__instance.__4__this.thePlantType == PuffUltimateGatling.PlantID)
             {

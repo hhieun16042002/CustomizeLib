@@ -73,7 +73,7 @@ namespace DoomGatlingBlover.BepInEx
                     "<color=#3D1400>余烬毁灭菇子弹：</color><color=red>施加余烬状态。能穿透二类防具。大型子弹会造成2次半径3格的范围伤害，仅第2次触发追击效果</color>\n" +
                     "<color=#3D1400>词条1:</color><color=red>枕戈待旦：攻击速度+100%</color>\n" +
                     "<color=#3D1400>词条2:</color><color=red>核能威慑：每4发必为大毁灭菇</color>\n" +
-                    "<color=#3D1400>连携词条：</color><color=red>究极浮空毁灭射手直击目标会挂上寄生毁灭炸弹。究极樱桃射手的子弹附带究极浮空毁灭射手的追加效果，给予寄生毁灭炸弹的充能x5</color>\n" +
+                    "<color=#3D1400>连携词条：</color><color=red>轰炸火力：究极浮空毁灭射手直击目标会挂上寄生毁灭炸弹。究极樱桃射手的子弹附带究极浮空毁灭射手的追加效果，给予寄生毁灭炸弹的充能x5</color>\n" +
                     "<color=#3D1400>寄生毁灭炸弹：</color><color=red>持续5秒，期间受到究极樱桃射手和究极浮空毁灭射手的伤害将等额储存在内，随后引爆，对半径3.5格的目标造成伤害并施加余烬效果，若目标死亡时将提前引爆。双方的子弹击中时携带寄生毁灭炸弹的目标会产生半径0.5格基于10%毁灭炸弹的伤害</color>\n\n" +
                     "<color=#3D1400>究极浮空毁灭射手是植物界的大师，他一生都在研究“炁”，“不管是植物还是僵尸，他们的身上都有不同的‘炁’，我们可以根据‘炁’所散发的颜色来判断他们的状态，他们的心情，他们的过去和未来”究极浮空毁灭射手闭上了眼睛“我们透过眼睛只能看到事物的表面，真正的世界需要我们用心去看，去观察，有的时候，闭上眼睛，才能看到事物的本相”</color>");
                 CustomCore.TypeMgrExtra.FlyingPlants.Add(UltimateDoomGatlingBlover.PlantID);
@@ -296,17 +296,17 @@ namespace DoomGatlingBlover.BepInEx
             if (Lawnf.TravelAdvanced(UltimateDoomGatlingBlover.BuffID) && __instance.fromType == PlantType.UltimateGatling)
             {
                 __instance.Damage *= 6;
-                if (zombie.coldTimer > 0f)
+                if (zombie.GetAttrTimers().coldTimer > 0f)
                 {
                     if (zombie.freezeSpeed != 0f)
                         zombie.SetFreeze(1f);
                     __instance.Damage *= 4;
                 }
 
-                if (zombie.isJalaed)
+                if (zombie.GetAttrTimers().isJalaed)
                     zombie.JalaedExplode(true, __instance.Damage);
 
-                if (zombie.poisonTimer > 0f)
+                if (zombie.GetAttrTimers().poisonTimer > 0f)
                     zombie.DamagedByPoison(__instance._damage / 40f);
                 if (DoomBomb.HasBomb(zombie))
                 {
@@ -328,17 +328,17 @@ namespace DoomGatlingBlover.BepInEx
         {
             if (Lawnf.TravelAdvanced(UltimateDoomGatlingBlover.BuffID) && __instance.fromType == PlantType.UltimateGatling)
             {
-                if (zombie.coldTimer > 0f)
+                if (zombie.GetAttrTimers().coldTimer > 0f)
                 {
                     if (zombie.freezeSpeed != 0f)
                         zombie.SetFreeze(1f);
                     __instance.Damage *= 4;
                 }
 
-                if (zombie.isJalaed)
+                if (zombie.GetAttrTimers().isJalaed)
                     zombie.JalaedExplode(true, __instance.Damage);
 
-                if (zombie.poisonTimer > 0f)
+                if (zombie.GetAttrTimers().poisonTimer > 0f)
                     zombie.DamagedByPoison(__instance._damage / 40f);
                 if (DoomBomb.HasBomb(zombie))
                 {

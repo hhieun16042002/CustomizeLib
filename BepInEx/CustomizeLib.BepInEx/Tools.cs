@@ -109,6 +109,7 @@ namespace CustomizeLib.BepInEx
         public static implicit operator UltiBuff(BuffID id) => (UltiBuff)id.id;
         public static implicit operator TravelDebuff(BuffID id) => (TravelDebuff)id.id;
         public static implicit operator TravelUnlocks(BuffID id) => (TravelUnlocks)id.id;
+        public static implicit operator int(BuffID id) => id.id;
         public static implicit operator BuffID(AdvBuff i) => new BuffID(i);
         public static implicit operator BuffID(UltiBuff id) => new BuffID(id);
         public static implicit operator BuffID(TravelDebuff id) => new BuffID(id);
@@ -172,8 +173,28 @@ namespace CustomizeLib.BepInEx
 
     public static class CoreTools
     {
+        public static float ColumnX
+        {
+            get
+            {
+                if (Mouse.Instance != null && !Mouse.Instance.IsDestroyed())
+                    return Mouse.Instance.GetBoxXFromColumn(1) - Mouse.Instance.GetBoxXFromColumn(0);
+                return 1f;
+            }
+        }
+        public static float RowY
+        {
+            get
+            {
+                if (Mouse.Instance != null && !Mouse.Instance.IsDestroyed())
+                    return Mouse.Instance.GetBoxYFromRow(1) - Mouse.Instance.GetBoxYFromRow(0);
+                return 1f;
+            }
+        }
+
         public static Dictionary<string, AdvBuff> AdvBuffPair = new();
         public static Dictionary<string, UltiBuff> UltiBuffPair = new();
+        public static Dictionary<string, TravelDebuff> DebuffBuffPair = new();
 
         public static void InitBuffDic()
         {
@@ -216,6 +237,20 @@ namespace CustomizeLib.BepInEx
                         UltiBuffPair.Add(str.Substring(0, index), buff);
                 }
             }
+
+            while (TravelDictionary.ultimateBuffsText.Count < Enum.GetValues<TravelDebuff>().Length) yield return new WaitForSeconds(1f);
+            foreach (var (buff, tuple) in TravelDictionary.debuffData)
+            {
+                var str = tuple.Item1;
+                int index = str.IndexOf('：');
+                if (index == -1)
+                    index = str.IndexOf(":");
+                if (index != -1)
+                {
+                    if (!DebuffBuffPair.ContainsKey(str.Substring(0, index)))
+                        DebuffBuffPair.Add(str.Substring(0, index), buff);
+                }
+            }
             yield break;
         }
 
@@ -246,160 +281,9 @@ namespace CustomizeLib.BepInEx
 
         public static TravelDebuff GetTravelDebuffByString(string name)
         {
-            var id = -1;
-            #region 映射
-            switch (name)
-            {
-                case "二爷1":
-                    id = 0;
-                    break;
-                case "二爷2":
-                    id = 1;
-                    break;
-                case "黑橄榄1":
-                    id = 2;
-                    break;
-                case "黑橄榄2":
-                    id = 3;
-                    break;
-                case "机鱼1":
-                    id = 4;
-                    break;
-                case "机鱼2":
-                    id = 5;
-                    break;
-                case "基洛夫1":
-                    id = 6;
-                    break;
-                case "基洛夫2":
-                    id = 7;
-                    break;
-                case "丑跳1":
-                    id = 8;
-                    break;
-                case "丑跳2":
-                    id = 9;
-                    break;
-                case "三叉戟1":
-                    id = 10;
-                    break;
-                case "三叉戟2":
-                    id = 11;
-                    break;
-                case "白舞王1":
-                    id = 12;
-                    break;
-                case "白舞王2":
-                    id = 13;
-                    break;
-                case "尸王1":
-                    id = 14;
-                    break;
-                case "尸王2":
-                    id = 15;
-                    break;
-                case "冲车1":
-                    id = 16;
-                    break;
-                case "植物概率死亡":
-                    id = 17;
-                    break;
-                case "阳光归零":
-                    id = 18;
-                    break;
-                case "血量翻倍":
-                    id = 19;
-                    break;
-                case "更多僵尸":
-                    id = 20;
-                    break;
-                case "黑车1":
-                    id = 21;
-                    break;
-                case "黑车2":
-                    id = 22;
-                    break;
-                case "博士":
-                    id = 23;
-                    break;
-                case "究极马超":
-                    id = 24;
-                    break;
-                case "究极鱼丸":
-                    id = 25;
-                    break;
-                case "究极将军":
-                    id = 26;
-                    break;
-                case "究极裂空":
-                    id = 27;
-                    break;
-                case "究极白车":
-                    id = 28;
-                    break;
-                case "究极读报":
-                    id = 29;
-                    break;
-                case "蹦极":
-                    id = 30;
-                    break;
-                case "究极丑皇":
-                    id = 31;
-                    break;
-                case "复活":
-                    id = 32;
-                    break;
-                case "植物数量限制":
-                    id = 33;
-                    break;
-                case "究极阿尔法":
-                    id = 34;
-                    break;
-                case "阿尔法1":
-                    id = 35;
-                    break;
-                case "冲车2":
-                    id = 36;
-                    break;
-                case "究极大帅":
-                    id = 37;
-                    break;
-                case "旅行飞碟1":
-                    id = 38;
-                    break;
-                case "旅行飞碟2":
-                    id = 39;
-                    break;
-                case "特种巨人1":
-                    id = 40;
-                    break;
-                case "特种巨人2":
-                    id = 41;
-                    break;
-                case "堡垒巨人1":
-                    id = 42;
-                    break;
-                case "特种黄金巨人":
-                    id = 43;
-                    break;
-                case "毁灭机枪二爷":
-                    id = 44;
-                    break;
-                case "鱼丸1":
-                    id = 45;
-                    break;
-                case "鱼丸2":
-                    id = 46;
-                    break;
-                case "重症难题":
-                    id = 47;
-                    break;
-                case "永久创伤":
-                    id = 48;
-                    break;
-            }
-            #endregion
-            return (TravelDebuff)id;
+            if (DebuffBuffPair.ContainsKey(name))
+                return DebuffBuffPair[name];
+            return (TravelDebuff)(-1);
         }
 
         public static TravelUnlocks GetTravelUnlocksByString(string name)
@@ -489,6 +373,7 @@ namespace CustomizeLib.BepInEx
 
         public static bool TravelUltimate(string name) => Lawnf.TravelUltimate(GetUltiBuffByString(name));
         public static int TravelUltimateLevel(string name) => Lawnf.TravelUltimateLevel(GetUltiBuffByString(name));
+        public static bool TravelDebuff(string name) => Lawnf.TravelDebuff(GetTravelDebuffByString(name));
 
         public static List<int> Range(int end = 1)
         {
@@ -597,5 +482,8 @@ namespace CustomizeLib.BepInEx
 
             return (cherryExplode, particle);
         }
+
+        public static bool IsObjExist(this Component component) => !(component == null || component.IsDestroyed() || component.gameObject == null || component.gameObject.IsDestroyed());
+        public static bool IsObjExist(this GameObject gameObject) => !(gameObject == null || gameObject.IsDestroyed());
     }
 }

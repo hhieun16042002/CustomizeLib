@@ -62,7 +62,7 @@ namespace IceSniperBepInEx
             if (zombie == null) return;
 
             // 造成伤害
-            if (zombie.freezeTimer > 0)
+            if (zombie.GetAttrTimers().freezeTimer > 0)
                 zombie.TakeDamage(DmgType.Normal, damage * 4);
             else
                 zombie.TakeDamage(DmgType.Normal, damage);

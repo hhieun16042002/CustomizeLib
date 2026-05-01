@@ -103,6 +103,21 @@ namespace SubspeciesEntry.BepInEx
         public static bool TravelAdvanced(string name) => Lawnf.TravelAdvanced(GetAdvBuffByString(name));
         public static bool TravelUltimate(string name) => Lawnf.TravelUltimate(GetUltiBuffByString(name));
         public static int TravelUltimateLevel(string name) => Lawnf.TravelUltimateLevel(GetUltiBuffByString(name));
+
+        /// <summary>
+        /// 获取 若要将僵尸的护甲值视为(armor - reducedArmor)，应增加造成多少伤害
+        /// </summary>
+        /// <param name="armor">僵尸原护甲量</param>
+        /// <param name="originDamage">原伤害</param>
+        /// <param name="reducedArmor">要减免的护甲系数</param>
+        /// <returns>应增加的伤害</returns>
+        public static float GetReducedArmorDamage(float armor, float originDamage, float reducedArmor)
+        {
+            float b = 100 + armor - reducedArmor;
+            if (b == 0) b = 1E-7f;
+            // 增加伤害 = (原伤害 * 免疫护甲量) / (100 + 护甲 - 免疫护甲量)
+            return (reducedArmor * originDamage) / b;
+        }
     }
 
     public static class PlantTools
@@ -124,122 +139,6 @@ namespace SubspeciesEntry.BepInEx
                     return Mouse.Instance.GetBoxYFromRow(1) - Mouse.Instance.GetBoxYFromRow(0);
                 return 1f;
             }
-        }
-
-        public static void AdjustLightLevel(Vector2 position, float radius, int level)
-        {
-            foreach (var collider in Physics2D.OverlapCircleAll(position, radius, LayerMask.GetMask("Plant")))
-            {
-                if (!collider.IsObjExist() || !collider.TryGetComponent<Plant>(out var plant) || !plant.IsObjExist()) continue;
-                plant.currentLightLevel += level;
-            }
-        }
-    }
-
-    public static class ReflectionTools
-    {
-        public static MethodInfo? GetMethod(Type type, BindingFlags flags, string name) => type.GetMethod(name, flags);
-
-        // 你说得对，但是这代码是ai写的，窝看不懂
-        /// <summary>
-        /// 获取MethodInfo(Action形式)
-        /// </summary>
-        /// <param name="method">原Method</param>
-        /// <returns>Action，参数：(实例, 方法参数)</returns>
-        public static Action<object, object[]> GetInvoker(MethodInfo method)
-        {
-            var dynamicMethod = new DynamicMethod(
-                "GetInvoker",
-                typeof(void),
-                new Type[] { typeof(object), typeof(object[]) },
-                method.DeclaringType.Module
-            );
-
-            var il = dynamicMethod.GetILGenerator();
-            var parameters = method.GetParameters();
-
-            if (!method.IsStatic)
-            {
-                il.Emit(OpCodes.Ldarg_0);
-                if (method.DeclaringType.IsValueType)
-                {
-                    il.Emit(OpCodes.Unbox, method.DeclaringType);
-                }
-            }
-
-            for (int i = 0; i < parameters.Length; i++)
-            {
-                il.Emit(OpCodes.Ldarg_1);
-                il.Emit(OpCodes.Ldc_I4, i);
-                il.Emit(OpCodes.Ldelem_Ref);
-
-                var paramType = parameters[i].ParameterType;
-                if (paramType.IsValueType)
-                {
-                    il.Emit(OpCodes.Unbox_Any, paramType);
-                }
-                else if (paramType != typeof(object))
-                {
-                    il.Emit(OpCodes.Castclass, paramType);
-                }
-            }
-
-            il.Emit(method.IsStatic ? OpCodes.Call : OpCodes.Call, method);
-            il.Emit(OpCodes.Ret);
-
-            return (Action<object, object[]>)dynamicMethod.CreateDelegate(
-                typeof(Action<object, object[]>));
-        }
-    }
-
-    public class Light
-    {
-        public Vector2 position;
-        public int level = 0;
-        public float radius = 0f;
-        public List<(int, int)> AddBox = new();
-
-        public Light(Vector2 position, int level, float radius)
-        {
-            this.position = position;
-            this.level = level;
-            this.radius = radius;
-            foreach (var collider in Physics2D.OverlapCircleAll(position, radius, LayerMask.GetMask("Plant")))
-            {
-                if (!collider.IsObjExist() || !collider.TryGetComponent<Plant>(out var plant) || !plant.IsObjExist()) continue;
-                if (AddBox.Contains((plant.thePlantColumn, plant.thePlantRow))) continue;
-                CreatePlant.Instance.AdjustLightLevel(plant.thePlantColumn, plant.thePlantRow, level, 0);
-                AddBox.Add((plant.thePlantColumn, plant.thePlantRow));
-            }
-        }
-
-        public void MoveTo(Vector2 position)
-        {
-            // 清除已有植物的增益
-            foreach (var (column, row) in AddBox)
-            {
-                CreatePlant.Instance.AdjustLightLevel(column, row, -level, 0);
-            }
-            AddBox.Clear();
-
-            // 添加新的位置
-            foreach (var collider in Physics2D.OverlapCircleAll(position, radius, LayerMask.GetMask("Plant")))
-            {
-                if (!collider.IsObjExist() || !collider.TryGetComponent<Plant>(out var plant) || !plant.IsObjExist()) continue;
-                if (AddBox.Contains((plant.thePlantColumn, plant.thePlantRow))) continue;
-                CreatePlant.Instance.AdjustLightLevel(plant.thePlantColumn, plant.thePlantRow, level, 0);
-                AddBox.Add((plant.thePlantColumn, plant.thePlantRow));
-            }
-        }
-
-        public void Die()
-        {
-            foreach (var (column, row) in AddBox)
-            {
-                CreatePlant.Instance.AdjustLightLevel(column, row, -level, 0);
-            }
-
-            AddBox.Clear();
         }
     }
 }

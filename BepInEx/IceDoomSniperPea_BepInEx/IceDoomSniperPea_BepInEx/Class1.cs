@@ -109,7 +109,7 @@ namespace IceDoomSniperPea.BepInEx
 
             int damage = plant.attackDamage;
 
-            if (targetZombie.freezeTimer > 0)
+            if (targetZombie.GetAttrTimers().freezeTimer > 0)
                 damage *= 4;
 
             AttackZombie(targetZombie, damage);
@@ -267,7 +267,7 @@ namespace IceDoomSniperPea.BepInEx
                     {
                         z.SetCold(10f);
                         z.AddfreezeLevel(50);
-                        if (z.freezeTimer > 0f)
+                        if (z.GetAttrTimers().freezeTimer > 0f)
                             z.TakeDamage(DmgType.Normal, dmg * 3);
                     };
                     Board.Instance.boardAction.CreateCherryExplode(transform.position, zombie.theZombieRow, CherryBombType.IceCharry, dmg, action: action, fromType: (PlantType)IceDoomSniperPea.PlantID);
@@ -334,7 +334,7 @@ namespace IceDoomSniperPea.BepInEx
             {
                 z.SetCold(10f);
                 z.AddfreezeLevel(50);
-                if (z.freezeTimer > 0f)
+                if (z.GetAttrTimers().freezeTimer > 0f)
                     z.TakeDamage(DmgType.Normal, dmg * 3, (PlantType)IceDoomSniperPea.PlantID);
             };
 
