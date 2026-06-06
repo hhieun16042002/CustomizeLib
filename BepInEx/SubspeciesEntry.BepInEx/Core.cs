@@ -131,6 +131,14 @@ namespace SubspeciesEntry.BepInEx
                     "力大砖飞：植物方造成的樱桃爆炸效果x3，二级时植物方造成的樱桃爆炸效果x10，且伤害不低于300");
             }
             #endregion
+            #region 黑高
+            {
+                // 世纪之盾
+                ReplaceText.ReplaceBuff(BuffType.UltimateBuff, (int)CoreTools.GetUltiBuffByString("世纪之盾"),
+                    "世纪之盾：究极黑曜石高坚果及亚种的韧性×3",
+                    "世纪之盾：究极黑曜石高坚果及亚种的韧性×3，二级时×9");
+            }
+            #endregion
         }
 
         public static void InitAlmanacText()
@@ -230,6 +238,21 @@ namespace SubspeciesEntry.BepInEx
                     "<color=#3D1400>词条2:</color><color=red>无限剑制：究极剑仙杨桃召唤飞剑时有10%概率对场上每个僵尸召唤飞剑</color>");
             }
             #endregion
+            #region 牢樱
+            {
+                ReplaceText.ReplaceAlmanac(PlantType.UltimateGatling,
+                    "植物方的樱桃爆炸伤害×3（樱桃炸弹除外）",
+                    "植物方的樱桃爆炸伤害×3，二级时×10，且伤害不低于300（均不包括樱桃炸弹）");
+            }
+            #endregion
+            #region 黑高
+            {
+                // 世纪之盾
+                ReplaceText.ReplaceAlmanac(PlantType.UltimateTallNut, 
+                    "韧性×3", 
+                    "韧性×3，二级时×9");
+            }
+            #endregion
         }
 
         public static void InitCardClick()
@@ -270,6 +293,12 @@ namespace SubspeciesEntry.BepInEx
             {
                 // 力大砖飞
                 BuffMgr.RegisterCustomLevelBuff(CoreTools.GetUltiBuffByString("力大砖飞"));
+            }
+            #endregion
+            #region 黑高
+            {
+                // 世盾
+                BuffMgr.RegisterCustomLevelBuff(CoreTools.GetUltiBuffByString("世纪之盾"));
             }
             #endregion
         }
@@ -467,13 +496,6 @@ namespace SubspeciesEntry.BepInEx
     [HarmonyPatch(typeof(TravelMgr))]
     public static class TravelMgrPatch
     {
-        [HarmonyPatch(nameof(TravelMgr.OnBoardStart))]
-        [HarmonyPostfix]
-        public static void PostOnBoardStart()
-        {
-            ReplaceText.InitBuff();
-        }
-
         [HarmonyPatch(nameof(TravelMgr.GetAdvancedBuffPool))]
         [HarmonyPostfix]
         public static void PostGetAdvancedBuffPool(ref Il2CppSystem.Collections.Generic.List<AdvBuff> __result)
@@ -564,6 +586,7 @@ namespace SubspeciesEntry.BepInEx
         {
             Core.Init();
             __instance.AddComponent<GameInfo>();
+            ReplaceText.InitBuff();
         }
     }
 

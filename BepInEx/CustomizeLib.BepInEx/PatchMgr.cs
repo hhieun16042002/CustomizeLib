@@ -3019,7 +3019,8 @@ namespace CustomizeLib.BepInEx
         [HarmonyPostfix]
         public static void PostAwake(CustomMenu __instance)
         {
-            if (GameAPP.canvas.IsObjExist() && GameAPP.canvas.GetChild(0).FindChild("Levels").IsObjExist())
+            if (GameAPP.canvas.IsObjExist()&& GameAPP.canvas.childCount > 0 && GameAPP.canvas.GetChild(0).name == "ChallengeMenu(Clone)" && 
+                GameAPP.canvas.GetChild(0).FindChild("Levels").IsObjExist())
             {
                 var child = GameAPP.canvas.GetChild(0).FindChild("Levels").FindChild("FirstBtns").FindChild("CustomLevels");
                 if (child.IsObjExist())

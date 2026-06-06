@@ -480,7 +480,7 @@
 		</Reference>
 	</ItemGroup>
 	<Target Name="PostBuild" AfterTargets="PostBuildEvent">
-		<Exec Command="COPY &quot;$(TargetPath)&quot; &quot;$(BepResPath)&quot;" />
-		<Exec Command="COPY &quot;$(TargetPath)&quot; &quot;$(InnerPath)&quot;" />
-	</Target>
+  <Exec Command="COPY &quot;$(TargetPath)&quot; &quot;$(BepResPath)&quot;" />
+  <Exec Command="COPY &quot;$(TargetPath)&quot; &quot;$(PluginsPath)&quot;" />
+</Target>
 </Project>
