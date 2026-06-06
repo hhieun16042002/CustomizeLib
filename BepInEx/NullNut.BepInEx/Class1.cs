@@ -51,7 +51,7 @@ namespace NullNut.BepInEx
         {
             if (__instance is not null && __instance.theAttackTarget is not null)
             {
-                __instance.theAttackTarget.TryGetComponent<Plant>(out var plant);
+                __instance.theAttackTarget.IsPlant(out var plant);
                 if (plant is not null && (int)plant.thePlantType == NullNut.PlantID)
                 {
                     switch (UnityEngine.Random.Range(0, 6))

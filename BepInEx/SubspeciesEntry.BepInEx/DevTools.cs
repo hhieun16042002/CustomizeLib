@@ -36,5 +36,10 @@ namespace SubspeciesEntry.BepInEx
             var obj = Il2CppSystem.Enum.ToObject(Il2CppType.From(type), id);
             return TravelMgr.Instance.GetText(obj);
         }
+
+        public static bool TravelAdvanced(string name) => Lawnf.TravelAdvanced(CoreTools.GetAdvBuffByString(name));
+        public static bool TravelUltimate(string name) => Lawnf.TravelUltimate(CoreTools.GetUltiBuffByString(name));
+        public static int TravelUltimateLevel(string name) => Lawnf.TravelUltimateLevel(CoreTools.GetUltiBuffByString(name));
+        public static Il2CppSystem.Collections.Generic.Dictionary<PlantType, GameLevel.RogueShooting.BaseConfig> Config() => GameLevel.RogueShooting.Config.configs;
     }
 }

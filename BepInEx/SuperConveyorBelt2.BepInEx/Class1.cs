@@ -28,8 +28,8 @@ namespace SuperConveyorBelt2.BepInEx
                 Logger.LogWarning("未安装 僵尸模仿者 Mod，超级传送带·福祸相依将不会加载！");
                 return;
             }
-            NormalPlants = GameAPP.resourcesManager.allPlants.ToSystemList().Where(t => !Lawnf.IsUltiPlant(t) && !TypeMgr.IsWaterPlant(t) && !TypeMgr.IsSpecialPlant(t) && !Lawnf.TowerPlant(t) && t != PlantType.MixBomb).ToList();
-            UltiPlants = GameAPP.resourcesManager.allPlants.ToSystemList().Where(t => Lawnf.IsUltiPlant(t) && !TypeMgr.IsWaterPlant(t) && !TypeMgr.IsSpecialPlant(t) && !Lawnf.TowerPlant(t) && t != PlantType.MixBomb).ToList();
+            NormalPlants = GameAPP.resourcesManager.allPlants.ToSystemList().Where(t => !Lawnf.IsUltiPlant(t) && !TypeMgr.IsWaterPlant(t) && !TypeMgr.IsPurplePlant(t) && !Lawnf.TowerPlant(t) && t != PlantType.MixBomb).ToList();
+            UltiPlants = GameAPP.resourcesManager.allPlants.ToSystemList().Where(t => Lawnf.IsUltiPlant(t) && !TypeMgr.IsWaterPlant(t) && !TypeMgr.IsPurplePlant(t) && !Lawnf.TowerPlant(t) && t != PlantType.MixBomb).ToList();
 
             CustomLevelData customLevelData = new CustomLevelData();
             var boardTag = new Board.BoardTag();

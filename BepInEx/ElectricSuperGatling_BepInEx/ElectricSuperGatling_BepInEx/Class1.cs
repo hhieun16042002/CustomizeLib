@@ -7,6 +7,7 @@ using System.Reflection;
 using CustomizeLib.BepInEx;
 using Unity.VisualScripting;
 using System.Collections;
+using CustomizeLib.BepInEx.ExtensionData.Basic;
 
 namespace ElectricSuperGatling_BepInEx
 {

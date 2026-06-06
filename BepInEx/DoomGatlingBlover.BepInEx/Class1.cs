@@ -17,7 +17,7 @@ namespace DoomGatlingBlover.BepInEx
             CustomCore.RegisterCustomBanMix(UltimateDoomGatlingBlover.PlantID,
                 () => (Lawnf.TravelAdvanced(CoreTools.GetAdvBuffByString("枕戈待旦")) && Lawnf.TravelAdvanced(CoreTools.GetAdvBuffByString("核能威慑")) && Utils.EnableTravelPlant()) || Utils.IsCheat());
             UltimateDoomGatlingBlover.BuffID = CustomCore.RegisterCustomBuff("轰炸火力：究极浮空毁灭射手的子弹会寄生毁灭炸弹。究极樱桃射手的子弹附带究极浮空毁灭射手的追加效果，给予寄生毁灭炸弹的充能x5",
-                BuffType.AdvancedBuff, () => CoreTools.TravelAdvanced("枕戈待旦") && CoreTools.TravelAdvanced("核能威慑") && CoreTools.TravelUltimate("力大砖飞") && CoreTools.TravelUltimate("快速填装"), 15000, PlantType.EndoFlame);
+                BuffType.AdvancedBuff, () => CoreTools.TravelAdvanced("枕戈待旦") && CoreTools.TravelAdvanced("核能威慑") && CoreTools.TravelUltimate("力大砖飞") && CoreTools.TravelUltimate("快速填装") && TravelStore.Instance != null, 15000, PlantType.EndoFlame);
         }
 
         public override void OnStart()
@@ -265,9 +265,9 @@ namespace DoomGatlingBlover.BepInEx
             return true;
         }
 
-        [HarmonyPatch(nameof(UltimateGatlingBlover.DieEvent))]
+        [HarmonyPatch(nameof(UltimateGatlingBlover.DieEventMustExecute))]
         [HarmonyPrefix]
-        public static bool PreDieEvent(UltimateGatlingBlover __instance, ref Plant.DieReason reason)
+        public static bool DieEventMustExecute(UltimateGatlingBlover __instance, ref Plant.DieReason reason)
         {
             if (__instance != null && reason == Plant.DieReason.ByShovel)
             {

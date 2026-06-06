@@ -108,12 +108,8 @@ namespace SolarSpruce
 
         public void Start()
         {
-
+            plant.ClearAllText();
             plant.shoot = plant.gameObject.transform.FindChild("body").FindChild("zi_dan").FindChild("Shoot");
-            if (plant.energyText != null)
-                plant.energyText.gameObject.SetActive(false);
-            if (plant.energyTextShadow != null)
-                plant.energyTextShadow.gameObject.SetActive(false);
             back = plant.gameObject.transform.FindChild("body/t1/t1").gameObject;
             // MelonLogger.Msg(Solar.Instance.deathTime);
         }

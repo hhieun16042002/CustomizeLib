@@ -39,10 +39,10 @@ namespace CustomizeLib.BepInEx
             {
                 MyShowCustomPlantsButton = Instantiate(
                     Resources.Load<GameObject>("ui/prefabs/InGameUI").transform.FindChild("Bottom/SeedLibrary/ShowLawn")
-                        .gameObject, InGameUI.Instance.SeedBank.transform.parent.FindChild("Bottom/SeedLibrary"));
+                        .gameObject, InGameUI.Instance.SeedBank.transform.parent.FindChild("Bottom/SeedLibrary/ShowCardLayout"));
                 MyShowCustomPlantsButton.name = "ShowCustom";
                 //设置位置
-                MyShowCustomPlantsButton.GetComponent<RectTransform>().anchoredPosition = new Vector2(580, -230);
+                MyShowCustomPlantsButton.GetComponent<RectTransform>().anchoredPosition = new Vector2(0f, 72f);
                 MyShowCustomPlantsButton.GetComponent<RectTransform>().position = new Vector3(
                     MyShowCustomPlantsButton.GetComponent<RectTransform>().position.x,
                     MyShowCustomPlantsButton.GetComponent<RectTransform>().position.y,
@@ -236,14 +236,6 @@ namespace CustomizeLib.BepInEx
         /// </summary>
         private void CreateAllCustomPages(List<PlantType> plantTypes)
         {
-            if (plantTypes == null || plantTypes.Count == 0)
-            {
-                Debug.Log("没有找到二创植物");
-                return;
-            }
-
-            int totalPages = Mathf.CeilToInt((float)plantTypes.Count / CardInPage);
-
             // 清理旧的页面
             if (MyPageParents != null)
             {
@@ -263,11 +255,40 @@ namespace CustomizeLib.BepInEx
             GameObject templatePage = GetTemplatePage();
             GameObject templateCard = GetTemplateCard();
 
-            if (templatePage == null || templateCard == null)
+            if (templatePage == null || templateCard == null) return;
+
+            // 如果没有二创植物，创建一个空页面
+            if (plantTypes == null || plantTypes.Count == 0)
             {
-                Debug.LogError("无法获取模板页面或卡片");
+                // 创建一个空页面
+                GameObject emptyPage = CreatePage(templatePage, 0);
+                MyPageParents.Add(emptyPage);
+
+                // 获取该页的Grid子对象
+                Transform pageGridTransform = emptyPage.transform.GetChild(0);
+
+                // 清空页面上的所有现有卡片
+                for (int i = pageGridTransform.childCount - 1; i >= 0; i--)
+                {
+                    Transform child = pageGridTransform.GetChild(i);
+                    if (child.gameObject != templateCard)
+                    {
+                        DestroyImmediate(child.gameObject);
+                    }
+                }
+
+                // 隐藏模板卡片
+                templateCard.SetActive(false);
+
+                // 初始时隐藏页面
+                emptyPage.SetActive(false);
+
+                // 重置页码
+                currentCustomPage = 0;
                 return;
             }
+
+            int totalPages = Mathf.CeilToInt((float)plantTypes.Count / CardInPage);
 
             //获取当前卡槽中的植物
             List<PlantType> cardsOnSeedBank = GetCardsOnSeedBank();
@@ -321,7 +342,7 @@ namespace CustomizeLib.BepInEx
             if (Board.Instance != null && !Board.Instance.boardTag.isIZ)
             {
                 Transform container = InGameUI.Instance.SeedBank.transform.parent.FindChild("Bottom/SeedLibrary/Grid/CardPagesContainer");
-                return container.FindChild("ColorfulCards").gameObject;
+                return container.FindChild("ColorCards").gameObject;
             }
             else if (Board.Instance != null && Board.Instance.boardTag.isIZ)
             {

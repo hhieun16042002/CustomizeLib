@@ -1,6 +1,7 @@
 ﻿using BepInEx;
 using BepInEx.Unity.IL2CPP;
 using CustomizeLib.BepInEx;
+using CustomizeLib.BepInEx.ExtensionData.Basic;
 using HarmonyLib;
 using Il2CppInterop.Runtime.Injection;
 using System.Reflection;
@@ -145,7 +146,7 @@ namespace ZombieImitater.BepInEx
                 {
                     var list = new List<AdvBuff>();
                     foreach (var (id, _) in TravelDictionary.advancedBuffsText)
-                        if (!data.advBuffs.Contains(id) && !data.advBuffs_lv2.Contains(id))
+                        if (!data.advBuffs.Contains(id))
                             list.Add(id);
                     var advBuff = list[UnityEngine.Random.Range(0, list.Count)];
                     data.advBuffs.Add(advBuff);
@@ -304,9 +305,6 @@ namespace ZombieImitater.BepInEx
                 position.y -= Lawnf.GetAllZombies().ToSystemList().Where(z => z.theZombieType == ZombieType.ZombieBoss || z.theZombieType == ZombieType.ZombieBoss2)
                     .ToList().Count * 0.4f;
                 __instance.healthText.transform.position = position;
-            }
-            {
-                __instance.healthTextShadow.transform.position = __instance.healthText.transform.position;
             }
         }
 

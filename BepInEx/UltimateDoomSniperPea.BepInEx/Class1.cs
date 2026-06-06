@@ -1,6 +1,7 @@
 ﻿using BepInEx;
 using BepInEx.Unity.IL2CPP;
 using CustomizeLib.BepInEx;
+using CustomizeLib.BepInEx.ExtensionData.Basic;
 using HarmonyLib;
 using Il2CppInterop.Runtime;
 using Il2CppInterop.Runtime.Injection;
@@ -160,7 +161,7 @@ namespace UltimateDoomSniperPea.BepInEx
                     LayerMask.GetMask("Zombie")
                 );
 
-                line.transform.rotation = Lawnf.GetRotateFromSpeed(direction);
+                line.transform.rotation = global::Core.Lawnf.GetRotateFromSpeed(direction);
 
                 foreach (var hit in hits)
                 {

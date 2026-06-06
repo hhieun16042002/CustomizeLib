@@ -1,12 +1,12 @@
 // #define DEBUG_FEATURE__ENABLE_MULTI_LEVEL_BUFF // 启用多级词条
 
 using AlmanacData;
+using CustomizeLib.BepInEx.ExtensionData.Basic;
 using HarmonyLib;
 using Il2CppInterop.Runtime;
 using Il2CppInterop.Runtime.InteropTypes;
 using Il2CppInterop.Runtime.InteropTypes.Arrays;
 using Il2CppInterop.Runtime.Runtime;
-using Il2CppSystem;
 using Microsoft.VisualBasic;
 using System;
 using System.Collections;
@@ -22,7 +22,7 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
-using static SingleBuffManager;
+using Core;
 using static UnityEngine.Object;
 
 ///
@@ -430,41 +430,140 @@ namespace CustomizeLib.BepInEx
         }
     }
 
-    //[HarmonyPatch(typeof(AlmanacMgrZombie))]
-    //public static class AlmanacMgrZombiePatch
-    //{
-    //    [HarmonyPatch(nameof(AlmanacMgrZombie.InitNameAndInfoFromJson))]
-    //    [HarmonyPrefix]
-    //    public static bool PreInitNameAndInfoFromJson(AlmanacMgrZombie __instance)
-    //    {
-    //        if (CustomCore.ZombiesAlmanac.ContainsKey(__instance.theZombieType))
-    //        {
-    //            for (int i = 0; i < __instance.transform.childCount; i++)
-    //            {
-    //                Transform childTransform = __instance.transform.GetChild(i);
-    //                if (childTransform == null)
-    //                    continue;
-    //                if (childTransform.name == "Name")
-    //                {
-    //                    childTransform.GetComponent<TextMeshPro>().text = CustomCore.ZombiesAlmanac[__instance.theZombieType].Item1;
-    //                    childTransform.GetChild(0).GetComponent<TextMeshPro>().text = CustomCore.ZombiesAlmanac[__instance.theZombieType].Item1;
-    //                }
-    //                if (childTransform.name == "Info")
-    //                {
-    //                    TextMeshPro info = childTransform.GetComponent<TextMeshPro>();
-    //                    info.overflowMode = TextOverflowModes.Page;
-    //                    info.fontSize = 40;
-    //                    info.text = CustomCore.ZombiesAlmanac[__instance.theZombieType].Item2;
-    //                    __instance.introduce = info;
-    //                }
-    //                if (childTransform.name == "Cost")
-    //                    childTransform.GetComponent<TextMeshPro>().text = "";
-    //            }
-    //            return false;
-    //        }
-    //        return true;
-    //    }
-    //}
+    [HarmonyPatch(typeof(AlmanacBuffMenu))]
+    public static class AlmanacBuffMenuPatch
+    {
+        [HarmonyPatch(nameof(AlmanacBuffMenu.Awake))]
+        [HarmonyPostfix]
+        public static void PostAwake(AlmanacBuffMenu __instance)
+        {
+            {
+                var curse = __instance.transform.FindChild("Scroll View/Viewport/Content/curseBuffs").gameObject;
+                var customBuffs = Instantiate(curse, __instance.transform.FindChild("Scroll View/Viewport/Content"));
+                customBuffs.name = "customBuffs";
+                customBuffs.transform.GetChild(0).GetComponent<TextMeshProUGUI>().text = "二创词条";
+                var list = new Il2CppSystem.Collections.Generic.List<AlmanacCardUI>();
+                foreach (var ((buffType, id), (desc, icon, zt)) in CustomCore.CustomBuffs)
+                {
+                    var obj = new Il2CppSystem.Object();
+                    switch (buffType)
+                    {
+                        case BuffType.UnlockPlant:
+                            obj = id.BoxEnumToIl2Object<TravelUnlocks>();
+                            break;
+                        case BuffType.AdvancedBuff:
+                            obj = id.BoxEnumToIl2Object<AdvBuff>();
+                            break;
+                        case BuffType.UltimateBuff:
+                            obj = id.BoxEnumToIl2Object<UltiBuff>();
+                            break;
+                        case BuffType.Debuff:
+                            obj = id.BoxEnumToIl2Object<TravelDebuff>();
+                            break;
+                        case BuffType.InvestmentBuff:
+                            obj = id.BoxEnumToIl2Object<InvestBuff>();
+                            break;
+                    }
+                    var cardInfo = new AlmanacBuffMenu.CardInfo
+                    {
+                        buff = obj,
+                        description = desc,
+                        isZombie = buffType == BuffType.Debuff
+                    };
+                    if (buffType == BuffType.Debuff)
+                        cardInfo.zombieType = zt;
+                    else
+                        cardInfo.plantType = icon;
+
+                    __instance.CreateCardUI(cardInfo, list);
+                }
+                foreach (var cardUI in list)
+                    cardUI.gameObject.SetActive(false);
+
+                Action action = () =>
+                {
+                    __instance.SetAllCards(false);
+                    foreach (var cardUI in list)
+                        cardUI.gameObject.SetActive(true);
+                };
+
+                UnityEvent unityEvent = new UnityEvent();
+                unityEvent.AddListener(action);
+                customBuffs.GetComponent<UIButton>().clickEvent = unityEvent;
+            }
+
+            {
+                foreach (var ((buffType, id), (almanacType, icon, zt)) in CustomCore.CustomAlmanacBuffType)
+                {
+                    var obj = new Il2CppSystem.Object();
+                    var list = new Il2CppSystem.Collections.Generic.List<AlmanacCardUI>();
+                    switch (almanacType)
+                    {
+                        case AlmanacBuffType.WeakUltimate:
+                            obj = id.BoxEnumToIl2Object<AdvBuff>();
+                            list = __instance.weakUltiBuffs;
+                            break;
+                        case AlmanacBuffType.StrongUltimate:
+                            obj = id.BoxEnumToIl2Object<UltiBuff>();
+                            list = __instance.strongUltiBuffs;
+                            break;
+                        case AlmanacBuffType.General:
+                            obj = id.BoxEnumToIl2Object<AdvBuff>();
+                            list = __instance.generalBuffs;
+                            break;
+                        case AlmanacBuffType.Random:
+                            obj = id.BoxEnumToIl2Object<AdvBuff>();
+                            list = __instance.randomBuffs;
+                            break;
+                        case AlmanacBuffType.Curse:
+                            obj = id.BoxEnumToIl2Object<AdvBuff>();
+                            list = __instance.curseBuffs;
+                            break;
+                        case AlmanacBuffType.Rogue:
+                            obj = id.BoxEnumToIl2Object<AdvBuff>();
+                            list = __instance.rogueBuffs;
+                            break;
+                        case AlmanacBuffType.Combo:
+                            obj = id.BoxEnumToIl2Object<AdvBuff>();
+                            list = __instance.comboBuffs;
+                            break;
+                        case AlmanacBuffType.Tiny:
+                            obj = id.BoxEnumToIl2Object<AdvBuff>();
+                            list = __instance.tinyBuffs;
+                            break;
+                        case AlmanacBuffType.Zombie:
+                            obj = id.BoxEnumToIl2Object<AdvBuff>();
+                            list = __instance.zombieBuffs;
+                            break;
+                    }
+                    var cardInfo = new AlmanacBuffMenu.CardInfo
+                    {
+                        buff = obj,
+                        description = TravelMgr.Instance.GetText(obj),
+                        plantType = icon
+                    };
+                    __instance.CreateCardUI(cardInfo, list);
+                }
+            }
+        }
+
+        [HarmonyPatch(nameof(AlmanacBuffMenu.OnCardClick))]
+        [HarmonyPostfix]
+        public static void PostOnCardClick(AlmanacBuffMenu __instance, AlmanacCardUI card)
+        {
+            AlmanacBuffMenu.CardInfo cardInfo = __instance.cardInfos[card];
+            var (type, id) = TravelExtensions.GetTypeAndID(cardInfo.buff);
+            if (CustomCore.CustomBuffsBg.ContainsKey((type, id)))
+            {
+                if (CustomCore.CustomBuffsBg[(type, id)].BgType == BuffBgType.Day)
+                    __instance.windowBackground.sprite = __instance.day;
+                else if (CustomCore.CustomBuffsBg[(type, id)].BgType == BuffBgType.Night)
+                    __instance.windowBackground.sprite = __instance.night;
+                else if (CustomCore.CustomBuffsBg[(type, id)].BgType == BuffBgType.Night)
+                    __instance.windowBackground.sprite = __instance.pool;
+            }
+        }
+    }
 
     [HarmonyPatch(typeof(ConveyManager))]
     public static class ConveyManagerPatch
@@ -490,7 +589,7 @@ namespace CustomizeLib.BepInEx
         }
     }
 
-    [HarmonyPatch(typeof(InGameText), nameof(InGameText.ShowText))]
+    [HarmonyPatch(typeof(Core.InGameText), nameof(Core.InGameText.ShowText))]
     public static class InGameTextPatch
     {
         public static bool disable = false;
@@ -990,100 +1089,100 @@ namespace CustomizeLib.BepInEx
             }
         }
 
-        [HarmonyPatch(nameof(InitBoard.MoveOverEvent))]
-        [HarmonyPrefix]
-        public static bool PreMoveOverEvent(InitBoard __instance, ref string direction)
-        {
-            if (GameAPP.theBoardType is not (LevelType)66) return true;
-            var levelData = CustomCore.CustomLevels[GameAPP.theBoardLevel];
-            if (direction == "right")
-            {
-                if (__instance.board != null)
-                {
-                    if (!__instance.board.boardTag.disableSelectCard)
-                    {
-                        // 设置游戏状态
-                        GameAPP.theGameStatus = GameStatus.Selecting;
+        //[HarmonyPatch(nameof(InitBoard.RightMoveCamera))]
+        //[HarmonyPostfix]
+        //public static void PostMoveOverEvent(InitBoard __instance, ref string direction)
+        //{
+        //    if (GameAPP.theBoardType is not (LevelType)66) return;
+        //    var levelData = CustomCore.CustomLevels[GameAPP.theBoardLevel];
+        //    if (direction == "right")
+        //    {
+        //        if (__instance.board != null)
+        //        {
+        //            if (!__instance.board.boardTag.disableSelectCard)
+        //            {
+        //                // 设置游戏状态
+        //                GameAPP.theGameStatus = GameStatus.Selecting;
 
-                        // UI控制
-                        InGameUI.Instance.ConveyorBelt.SetActive(false);
-                        InGameUI.Instance.Bottom.SetActive(true);
+        //                // UI控制
+        //                InGameUI.Instance.ConveyorBelt.SetActive(false);
+        //                InGameUI.Instance.Bottom.SetActive(true);
 
-                        // 启动协程移动UI元素
-                        __instance.StartCoroutine(__instance.MoveDirection(InGameUI.Instance.SeedBank, 79f, 0));
-                        __instance.StartCoroutine(__instance.MoveDirection(InGameUI.Instance.Bottom, 525f, 1));
-                    }
-                    else
-                    {
-                        // 延迟执行方法
-                        __instance.Invoke("LeftMoveCamera", 1.5f);
-                        InGameUI.Instance.Bottom.SetActive(false);
-                    }
-                }
-            }
-            else if (direction == "left")
-            {
-                if (__instance.board == null) return false;
+        //                // 启动协程移动UI元素
+        //                __instance.StartCoroutine(__instance.MoveDirection(InGameUI.Instance.SeedBank, 79f, 0));
+        //                __instance.StartCoroutine(__instance.MoveDirection(InGameUI.Instance.Bottom, 525f, 1));
+        //            }
+        //            else
+        //            {
+        //                // 延迟执行方法
+        //                __instance.Invoke("LeftMoveCamera", 1.5f);
+        //                InGameUI.Instance.Bottom.SetActive(false);
+        //            }
+        //        }
+        //    }
+        //    else if (direction == "left")
+        //    {
+        //        if (__instance.board == null) return;
 
-                if (__instance.board.boardTag.disableSelectCard)
-                {
-                    if (__instance.board.cardBank)
-                    {
-                        __instance.StartCoroutine(__instance.MoveDirection(InGameUI.Instance.SeedBank, 79f, 0));
-                        __instance.AddCard();
-                    }
-                    else
-                    {
-                        InGameUI.Instance.SeedBank.SetActive(false);
-                    }
-                    InGameUI.Instance.Bottom.SetActive(false);
-                }
+        //        if (__instance.board.boardTag.disableSelectCard)
+        //        {
+        //            if (__instance.board.cardBank)
+        //            {
+        //                __instance.StartCoroutine(__instance.MoveDirection(InGameUI.Instance.SeedBank, 79f, 0));
+        //                __instance.AddCard();
+        //            }
+        //            else
+        //            {
+        //                InGameUI.Instance.SeedBank.SetActive(false);
+        //            }
+        //            InGameUI.Instance.Bottom.SetActive(false);
+        //        }
 
-                // 音量渐变协程
-                __instance.StartCoroutine(__instance.DecreaseVolume());
+        //        // 音量渐变协程
+        //        __instance.StartCoroutine(__instance.DecreaseVolume());
 
-                // 降低UI位置
-                InGameUI.Instance.LowerUI();
+        //        // 降低UI位置
+        //        InGameUI.Instance.LowerUI();
 
-                // 初始化割草机（特定模式下）
-                if (!__instance.board.boardTag.disableMower)
-                {
-                    __instance.InitMower();
-                }
+        //        // 初始化割草机（特定模式下）
+        //        if (!__instance.board.boardTag.disableMower)
+        //        {
+        //            __instance.InitMower();
+        //        }
 
-                // 雾效果移动
-                if (__instance.board.fog != null)
-                {
-                    Vector3 fogPosition = __instance.board.fog.transform.position;
-                    Vector3 boardPosition = __instance.board.background.transform.position;
+        //        // 雾效果移动
+        //        if (__instance.board.fog != null)
+        //        {
+        //            Vector3 fogPosition = __instance.board.fog.transform.position;
+        //            Vector3 boardPosition = __instance.board.background.transform.position;
 
-                    FogMgr.Instance.MoveObject(
-                        new(fogPosition.x,
-                        fogPosition.y,
-                        boardPosition.z),
-                        10f  // 移动速度
-                    );
-                }
+        //            FogMgr.Instance.MoveObject(
+        //                new(fogPosition.x,
+        //                fogPosition.y,
+        //                boardPosition.z),
+        //                10f  // 移动速度
+        //            );
+        //        }
 
-                // BOSS战特殊处理
-                float invokeDelay = 0.5f;
-                if (__instance.board.boardTag.isBoss || __instance.board.boardTag.isBoss2)
-                {
-                    var zombie = CreateZombie.Instance.SetZombie(0, levelData.RealBoss2 ? ZombieType.ZombieBoss2 : ZombieType.ZombieBoss, 0f);
+        //        // BOSS战特殊处理
+        //        float invokeDelay = 0.5f;
+        //        if (__instance.board.boardTag.isBoss || __instance.board.boardTag.isBoss2)
+        //        {
+        //            var zombie = CreateZombie.Instance.SetZombie(0, levelData.RealBoss2 ? ZombieType.ZombieBoss2 : ZombieType.ZombieBoss, 0f);
 
-                    if (__instance.board.boss2)
-                    {
-                        Lawnf.SetZombieHealth(zombie, 5f);
-                    }
-                    invokeDelay = 3.5f;
-                    __instance.board.boss2 = levelData.RealBoss2;
-                }
+        //            if (__instance.board.boss2)
+        //            {
+        //                Lawnf.SetZombieHealth(zombie, 5f);
+        //            }
+        //            invokeDelay = 3.5f;
+        //            __instance.board.boss2 = levelData.RealBoss2;
+        //        }
 
-                // 延迟调用方法
-                __instance.Invoke("ReadySetPlant", invokeDelay);
-            }
-            return false;
-        }
+        //        // 延迟调用方法
+        //        __instance.Invoke("ReadySetPlant", invokeDelay);
+        //    }
+        //    return false;
+        //}
     }
 
     [HarmonyPatch(typeof(InitZombieList))]
@@ -1096,7 +1195,7 @@ namespace CustomizeLib.BepInEx
             if (Utils.IsCustomLevel(out var levelData))
             {
                 foreach (var z in levelData.ZombieList())
-                    InitZombieList.allow[(int)z] = true;
+                    InitZombieList.zombieToSpawns.Add(z);
             }
         }
     }
@@ -1296,9 +1395,16 @@ namespace CustomizeLib.BepInEx
     [HarmonyPatch(typeof(GameAPP))]
     public static class GameAPPPatch
     {
+        [HarmonyPatch(nameof(GameAPP.Awake))]
+        [HarmonyPostfix]
+        public static void PostAwake()
+        {
+            InterfaceCreator.InitInstance();
+        }
+
         [HarmonyPatch(nameof(GameAPP.Start))]
         [HarmonyPostfix]
-        public static void PostAwake(GameAPP __instance)
+        public static void PostStart(GameAPP __instance)
         {
             __instance.StartCoroutine(CoreTools.Init());
             __instance.StartCoroutine(PatchMgr.RegisterSkin());
@@ -1353,6 +1459,8 @@ namespace CustomizeLib.BepInEx
                     GameAPP.resourcesManager.allZombieTypes.Add(z.Key);//注册僵尸类型
                 GameAPP.resourcesManager.zombiePrefabs[z.Key] = z.Value.Item1;//注册僵尸预制体
                 GameAPP.resourcesManager.zombiePrefabs[z.Key].tag = "Zombie";//必修打tag
+                if (z.Value.Item2 != null)
+                    GameAPP.resourcesManager.zombieSprites[z.Key] = z.Value.Item2;
             }
 
             foreach (var (id, list) in CustomCore.CustomSkinBullet) //注册二创皮肤子弹
@@ -1388,6 +1496,11 @@ namespace CustomizeLib.BepInEx
             foreach (var spr in CustomCore.CustomSprites)//注册自定义精灵贴图
             {
                 GameAPP.spritePrefab[spr.Key] = spr.Value;
+            }
+
+            foreach (var audio in CustomCore.CustomSounds)
+            {
+                GameAPP.soundManager.sounds[(SoundType)audio.Key] = audio.Value;
             }
         }
     }
@@ -1435,9 +1548,6 @@ namespace CustomizeLib.BepInEx
                         uncrashablePlants.Add(item);
                     propertyInfo.SetValue(null, uncrashablePlants);
                 }
-
-                if (CustomCore.CustomZombieTypes.Count > 0 && ((long)CustomCore.CustomZombieTypes.DefaultIfEmpty().Max() + 1L) > InitZombieList.allow.Length)
-                    InitZombieList.allow = new Il2CppStructArray<bool>((long)CustomCore.CustomZombieTypes.Max() + 1L);
 
                 PatchMgr.Load = true;
 
@@ -1511,10 +1621,10 @@ namespace CustomizeLib.BepInEx
         }
     }
 
-    [HarmonyPatch(typeof(OptionMenu.__c__DisplayClass12_0))]
+    [HarmonyPatch(typeof(OptionMenu.__c__DisplayClass18_0))]
     public static class OptionMenuPatch
     {
-        [HarmonyPatch(nameof(OptionMenu.__c__DisplayClass12_0._OnLockAlmanacMenu_b__0))]
+        [HarmonyPatch(nameof(OptionMenu.__c__DisplayClass18_0._OnLockAlmanacMenu_b__0))]
         [HarmonyPostfix]
         public static void PostOnLockAlmanacMenu()
         {
@@ -1558,12 +1668,12 @@ namespace CustomizeLib.BepInEx
     [HarmonyPatch(typeof(SeedLibrary))]
     public static class SeedLibraryPatch
     {
-        [HarmonyPatch(nameof(SeedLibrary.Start))]
+        [HarmonyPatch(nameof(SeedLibrary.InitCardGroup))]
         [HarmonyPostfix]
-        public static void PostStart(SeedLibrary __instance)
+        public static void PostSetAllCards(SeedLibrary __instance)
         {
             // 注册自定义卡牌
-            PatchMgr.ShowCustomCards();
+            PatchMgr.ShowCustomCards(__instance);
         }
     }
 
@@ -1578,7 +1688,7 @@ namespace CustomizeLib.BepInEx
         public static void PostStart(PlantCardPackageBuilder __instance)
         {
             // 注册自定义卡牌
-            PatchMgr.ShowCustomCards();
+            PatchMgr.ShowCustomCards(__instance);
         }
     }
 
@@ -1728,7 +1838,7 @@ namespace CustomizeLib.BepInEx
 
                 if (immediately)
                 {
-                    cherry.Explode();
+                    cherry.Explode(CustomDamageMaker.DamageMaker);
                 }
 
                 __result = cherry;
@@ -2064,8 +2174,7 @@ namespace CustomizeLib.BepInEx
         {
             foreach (var (key, value) in CustomCore.CustomAdvancedBuffs)
             {
-                if (value.Item3.Invoke() && !TravelMgr.Instance.data.advBuffs.Contains((AdvBuff)key) && 
-                    !TravelMgr.Instance.data.advBuffs_lv2.Contains((AdvBuff)key))
+                if (value.Item3.Invoke() && !TravelMgr.Instance.data.advBuffs.Contains((AdvBuff)key))
                     __result.Add((AdvBuff)key);
             }
 
@@ -2723,8 +2832,8 @@ namespace CustomizeLib.BepInEx
         }
 
         [HarmonyPrefix]
-        [HarmonyPatch(nameof(TypeMgr.IsSpecialPlant))]
-        public static bool PreIsSpecialPlant(ref PlantType theSeedType, ref bool __result)
+        [HarmonyPatch(nameof(TypeMgr.IsPurplePlant))]
+        public static bool PreIsPurplePlant(ref PlantType theSeedType, ref bool __result)
         {
             if (CustomCore.TypeMgrExtra.IsSpecialPlant.Contains(theSeedType))
             {
@@ -2908,25 +3017,23 @@ namespace CustomizeLib.BepInEx
     {
         [HarmonyPatch(nameof(CustomMenu.Awake))]
         [HarmonyPostfix]
-        public static void PostAwake()
+        public static void PostAwake(CustomMenu __instance)
         {
             if (GameAPP.canvas.IsObjExist() && GameAPP.canvas.GetChild(0).FindChild("Levels").IsObjExist())
             {
                 var child = GameAPP.canvas.GetChild(0).FindChild("Levels").FindChild("FirstBtns").FindChild("CustomLevels");
                 if (child.IsObjExist())
                     child.GetChild(1).GetComponent<BoxCollider2D>().enabled = false;
-            }
-        }
-
-        [HarmonyPatch(nameof(CustomMenu.OnDestroy))]
-        [HarmonyPostfix]
-        public static void PostOnDestroy()
-        {
-            if (GameAPP.canvas.IsObjExist() && GameAPP.canvas.GetChild(0).FindChild("Levels").IsObjExist())
-            {
-                var child = GameAPP.canvas.GetChild(0).FindChild("Levels").FindChild("FirstBtns").FindChild("CustomLevels");
-                if (child.IsObjExist())
-                    child.GetChild(1).GetComponent<BoxCollider2D>().enabled = true;
+                Action action = () =>
+                {
+                    if (GameAPP.canvas.IsObjExist() && GameAPP.canvas.GetChild(0).FindChild("Levels").IsObjExist())
+                    {
+                        var child = GameAPP.canvas.GetChild(0).FindChild("Levels").FindChild("FirstBtns").FindChild("CustomLevels");
+                        if (child.IsObjExist())
+                            child.GetChild(1).GetComponent<BoxCollider2D>().enabled = true;
+                    }
+                };
+                __instance.transform.FindChild("LowerButtons/Exit").GetComponent<UIButton>().clickEvent.AddListener(action);
             }
         }
     }
@@ -3007,6 +3114,8 @@ namespace CustomizeLib.BepInEx
             var levelData = CustomCore.CustomLevels[levelNumber];
 
             // 清理UI资源
+            SynergyManager.Instance.ClearAllSynergies();
+            EventManager.ClearAllEvents();
             GameAPP.UIManager.PopAll();
 
             // 重置相机
@@ -3019,6 +3128,7 @@ namespace CustomizeLib.BepInEx
             GameAPP.theBoardType = levelType;
             GameAPP.theBoardLevel = levelNumber;
 
+            RogueManager.Instance.Clear();
             // 清理现有的Travel管理器
             if (TravelMgr.Instance != null)
             {
@@ -3040,8 +3150,7 @@ namespace CustomizeLib.BepInEx
             board.seedPool = levelData.SeedRainPlantTypes().ToIl2CppList();
             levelData.PostBoard(board);
             // 加载并实例化地图
-            GameObject mapInstance = UnityEngine.Object.Instantiate(MapData_cs.GetMap(levelData.SceneType, board), boardGO.transform);
-            board.ChangeMap(mapInstance);
+            MapData_cs.GetMap(levelData.SceneType, board);
 
             InitZombieList.InitZombie((LevelType)levelType, levelNumber);
 
@@ -3119,14 +3228,14 @@ namespace CustomizeLib.BepInEx
         [HarmonyPostfix]
         public static void PostSaveSurvivalDataByButton(ref int level, ref int id)
         {
-            PatchMgr.SaveEndlessBuffArray(level, id);
+            PatchMgr.SaveEndlessData(level, id);
         }
 
-        [HarmonyPatch(nameof(SaveInfo.SaveSurvivalData), new Type[] { typeof(int), typeof(bool), typeof(int) })]
+        [HarmonyPatch(nameof(SaveInfo.SaveSurvivalData), new Type[] { typeof(int), typeof(bool), typeof(int), typeof(string) })]
         [HarmonyPostfix]
         public static void PostSaveSurvivalDataByAuto(ref int level, ref int id)
         {
-            PatchMgr.SaveEndlessBuffArray(level, id);
+            PatchMgr.SaveEndlessData(level, id);
         }
     }
 
@@ -3135,40 +3244,22 @@ namespace CustomizeLib.BepInEx
     {
         [HarmonyPatch(nameof(SaveMgr.SaveBoard))]
         [HarmonyPostfix]
-        public static void PostLoadBoard(SaveMgr __instance, ref int level, ref int id)
+        public static void PostSaveBoard(SaveMgr __instance, ref int level, ref int id)
         {
-            PatchMgr.SaveEndlessBuffArray(level, id);
+            PatchMgr.SaveEndlessData(level, id);
         }
 
         [HarmonyPatch(nameof(SaveMgr.LoadBoard))]
         [HarmonyPostfix]
-        public static void PostLoadBoard(SaveMgr __instance, ref int level)
+        public static void PostLoadBoard(SaveMgr __instance, ref int level, ref int id)
         {
             if (TravelMgr.Instance == null || SaveInfo.Instance == null)
                 return;
             var idGet = SaveInfo.Instance.GetData("endlessID");
             if (idGet is null)
                 return;
-            var id = (int)idGet;
-            String originalPath = SaveInfo.Instance.GetPath(level, id);
-            String? directoryPath = Path.GetDirectoryName(originalPath);
-            if (directoryPath is null)
-                return;
-            String fileName = Path.GetFileName(originalPath);
-            String filePath = Path.Combine(directoryPath, $"{fileName}.extra.json");
-            if (!File.Exists(filePath))
-                File.Create(filePath).Dispose();
-            String text = File.ReadAllText(filePath);
-            if (text == null || text == "")
-            {
-                text = JsonSerializer.Serialize<int[]>(new int[CustomCore.CustomAdvancedBuffs.Count]);
-            }
-            int[]? array = JsonSerializer.Deserialize<int[]>(text);
-            if (array is null)
-                return;
-            TravelMgr.Instance.SetData("CustomBuffsLevel", array);
-            TravelMgr.Instance.SetData("LoadByEndless", true);
-            SaveInfo.Instance.SetData("endlessID", null);
+            var idG = (int)idGet;
+            PatchMgr.LoadEndlessData(level, id, idG);
         }
     }
 
@@ -3222,6 +3313,13 @@ namespace CustomizeLib.BepInEx
             }
         }
 
+        #region 无尽
+        public static void SaveEndlessData(int level, int id)
+        {
+            SaveEndlessBuffArray(level, id);
+            SaveDataArray(level, id);
+        }
+
         public static void SaveEndlessBuffArray(int level, int id)
         {
             if (TravelMgr.Instance == null)
@@ -3248,6 +3346,88 @@ namespace CustomizeLib.BepInEx
                 File.Create(filePath).Dispose();
             File.WriteAllText(filePath, json);
         }
+
+        public static void SaveDataArray(int level, int id)
+        {
+            //var plantDatas = new List<CustomEndlessPlantData>();
+            //foreach (var plant in Lawnf.GetAllPlants())
+            //{
+            //    foreach (var comp in plant.GetComponents<Component>())
+            //        if (CustomCore.CustomEndlessSaveData.ContainsKey(comp.GetIl2CppType()))
+            //        {
+            //            plantDatas.Add(new CustomEndlessPlantData()
+            //            {
+            //                pt = plant.thePlantType,
+            //                col = plant.thePlantColumn,
+            //                row = plant.thePlantRow,
+            //                value = GetValueByName(comp, CustomCore.CustomEndlessSaveData[comp.GetIl2CppType()])
+            //            });
+            //        }
+            //}
+        }
+
+        public static object? GetValueByName(Component comp, string name)
+        {
+            if (comp == null) return null;
+
+            var prop = comp.GetType().GetProperty(name, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static);
+            if (prop != null && prop.CanRead)
+                return prop?.GetValue(comp);
+
+            var field = comp.GetType().GetField(name, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static);
+            if (field != null)
+                return field.GetValue(comp);
+
+            return null;
+        }
+
+        public static void SetValueByName(Component comp, string name, object? val)
+        {
+            if (comp == null) return;
+
+            var prop = comp.GetType().GetProperty(name, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static);
+            if (prop != null && prop.CanWrite)
+            {
+                prop?.SetValue(comp, val);
+                return;
+            }
+
+            var field = comp.GetType().GetField(name, BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static);
+            if (field != null)
+            {
+                field.SetValue(comp, val);
+                return;
+            }
+        }
+
+        public static void LoadEndlessData(int level, int id, int idG)
+        {
+            LoadEndlessBuffArray(level, idG);
+        }
+
+        public static void LoadEndlessBuffArray(int level, int id)
+        {
+            String originalPath = SaveInfo.Instance.GetPath(level, id);
+            String? directoryPath = Path.GetDirectoryName(originalPath);
+            if (directoryPath is null)
+                return;
+            String fileName = Path.GetFileName(originalPath);
+            String filePath = Path.Combine(directoryPath, $"{fileName}.extra.json");
+            if (!File.Exists(filePath))
+                File.Create(filePath).Dispose();
+            String text = File.ReadAllText(filePath);
+            if (text == null || text == "")
+            {
+                text = JsonSerializer.Serialize<int[]>(new int[CustomCore.CustomAdvancedBuffs.Count]);
+            }
+            int[]? array = JsonSerializer.Deserialize<int[]>(text);
+            if (array is null)
+                return;
+            TravelMgr.Instance.SetData("CustomBuffsLevel", array);
+            TravelMgr.Instance.SetData("LoadByEndless", true);
+            SaveInfo.Instance.SetData("endlessID", null);
+        }
+        #endregion
 
         public static void OnChangeSkin(PlantType almanacType, int index)
         {
@@ -3665,8 +3845,15 @@ namespace CustomizeLib.BepInEx
         #endregion
         
 
-        public static void ShowCustomCards()
+        public static void ShowCustomCards(MonoBehaviour mono)
         {
+            mono.StartCoroutine(Show());
+        }
+
+        private static IEnumerator Show()
+        {
+            // 1.5s等待初始化
+            yield return new WaitForSeconds(1.5f);
             GameObject? MyColorfulCard = Utils.GetColorfulCardGameObject();
             List<PlantType> cardsOnSeedBank = new List<PlantType>();
             Dictionary<PlantType, List<bool>> cardsOnSeedBankExtra = new Dictionary<PlantType, List<bool>>();
@@ -3676,7 +3863,7 @@ namespace CustomizeLib.BepInEx
             else if (Board.Instance != null && Board.Instance.boardTag.isIZ)
                 seedGroup = InGameUI_IZ.Instance.transform.FindChild("SeedBank/SeedGroup").gameObject;
             if (seedGroup == null)
-                return;
+                yield break;
             for (int i = 0; i < seedGroup.transform.childCount; i++)
             {
                 GameObject seed = seedGroup.transform.GetChild(i).gameObject;
@@ -3690,7 +3877,7 @@ namespace CustomizeLib.BepInEx
                 }
             }
             if (MyColorfulCard == null)
-                return;
+                yield break;
             var isIZ = Board.Instance.boardTag.isIZ;
             foreach (var (pt, (list, times)) in CustomCore.CustomCards)
             {
@@ -3738,7 +3925,7 @@ namespace CustomizeLib.BepInEx
                             component.CD = component.fullCD;
                             component.parent = TempCard;
                             if (cardsOnSeedBank.Contains(pt))
-                               packet.gameObject.SetActive(false);
+                                packet.gameObject.SetActive(false);
                             CheckCardState? customComponent = TempCard.GetOrAddComponent<CheckCardState>();
                             if (customComponent == null)
                                 continue;
@@ -3752,7 +3939,7 @@ namespace CustomizeLib.BepInEx
 
             GameObject? MyNormalCard = Utils.GetNormalCardGameObject();
             if (MyNormalCard == null)
-                return;
+                yield break;
             foreach (var (pt, (list, times)) in CustomCore.CustomNormalCards)
             {
                 var repeat = isIZ ? times : times + 1;

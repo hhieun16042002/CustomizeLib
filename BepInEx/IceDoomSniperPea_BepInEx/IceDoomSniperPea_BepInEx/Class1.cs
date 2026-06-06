@@ -9,6 +9,7 @@ using UnityEngine.Rendering;
 using System;
 using System.Collections.Generic;
 using Unity.VisualScripting;
+using CustomizeLib.BepInEx.ExtensionData.Basic;
 
 namespace IceDoomSniperPea.BepInEx
 {
@@ -274,7 +275,7 @@ namespace IceDoomSniperPea.BepInEx
                     int totalHealth = zombie.theHealth + zombie.theFirstArmorHealth + zombie.theSecondArmorHealth;
                     if (Utils.TravelCustomBuffLevel(BuffType.AdvancedBuff, (int)IceDoomSniperPea.buff1) == 2)
                     {
-                        int damage = zombie.GetDamage((int)(totalHealth * 0.1f) + 1, DmgType.Normal, false);
+                        int damage = zombie.GetDamage((int)(totalHealth * 0.1f) + 1, DamageType.Normal, false);
                         if (zombie.theZombieType == ZombieType.TrainingDummy)
                         {
                             zombie.theHealth -= damage;
@@ -349,7 +350,7 @@ namespace IceDoomSniperPea.BepInEx
             int totalHealth = zombie.theHealth + zombie.theFirstArmorHealth + zombie.theSecondArmorHealth;
             if (Utils.TravelCustomBuffLevel(BuffType.AdvancedBuff, (int)IceDoomSniperPea.buff1) == 2)
             {
-                int damage = zombie.GetDamage((int)(totalHealth * 0.1f) + 1, DmgType.Normal, false);
+                int damage = zombie.GetDamage((int)(totalHealth * 0.1f) + 1, DamageType.Normal, false);
                 if (zombie.theZombieType == ZombieType.TrainingDummy)
                 {
                     zombie.theHealth -= damage;

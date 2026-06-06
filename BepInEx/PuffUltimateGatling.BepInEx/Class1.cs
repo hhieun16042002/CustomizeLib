@@ -6,6 +6,7 @@ using BepInEx.Unity.IL2CPP;
 using System.Reflection;
 using Unity.VisualScripting;
 using CustomizeLib.BepInEx;
+using CustomizeLib.BepInEx.ExtensionData.Basic;
 
 namespace DoomGatlingBlover.BepInEx
 {

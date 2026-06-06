@@ -1,12 +1,14 @@
 ﻿using BepInEx;
 using BepInEx.Unity.IL2CPP;
 using CustomizeLib.BepInEx;
+using CustomizeLib.BepInEx.ExtensionData.Basic;
 using HarmonyLib;
 using Il2CppInterop.Runtime.Injection;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UIElements;
 using static UltimateGoldImitater.BepInEx.UltimateGoldImitater;
+using Core;
 
 namespace UltimateGoldImitater.BepInEx
 {
@@ -42,7 +44,11 @@ namespace UltimateGoldImitater.BepInEx
                 $"②<Boss>黄金僵王博士：血量x？，免疫寒冷，免疫冻结\n" +
                 $"③<Boss>黑橄榄大帅：血量x？</color>\n" +
                 $"<color=#3D1400>词条1:</color><color=red>孤注一掷：黄金模仿者和究极黄金模仿者随机究极的概率大幅提升</color>\n\n" +
-                $"<color=#3D1400>宝开鱼</color>\n\n" +
+                $"<color=#3D1400>“欲戴其冠，必承其重”\n" +
+                $"那枚头冠，从出生起，就戴在他的头上，人们都说他是天选，这是他的宿命。在他很小的时候，他的父母带他到那尊巨大面前，幼小的他看着雕像上巨大的头冠，在对比自己的，自己的头冠更像是一枚精巧的戒指，落在他的小脑袋上，他不懂那意味着什么，只是指着头冠“像～”又指了指雕像。\n" +
+                $"那尊巨大的雕像，曾是带来希望和财富的象征，再有象征性的事物，在经过历史的长河时，总会丢失些什么，而这座雕像丢失的，这枚头冠丢失的，正是希望。人们指望这个带着头冠小孩儿为他们创造财富，日子一天一天过去，孩子一天一天长大，人们从期待逐渐变得怀疑，直到最后变得愤怒！“那个孩子，他不能带给我们财富，那就是祸害！我们会变成这样，我们变得平庸，我们没有富贵，都是因为他！抓住他！把他烧了！”门口的人越聚越多，就像是挤在蜂巢的蜜蜂……\n" +
+                $"“后来呢。”\n" +
+                $"“后来，我逃出来了，我一个人逃出来了。”</color>\n\n" +
                 $"<color=#955300>花费：</color><color=red>50</color>\n" +
                 $"<color=#955300>冷却：</color><color=red>15秒</color>");
             CustomCore.RegisterCustomClickCardOnPlantEvent(UltimateGoldImitater.PlantID, PlantType.DiamondImitater,
@@ -311,6 +317,7 @@ namespace UltimateGoldImitater.BepInEx
                             z.theHealth /= 10;
                             z.theMaxHealth /= 10;
                         }
+                        z.AddComponent<ClearCold>().zombie = z;
                     }
                     break;
                 case ZombieType.HorseBoss:
@@ -340,7 +347,7 @@ namespace UltimateGoldImitater.BepInEx
             float speedMultiplier = UnityEngine.Random.Range(speedMin, speedMax);
             zombie.theOriginSpeed = zombie.theOriginSpeed * speedMultiplier;
 
-            if (zombie.theZombieType is not ZombieType.ZombieBoss or ZombieType.ZombieBoss2)
+            if (zombie.theZombieType != ZombieType.ZombieBoss && zombie.theZombieType != ZombieType.ZombieBoss2)
             {
                 float scaleMultiplier = UnityEngine.Random.Range(scaleMin, scaleMax);
 
@@ -385,7 +392,7 @@ namespace UltimateGoldImitater.BepInEx
                                     {
                                         var list = new List<AdvBuff>();
                                         foreach (var (id, _) in TravelDictionary.advancedBuffsText)
-                                            if (!data.advBuffs.Contains(id) && !data.advBuffs_lv2.Contains(id))
+                                            if (!data.advBuffs.Contains(id))
                                                 list.Add(id);
                                         var advBuff = list[UnityEngine.Random.Range(0, list.Count)];
                                         TravelMgr.Instance.GetNormalBuff(advBuff);
@@ -645,9 +652,6 @@ namespace UltimateGoldImitater.BepInEx
                     .ToList().Count * 0.4f;
                 __instance.healthText.transform.position = position;
             }
-            {
-                __instance.healthTextShadow.transform.position = __instance.healthText.transform.position;
-            }
         }
 
         [HarmonyPatch(nameof(ZombieBoss.GetDamage))]
@@ -659,27 +663,26 @@ namespace UltimateGoldImitater.BepInEx
                 __result = Mathf.Min(__result, 5000);
             }
         }
+    }
 
-        [HarmonyPatch(nameof(ZombieBoss.SetCold))]
-        [HarmonyPrefix]
-        public static bool PreSetCold(ZombieBoss __instance)
-        {
-            if (__instance.GetData<bool>("UltimateGoldImitater_SpawnByGold"))
-            {
-                return false;
-            }
-            return true;
-        }
+    public class ClearCold : MonoBehaviour
+    {
+        public Zombie zombie;
 
-        [HarmonyPatch(nameof(ZombieBoss.SetFreeze))]
-        [HarmonyPrefix]
-        public static bool PreSetFreeze(ZombieBoss __instance)
+        public void Update()
         {
-            if (__instance.GetData<bool>("UltimateGoldImitater_SpawnByGold"))
+            if (zombie != null && !zombie.IsDestroyed())
             {
-                return false;
+                zombie.freezeLevel = 0;
+                if (zombie.TryGetEffect<ColdEffect>(EffectType.Cold, out var cold) && cold.duration > 0f)
+                {
+                    cold.duration = 0f;
+                }
+                if (zombie.TryGetEffect<FreezeEffect>(EffectType.Freeze, out var freeze) && freeze.duration > 0f)
+                {
+                    freeze.duration = 0f;
+                }
             }
-            return true;
         }
     }
 

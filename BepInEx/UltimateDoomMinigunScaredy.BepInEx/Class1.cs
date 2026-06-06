@@ -17,7 +17,7 @@ namespace UltimateDoomMinigunScaredy.BepInEx
             ClassInjector.RegisterTypeInIl2Cpp<UltimateDoomMinigunScaredy>();
             Console.OutputEncoding = System.Text.Encoding.UTF8;
             var ab = CustomCore.GetAssetBundle(Assembly.GetExecutingAssembly(), "ultimatedoomminigunscaredy");
-            CustomCore.RegisterCustomPlant<SuperDoomScaredy, UltimateDoomMinigunScaredy>((int)UltimateDoomMinigunScaredy.PlantID, ab.GetAsset<GameObject>("UltimateDoomMinigunScaredyPrefab"),
+            CustomCore.RegisterCustomPlant<GatlingDoomScaredy, UltimateDoomMinigunScaredy>((int)UltimateDoomMinigunScaredy.PlantID, ab.GetAsset<GameObject>("UltimateDoomMinigunScaredyPrefab"),
                 ab.GetAsset<GameObject>("UltimateDoomMinigunScaredyPreview"), [], 0.5f, 0f, 300, 300, 90f, 1000);
             CustomCore.AddPlantAlmanacStrings((int)UltimateDoomMinigunScaredy.PlantID, $"究极速射毁灭机枪胆小菇({(int)UltimateDoomMinigunScaredy.PlantID})",
                 "发射毁灭菇的加特林速射机枪胆小菇\n" +
@@ -45,7 +45,7 @@ namespace UltimateDoomMinigunScaredy.BepInEx
     {
         public static PlantType PlantID = (PlantType)1953;
 
-        public SuperDoomScaredy plant => gameObject.GetComponent<SuperDoomScaredy>();
+        public GatlingDoomScaredy plant => gameObject.GetComponent<GatlingDoomScaredy>();
 
         public void Awake()
         {

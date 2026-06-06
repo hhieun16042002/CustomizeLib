@@ -38,9 +38,6 @@
     <Reference Include="Cpp2IL.Core">
       <HintPath>..\..\..\lib\BepInEx\core\Cpp2IL.Core.dll</HintPath>
     
-  <Private>False</Private></Reference>
-    <Reference Include="CustomizeLib.BepInEx">
-      <HintPath>..\..\res\BepInEx\CustomizeLib.BepInEx.dll</HintPath>
     
   <Private>False</Private></Reference>
     <Reference Include="Il2CppInterop.Generator">
@@ -110,6 +107,6 @@
   </ItemGroup>
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
   <Exec Command="COPY &quot;$(TargetPath)&quot; &quot;$(BepResPath)&quot;" />
-  <Exec Command="COPY &quot;$(TargetPath)&quot; &quot;$(PluginsPath)&quot;" />
+  <Exec Command="COPY &quot;$(TargetPath)&quot; &quot;$(InnerPath)&quot;" />
 </Target>
 </Project>

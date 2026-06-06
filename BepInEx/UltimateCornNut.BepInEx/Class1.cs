@@ -58,7 +58,7 @@ namespace UltimateCornNut.BepInEx
         {
             if (__instance != null && __instance.theAttackTarget != null)
             {
-                if (__instance.theAttackTarget.TryGetComponent<Plant>(out var plant) && plant != null && (int)plant.thePlantType == UltimateCornNut.PlantID)
+                if (__instance.theAttackTarget.IsPlant(out var plant) && plant != null && (int)plant.thePlantType == UltimateCornNut.PlantID)
                 {
                     __instance.BeSmall();
                     __instance.Buttered(2f);

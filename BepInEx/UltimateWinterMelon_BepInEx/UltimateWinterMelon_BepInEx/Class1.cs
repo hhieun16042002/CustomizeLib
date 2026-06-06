@@ -74,8 +74,8 @@ namespace UltimateWinterMelonBepInEx
             {
                 if (plant != null) //空值判断
                     plant.thePlantAttackInterval = 2f;
-                if (plant.healthSlider != null)
-                    UpdateText(); //更新血条
+                //if (plant.healthSlider != null)
+                //    UpdateText(); //更新血条
                                   // rotateCountdown -= Time.fixedUnscaledDeltaTime; // 旋转间隔减少不受timeScale影响的deltaTime
                 if (Tground != null)
                 {
@@ -86,7 +86,7 @@ namespace UltimateWinterMelonBepInEx
                 {
                     Tground.transform.Rotate(0, 0, -90f * Time.unscaledDeltaTime);
                 }
-                if (plant != null && plant.healthSlider != null && plant.healthSlider.healthText != null && plant.healthSlider.healthTextShadow != null)
+                if (plant != null && plant.healthSlider != null && plant.healthSlider.healthText != null)
                 {
                     superShootText.gameObject.SetActive(plant.healthSlider.gameObject.active);
                     superShootTextShadow.gameObject.SetActive(plant.healthSlider.gameObject.active);
@@ -104,31 +104,34 @@ namespace UltimateWinterMelonBepInEx
             Tground = plant.gameObject.transform.FindChild("body").FindChild("Tground").gameObject;
             if (plant.healthSlider == null)
                 return;
-            plant.healthSlider.textHead = plant.gameObject.transform.GetChild(1);
-            InitText();
+            // plant.healthSlider.textHead = plant.gameObject.transform.GetChild(1);
+            var func = () => $"大招概率:{superShoot}";
+            Debug.Log(func.Invoke());
+            plant.healthSlider.RegisterText(Color.cyan, func, new Il2CppSystem.Nullable<Vector2>(new Vector2(2f, 2f)));
+            // InitText();
         }
 
         public void InitText()
         {
-            if (plant.healthSlider == null)
-                return;
-            Transform textHead = plant.healthSlider.textHead;
-            textHead.position = new Vector3(textHead.position.x, textHead.position.y + 0.3f, 0f);
-            if (superShootText == null)
-                superShootText = plant.SetPlantText("大招概率", Color.cyan, new Vector2(0f, -0.4f), textHead, $"大招概率:{superShoot}%", 20);
-            if (superShootTextShadow == null)
-                superShootTextShadow = plant.SetPlantText("大招概率", Color.black, new Vector2(0.01f, -0.41f), textHead, $"大招概率:{superShoot}%", 19);
+            //if (plant.healthSlider == null)
+            //    return;
+            //Transform textHead = plant.healthSlider.textHead;
+            //textHead.position = new Vector3(textHead.position.x, textHead.position.y + 0.3f, 0f);
+            //if (superShootText == null)
+            //    superShootText = plant.SetPlantText("大招概率", Color.cyan, new Vector2(0f, -0.4f), textHead, $"大招概率:{superShoot}%", 20);
+            //if (superShootTextShadow == null)
+            //    superShootTextShadow = plant.SetPlantText("大招概率", Color.black, new Vector2(0.01f, -0.41f), textHead, $"大招概率:{superShoot}%", 19);
         }
 
-        public void UpdateText()
-        {
-            if (superShootText == null || superShootTextShadow == null)
-                InitText();
-            superShootText.text = $"大招概率:{superShoot}%";
-            superShootTextShadow.text = $"大招概率:{superShoot}%";
-            superShootText.fontSize = 2.3f;
-            superShootTextShadow.fontSize = 2.3f;
-        }
+        //public void UpdateText()
+        //{
+        //    if (superShootText == null || superShootTextShadow == null)
+        //        InitText();
+        //    superShootText.text = $"大招概率:{superShoot}%";
+        //    superShootTextShadow.text = $"大招概率:{superShoot}%";
+        //    superShootText.fontSize = 2.3f;
+        //    superShootTextShadow.fontSize = 2.3f;
+        //}
         public void SuperShoot()
         {
             try

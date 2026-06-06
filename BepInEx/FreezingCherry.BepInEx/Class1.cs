@@ -1,12 +1,14 @@
 ﻿using BepInEx;
 using BepInEx.Unity.IL2CPP;
 using CustomizeLib.BepInEx;
+using CustomizeLib.BepInEx.ExtensionData.Basic;
 using HarmonyLib;
 using Il2CppInterop.Runtime.Injection;
 using System.Collections;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Rendering;
+using Core;
 
 namespace FreezingCherry.BepInEx
 {
@@ -154,7 +156,7 @@ namespace FreezingCherry.BepInEx
             if (plant == null) return false;
             if (collision == null || !collision.TryGetComponent<Bullet>(out var bullet) || bullet == null)
                 return false;
-            if (bullet.fromEnermy)
+            if (bullet.Team == Team.AI)
                 return false;
             int energy = 0;
 
@@ -348,7 +350,7 @@ namespace FreezingCherry.BepInEx
             if (zombies.Count > 0)
             {
                 zombie = zombies[UnityEngine.Random.Range(0, zombies.Count)];
-                projectileParams = Lawnf.CalculateProjectileWithSpeed(shoot, zombie.Velocity, zombie.ColliderPosition, 1.5f);
+                projectileParams = global::Core.Lawnf.CalculateProjectileWithSpeed(shoot, zombie.Velocity, zombie.ColliderPosition, 1.5f);
             }
             else
             {

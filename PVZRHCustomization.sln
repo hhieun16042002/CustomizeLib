@@ -40,6 +40,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "解决方案项", "解决方案项", "{9FA3D6BD-1EC1-3BA5-80CB-CE02773A58D5}"
 	ProjectSection(SolutionItems) = preProject
 		Directory.Build.props = Directory.Build.props
+		Il2CppHelp.md = Il2CppHelp.md
 		LICENSE = LICENSE
 		NOTICE.txt = NOTICE.txt
 		README.md = README.md
@@ -281,6 +282,16 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UltimatePortalSpring.BepInEx", "BepInEx\UltiamtePortalSpring.BepInEx\UltimatePortalSpring.BepInEx.csproj", "{8D980DE7-1B95-45A1-BB0C-A308D54EF0C4}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AutoPlay.BepInEx", "BepInEx\AutoPlay.BepInEx\AutoPlay.BepInEx.csproj", "{D7D5B83A-F5EA-418A-994C-9663624FE276}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GGGGPenguin.BepInEx", "BepInEx\GGGGPenguin.BepInEx\GGGGPenguin.BepInEx.csproj", "{D8651FB4-CB79-4236-8F57-91D68B8F8656}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PriceWins.BepInEx", "BepInEx\PriceWins.BepInEx\PriceWins.BepInEx.csproj", "{98F921B9-B8F4-4176-BFBF-51DF0FACD856}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SuperPeaFume.BepInEx", "BepInEx\SuperPeaFume.BepInEx\SuperPeaFume.BepInEx.csproj", "{4984DC9A-FCCA-4C50-BB6E-4D1EB1737FAA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MegaSuperGatling.BepInEx", "BepInEx\MegaSuperGatling.BepInEx\MegaSuperGatling.BepInEx.csproj", "{6A50D025-5775-4CAB-AFC4-2C46265CB798}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EvolveGodSuperSnowGatling.BepInEx", "BepInEx\EvolveGodSuperSnowGatling.BepInEx\EvolveGodSuperSnowGatling.BepInEx.csproj", "{B81EE522-668C-40D8-B78D-712BD76BD5F4}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -828,6 +839,26 @@ Global
 		{D7D5B83A-F5EA-418A-994C-9663624FE276}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D7D5B83A-F5EA-418A-994C-9663624FE276}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D7D5B83A-F5EA-418A-994C-9663624FE276}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D8651FB4-CB79-4236-8F57-91D68B8F8656}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D8651FB4-CB79-4236-8F57-91D68B8F8656}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D8651FB4-CB79-4236-8F57-91D68B8F8656}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D8651FB4-CB79-4236-8F57-91D68B8F8656}.Release|Any CPU.Build.0 = Release|Any CPU
+		{98F921B9-B8F4-4176-BFBF-51DF0FACD856}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{98F921B9-B8F4-4176-BFBF-51DF0FACD856}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{98F921B9-B8F4-4176-BFBF-51DF0FACD856}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{98F921B9-B8F4-4176-BFBF-51DF0FACD856}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4984DC9A-FCCA-4C50-BB6E-4D1EB1737FAA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4984DC9A-FCCA-4C50-BB6E-4D1EB1737FAA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4984DC9A-FCCA-4C50-BB6E-4D1EB1737FAA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4984DC9A-FCCA-4C50-BB6E-4D1EB1737FAA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6A50D025-5775-4CAB-AFC4-2C46265CB798}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6A50D025-5775-4CAB-AFC4-2C46265CB798}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6A50D025-5775-4CAB-AFC4-2C46265CB798}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6A50D025-5775-4CAB-AFC4-2C46265CB798}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B81EE522-668C-40D8-B78D-712BD76BD5F4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B81EE522-668C-40D8-B78D-712BD76BD5F4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B81EE522-668C-40D8-B78D-712BD76BD5F4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B81EE522-668C-40D8-B78D-712BD76BD5F4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,12 +1,14 @@
 ﻿// #define DEBUG_FEATURE__ENABLE_MULTI_LEVEL_BUFF // 启用多级词条
 
 using BepInEx.Unity.IL2CPP;
+using CustomizeLib.BepInEx.ExtensionData.Basic;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using TMPro;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.Experimental.Rendering;
@@ -143,6 +145,49 @@ namespace CustomizeLib.BepInEx
         public static implicit operator BuffBgType(TravelStoreWindow.BgType bgType) => new BuffBgType(bgType);
     }
 
+    /// <summary>
+    /// 自定义词条类型(在词条图鉴中显示)
+    /// </summary>
+    public enum AlmanacBuffType
+    {
+        /// <summary>
+        /// 弱究
+        /// </summary>
+        WeakUltimate,
+        /// <summary>
+        /// 强究
+        /// </summary>
+        StrongUltimate,
+        /// <summary>
+        /// 通用
+        /// </summary>
+        General,
+        /// <summary>
+        /// 随机
+        /// </summary>
+        Random,
+        /// <summary>
+        /// 诅咒
+        /// </summary>
+        Curse,
+        /// <summary>
+        /// 进化
+        /// </summary>
+        Rogue,
+        /// <summary>
+        /// 连携
+        /// </summary>
+        Combo,
+        /// <summary>
+        /// 小小词条
+        /// </summary>
+        Tiny,
+        /// <summary>
+        /// 僵尸
+        /// </summary>
+        Zombie
+    }
+
     public class ZombieAttrTimers
     {
         public Zombie zombie;
@@ -249,10 +294,60 @@ namespace CustomizeLib.BepInEx
         public PlantAlmanac() { }
     }
 
-    public static class ZombieExtensions
+    /// <summary>
+    /// 旧版兼容
+    /// </summary>
+    public static class GameExtensions
     {
         public static void UnCold(this Zombie zombie) => zombie.GetAttrTimers().coldTimer = 0f;
+        public static void TakeDamage(this Zombie zombie, DamageType theDamageType, int theDamage, PlantType reportType = PlantType.Nothing, bool fix = false)
+            => zombie.TakeDamage(theDamage, CustomDamageMaker.DamageMaker, theDamageType, reportType, fix);
+        public static void TakeDamage(this Zombie zombie, DmgType theDamageType, int theDamage, PlantType reportType = PlantType.Nothing, bool fix = false)
+            => zombie.TakeDamage(theDamage, CustomDamageMaker.DamageMaker, (DamageType)(int)theDamageType, reportType, fix);
+        public static void TakeDamage(this Plant plant, int damage, int damageType = 0) =>
+            plant.TakeDamage(damage, CustomDamageMaker.DamageMaker, (DamageType)damageType);
+        public static void Explode(this BombCherry cherry) => cherry.Explode(CustomDamageMaker.DamageMaker);
     }
+
+    /// <summary>
+    /// 旧版本DmgType留存实现
+    /// </summary>
+    public enum DmgType
+    {
+        Normal = 0,
+        NormalAll = 1,
+        Ice = 2,
+        IceAll = 3,
+        Shieldless = 4,
+        IceShieldless = 5,
+        RealDamage = 6,
+        Explode = 10,
+        Squash = 11,
+        Carred = 12,
+        Hammer = 13,
+        MaxDamage = 14,
+        CherryExplode = 15,
+        JackboxExplode = 16,
+        UltimateTallNutAll = 17,
+        DoomExplode = 18,
+        UltimateBamboo = 19
+    }
+
+    #region 无尽额外信息
+    public struct CustomEndlessPlantData
+    {
+        public object value;
+        public Type type;
+        public int row;
+        public int col;
+        public PlantType pt;
+    }
+
+    public struct CustomEndlessData
+    {
+        public List<CustomEndlessPlantData> plantDatas;
+    }
+    #endregion
 
     public static class TravelExtensions
     {
@@ -333,6 +428,11 @@ namespace CustomizeLib.BepInEx
                 buffType = BuffType.InvestmentBuff;
                 id = (int)buff.Unbox<InvestBuff>();
             }
+            else if (buff.IsTypeOf<TravelUnlocks>())
+            {
+                buffType = BuffType.UnlockPlant;
+                id = (int)buff.Unbox<TravelUnlocks>();
+            }
             return (buffType, id);
         }
 
@@ -348,6 +448,19 @@ namespace CustomizeLib.BepInEx
             var tuple = GetTypeAndID(buff);
             window.SetTypeAndID(tuple.Item1, tuple.Item2);
             return tuple;
+        }
+
+        public static Type GetBuffType(BuffType buffType)
+        {
+            switch (buffType)
+            {
+                case BuffType.AdvancedBuff: return typeof(AdvBuff);
+                case BuffType.UltimateBuff: return typeof(UltiBuff);
+                case BuffType.Debuff: return typeof(TravelDebuff);
+                case BuffType.InvestmentBuff: return typeof(InvestBuff);
+                case BuffType.UnlockPlant: return typeof(TravelUnlocks);
+            }
+            return null;
         }
     }
 
@@ -986,6 +1099,16 @@ namespace CustomizeLib.BepInEx
             //     }
             // }
         }
+
+        public static List<(T1, T2)> ToEnumList<T1, T2>(this List<(int, int)> list) where T1 : Enum where T2 : Enum
+        {
+            var result = new List<(T1, T2)>();
+            foreach (var (v1, v2) in list)
+                result.Add((v1.ToEnumVal<T1>(), v2.ToEnumVal<T2>()));
+            return result;
+        }
+
+        public static T ToEnumVal<T>(this int value) where T : Enum => (T)Enum.ToObject(typeof(T), value);
     }
 
     public static class Utils
@@ -1023,22 +1146,7 @@ namespace CustomizeLib.BepInEx
             if (Board.Instance is not null && !Board.Instance.boardTag.isIZ)
             {
                 GameObject? MyCard = null;
-                MyCard = InGameUI.Instance.SeedBank.transform.parent.FindChild("Bottom/SeedLibrary/Grid/CardPagesContainer/ColorfulCards/Page1/CattailGirl").gameObject;
-                #region disable
-                /*int value = 0;
-                GameObject? MyPage = null;
-                try
-                {
-                }
-                catch (NullReferenceException)
-                {
-                    SelectCustomPlants.GetCardGUI(ref MyPage, ref MyCard, ref value);
-                }
-                if (MyCard.transform.childCount < 2)
-                    SelectCustomPlants.GetCardGUI(ref MyPage, ref MyCard, ref value);
-                if (MyCard == null)
-                    return null;*/
-                #endregion
+                MyCard = InGameUI.Instance.SeedBank.transform.parent.FindChild("Bottom/SeedLibrary/Grid/CardPagesContainer/ColorCards/SampleGrid(Clone)").GetChild(0).gameObject;
                 return MyCard;
             }
             else if (Board.Instance is not null && Board.Instance.boardTag.isIZ)
@@ -1046,22 +1154,6 @@ namespace CustomizeLib.BepInEx
 
                 GameObject? MyCard = null;
                 MyCard = IZBottomMenu.Instance.plantLibrary.transform.FindChild("Grid/ColorfulCards/Page1/CattailGirl").gameObject;
-                #region disable
-                /*int value = 0;
-                GameObject? MyPage = null;
-                try
-                {
-                    
-                }
-                catch (NullReferenceException)
-                {
-                    SelectCustomPlants.GetCardGUI(ref MyPage, ref MyCard, ref value);
-                }
-                if (MyCard.transform.childCount < 2)
-                    SelectCustomPlants.GetCardGUI(ref MyPage, ref MyCard, ref value);
-                if (MyCard == null)
-                    return null;*/
-                #endregion
                 return MyCard;
             }
             return null;
@@ -1076,7 +1168,7 @@ namespace CustomizeLib.BepInEx
             if (Board.Instance is not null && !Board.Instance.boardTag.isIZ)
             {
                 GameObject? MyCard = null;
-                MyCard = InGameUI.Instance.SeedBank.transform.parent.FindChild("Bottom/SeedLibrary/Grid/CardPagesContainer/NormalCards/Page1/PeaShooter").gameObject;
+                MyCard = InGameUI.Instance.SeedBank.transform.parent.FindChild("Bottom/SeedLibrary/Grid/CardPagesContainer/NormalCards/SampleGrid(Clone)").GetChild(0).gameObject;
                 return MyCard;
             }
             else if (Board.Instance is not null && Board.Instance.boardTag.isIZ)
@@ -1096,7 +1188,7 @@ namespace CustomizeLib.BepInEx
         {
             if (Board.Instance != null && !Board.Instance.boardTag.isIZ)
             {
-                return InGameUI.Instance.SeedBank.transform.parent.FindChild("Bottom/SeedLibrary/Grid/CardPagesContainer/ColorfulCards/Page1");
+                return InGameUI.Instance.SeedBank.transform.parent.FindChild("Bottom/SeedLibrary/Grid/CardPagesContainer/ColorCards/SampleGrid(Clone)");
             }
             else if (Board.Instance != null && Board.Instance.boardTag.isIZ)
             {
@@ -1109,11 +1201,11 @@ namespace CustomizeLib.BepInEx
         {
             if (Board.Instance != null && Board.Instance.boardTag.isTowerDefence)
             {
-                return InGameUI.Instance.SeedBank.transform.parent.FindChild("Bottom/SeedLibrary/Grid/CardPagesContainer/TowerCard/Page1");
+                return InGameUI.Instance.SeedBank.transform.parent.FindChild("Bottom/SeedLibrary/Grid/CardPagesContainer/TowerCards/Page1");
             }
             else if (Board.Instance != null && !Board.Instance.boardTag.isIZ)
             {
-                return InGameUI.Instance.SeedBank.transform.parent.FindChild("Bottom/SeedLibrary/Grid/CardPagesContainer/Pages/Page1");
+                return InGameUI.Instance.SeedBank.transform.parent.FindChild("Bottom/SeedLibrary/Grid/CardPagesContainer/NormalCards/SampleGrid(Clone)");
             }
             else if (Board.Instance != null && Board.Instance.boardTag.isIZ)
             {

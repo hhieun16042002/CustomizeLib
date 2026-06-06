@@ -148,14 +148,15 @@ namespace PuffUltimateChomper.BepInEx
             return true;
         }
 
-        [HarmonyPatch(nameof(UltimateChomper.InitText))]
+        [HarmonyPatch(nameof(UltimateChomper.OnAfterInitText))]
         [HarmonyPostfix]
-        public static void PostInitText(UltimateChomper __instance)
+        public static void PostOnAfterInitText(UltimateChomper __instance)
         {
             if (__instance.thePlantType == PuffUltimateChomper.PlantID)
             {
-                __instance.killingText.gameObject.SetActive(false);
-                __instance.killingTextShadow.gameObject.SetActive(false);
+                foreach (var kvp in __instance.healthSlider.registedTexts)
+                    UnityEngine.Object.Destroy(kvp.Key.gameObject);
+                __instance.healthSlider.registedTexts = new();
             }
         }
     }

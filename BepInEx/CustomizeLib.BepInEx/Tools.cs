@@ -12,6 +12,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -21,8 +22,10 @@ namespace CustomizeLib.BepInEx
     public static class Tools
     {
         public static Assembly GetAssembly() => Assembly.GetCallingAssembly();
-        public static Assembly Assembly {
-            get {
+        public static Assembly Assembly
+        {
+            get
+            {
                 return Assembly.GetCallingAssembly();
             }
         }
@@ -169,6 +172,11 @@ namespace CustomizeLib.BepInEx
         public virtual void OnStart() { }
 
         public virtual void OnGameInit() { }
+    }
+
+    public class EmptyDoom : MonoBehaviour
+    {
+        public void Die() => Destroy(gameObject);
     }
 
     public static class CoreTools
@@ -404,7 +412,7 @@ namespace CustomizeLib.BepInEx
 
             if (immediately)
             {
-                cherry.Explode();
+                cherry.Explode(CustomDamageMaker.DamageMaker);
             }
 
             return particle;
@@ -477,7 +485,7 @@ namespace CustomizeLib.BepInEx
             // 如果设置为立即爆炸，则直接引爆
             if (immediately)
             {
-                cherryExplode.Explode();
+                cherryExplode.Explode(CustomDamageMaker.DamageMaker);
             }
 
             return (cherryExplode, particle);
@@ -485,5 +493,248 @@ namespace CustomizeLib.BepInEx
 
         public static bool IsObjExist(this Component component) => !(component == null || component.IsDestroyed() || component.gameObject == null || component.gameObject.IsDestroyed());
         public static bool IsObjExist(this GameObject gameObject) => !(gameObject == null || gameObject.IsDestroyed());
+        public static int GetStarProbability()
+        {
+            int total = 0;
+            var config = GameAPP.config;
+            if (config.levelZombieInRandom) total += 2;
+            if (config.strongUltiZombieInRandom) total += 2;
+            if (config.leaderInRandom) total += 6;
+            return total;
+        }
+    }
+
+    public static class InterfaceExtension
+    {
+        // 植物
+        public static bool IsPlant(this IDamageable damageable, out Plant plant)
+        {
+            if (damageable.TryCast<Plant>() != null)
+            {
+                plant = damageable.TryCast<Plant>();
+                return true;
+            }
+            plant = null;
+            return false;
+        }
+        public static bool IsPlant(this IDamageMaker damageable, out Plant plant)
+        {
+            if (damageable.TryCast<Plant>() != null)
+            {
+                plant = damageable.TryCast<Plant>();
+                return true;
+            }
+            plant = null;
+            return false;
+        }
+
+        // 僵尸
+        public static bool IsZombie(this IDamageable damageable, out Zombie zombie)
+        {
+            if (damageable.TryCast<Zombie>() != null)
+            {
+                zombie = damageable.TryCast<Zombie>();
+                return true;
+            }
+            zombie = null;
+            return false;
+        }
+        public static bool IsZombie(this IDamageMaker damageable, out Zombie zombie)
+        {
+            if (damageable.TryCast<Zombie>() != null)
+            {
+                zombie = damageable.TryCast<Zombie>();
+                return true;
+            }
+            zombie = null;
+            return false;
+        }
+
+        // 子弹
+        public static bool IsBullet(this IDamageable damageable, out Bullet bullet)
+        {
+            if (damageable.TryCast<Bullet>() != null)
+            {
+                bullet = damageable.TryCast<Bullet>();
+                return true;
+            }
+            bullet = null;
+            return false;
+        }
+        public static bool IsBullet(this IDamageMaker damageable, out Bullet bullet)
+        {
+            if (damageable.TryCast<Bullet>() != null)
+            {
+                bullet = damageable.TryCast<Bullet>();
+                return true;
+            }
+            bullet = null;
+            return false;
+        }
+
+        public static IDamageable ToIDamageable(this Entity entity) => entity.Cast<IDamageable>();
+        public static IDamageMaker ToIDamageMaker(this Entity entity) => entity.Cast<IDamageMaker>();
+        public static IDamageMaker ToIDamageMaker(this Bullet entity) => entity.Cast<IDamageMaker>();
+
+        // 新版调用兼容
+        #region 新版受伤方法
+        public static void TakeDamage(this Zombie zombie, int theDamage, Entity damageFrom, DamageType theDamageType, PlantType reportType = PlantType.Nothing, bool fix = false) =>
+            zombie.TakeDamage(theDamage, damageFrom.ToIDamageMaker(), theDamageType, reportType, fix);
+        public static void TakeDamage(this Zombie zombie, int theDamage, Bullet damageFrom, DamageType theDamageType, PlantType reportType = PlantType.Nothing, bool fix = false) =>
+            zombie.TakeDamage(theDamage, damageFrom.ToIDamageMaker(), theDamageType, reportType, fix);
+
+        public static void TakeDamage(this Plant plant, int damage, Entity damageFrom, DamageType damageType = DamageType.Normal, PlantType reportType = PlantType.Nothing, bool fix = false) =>
+            plant.TakeDamage(damage, damageFrom.ToIDamageMaker(), damageType, reportType, fix);
+
+        public static void TakeDamage(this Plant plant, int damage, Bullet damageFrom, DamageType damageType = DamageType.Normal, PlantType reportType = PlantType.Nothing, bool fix = false) =>
+            plant.TakeDamage(damage, damageFrom.ToIDamageMaker(), damageType, reportType, fix);
+        #endregion
+
+        public static string FormatAlmanac(string input) => StringFormatter.Format(input);
+    }
+
+    public class StringFormatter
+    {
+        public static readonly HashSet<char> NumberCharset = new HashSet<char>
+        {
+            '①', '②', '③', '④', '⑤', '⑥', '⑦', '⑧', '⑨', '⑩'
+        };  
+
+        /// <summary>
+        /// 格式化输入的字符串
+        /// </summary>
+        /// <param name="input">原始字符串</param>
+        /// <returns>格式化后的字符串</returns>
+        public static string Format(string input)
+        {
+            if (string.IsNullOrEmpty(input))
+                return input;
+
+            // 按行分割，保留空行
+            string[] lines = input.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.None);
+            StringBuilder result = new StringBuilder();
+
+            for (int i = 0; i < lines.Length; i++)
+            {
+                string line = lines[i];
+                bool isLastLine = (i == lines.Length - 1);
+
+                if (i == 0)
+                {
+                    // 第一行不做任何操作
+                    result.Append(line);
+                }
+                else if (isLastLine)
+                {
+                    // 最后一行特殊处理
+                    result.Append(ProcessLastLine(line));
+                }
+                else
+                {
+                    // 中间行（第2行到倒数第2行）按常规规则处理
+                    result.Append(ProcessNormalLine(line));
+                }
+
+                // 添加换行符（除了最后一行）
+                if (i != lines.Length - 1)
+                    result.Append(Environment.NewLine);
+            }
+
+            return result.ToString();
+        }
+
+        /// <summary>
+        /// 处理普通行（不是第一行也不是最后一行）
+        /// </summary>
+        private static string ProcessNormalLine(string line)
+        {
+            if (string.IsNullOrEmpty(line))
+                return line; // 空行保持不变
+
+            // 1. 检查是否包含序号
+            int indexOfNumber = FindFirstSerialNumber(line);
+            if (indexOfNumber != -1)
+            {
+                // 序号规则：行首到序号（含序号）为棕色，序号后为红色，行尾闭合红色
+                return $"<color=#3D1400>{line.Substring(0, indexOfNumber + 1)}</color><color=red>{line.Substring(indexOfNumber + 1)}</color>";
+            }
+
+            // 2. 检查中文冒号 或 特殊英文冒号（词条{integer}:）
+            int colonIndex = FindFirstColon(line);
+            if (colonIndex != -1)
+            {
+                // 冒号规则：行首到冒号（含冒号）为棕色，冒号后为红色，行尾闭合红色
+                return $"<color=#3D1400>{line.Substring(0, colonIndex + 1)}</color><color=red>{line.Substring(colonIndex + 1)}</color>";
+            }
+
+            // 3. 无特殊标记，保持原样
+            return line;
+        }
+
+        /// <summary>
+        /// 处理最后一行
+        /// </summary>
+        private static string ProcessLastLine(string line)
+        {
+            if (string.IsNullOrEmpty(line))
+                return line;
+
+            // 最后一行：开头加<color=#3D1400>，末尾加</color>
+            return $"<color=#3D1400>{line}</color>";
+        }
+
+        /// <summary>
+        /// 查找第一个序号的位置
+        /// </summary>
+        private static int FindFirstSerialNumber(string line)
+        {
+            for (int i = 0; i < line.Length; i++)
+            {
+                if (NumberCharset.Contains(line[i]))
+                    return i;
+            }
+            return -1;
+        }
+
+        /// <summary>
+        /// 查找第一个可处理的冒号（中文冒号，或符合“词条{integer}:”的英文冒号）
+        /// </summary>
+        /// <summary>
+        /// 查找第一个有效冒号的位置（从左到右）
+        /// </summary>
+        private static int FindFirstColon(string line)
+        {
+            for (int i = 0; i < line.Length; i++)
+            {
+                char c = line[i];
+                if (c == '：') // 中文冒号直接匹配
+                {
+                    return i;
+                }
+                if (c == ':') // 英文冒号需要验证前置条件
+                {
+                    // 检查冒号前面是否正好是“词条{integer}”
+                    string prefix = line.Substring(0, i);
+                    if (Regex.IsMatch(prefix, @"词条\d+$"))
+                    {
+                        return i;
+                    }
+                }
+            }
+            return -1;
+        }
+
+        /// <summary>
+        /// 判断英文冒号是否满足特殊条件（前面是“词条{integer}”）
+        /// </summary>
+        private static bool IsSpecialEnglishColon(string line, int colonIndex)
+        {
+            if (colonIndex <= 0)
+                return false;
+
+            string prefix = line.Substring(0, colonIndex);
+            // 匹配模式：词条后跟一个或多个数字（允许数字前后无空格）
+            return Regex.IsMatch(prefix, @"词条\d+$");
+        }
     }
 }

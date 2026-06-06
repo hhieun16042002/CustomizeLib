@@ -22,82 +22,42 @@ namespace SubspeciesEntry.BepInEx.Plants
 
             if (CoreTools.TravelUltimate("万劫不复"))
             {
-                __instance.StartCoroutine(ClearDebuff(__instance).WrapToIl2Cpp());
-            }
-        }
-
-        public static IEnumerator ClearDebuff(UltimatePortalNut __instance)
-        {
-            float startTime = Time.time;
-            while (Time.time - startTime <= 0.1f)
-            {
-                try
+                __instance.TryBeActive();
+                if (GameAPP.Instance.GetComponent<DelayAction>() == null) return;
+                if (GameAPP.Instance.GetComponent<DelayAction>().actions == null) return;
+                for (int i = GameAPP.Instance.GetComponent<DelayAction>().actions.Count - 1; i >= 0; i--)
                 {
-                    if (__instance == null) yield break;
-                    __instance.TryBeActive();
-                    if (GameAPP.Instance.GetComponent<DelayAction>() == null) yield break;
-                    if (GameAPP.Instance.GetComponent<DelayAction>().actions == null) yield break;
-                    for (int i = GameAPP.Instance.GetComponent<DelayAction>().actions.Count - 1; i >= 0; i--)
+                    if (GameAPP.Instance.GetComponent<DelayAction>().actions.Count <= 0 || i < 0)
+                        break;
+                    if (i >= GameAPP.Instance.GetComponent<DelayAction>().actions.Count)
+                        continue;
+                    var action = GameAPP.Instance.GetComponent<DelayAction>().actions[i];
+                    if (action == null) continue;
+                    var target = action.action.Target.TryCast<Bullet_doom_ulti.__c__DisplayClass3_0>();
+                    if (target != null && target.plant == __instance)
                     {
-                        if (GameAPP.Instance.GetComponent<DelayAction>().actions.Count <= 0 || i < 0)
-                            break;
-                        if (i >= GameAPP.Instance.GetComponent<DelayAction>().actions.Count)
-                            continue;
-                        var action = GameAPP.Instance.GetComponent<DelayAction>().actions[i];
-                        if (action == null) continue;
-                        var target = action.action.Target.TryCast<Bullet_doom_ulti.__c__DisplayClass3_0>();
-                        if (target != null && target.plant == __instance)
-                        {
-                            action.active = false;
-                            action.action = null;
-                        }
+                        action.active = false;
+                        action.action = null;
                     }
-                    if (Lawnf.GetAllZombies().Count > 0)
+                }
+                __instance.RemoveBuff(EffectType.Curse);
+                if (Lawnf.GetAllZombies().Count > 0)
+                {
+                    foreach (Zombie zombie in Lawnf.GetAllZombies())
                     {
-                        foreach (Zombie zombie in Lawnf.GetAllZombies())
+                        if (zombie != null)
                         {
-                            if (zombie != null)
+                            if (zombie.theZombieType == ZombieType.SuperLadderZombie)
                             {
-                                if (zombie.theZombieType == ZombieType.UltimateHorse)
+                                var ladder = zombie.transform.GetComponent<SuperLadderZombie>();
+                                if (ladder != null && ladder.ladder != null && ladder.ladder.theItemRow == __instance.thePlantRow && ladder.ladder.theItemColumn == __instance.thePlantColumn)
                                 {
-                                    var horse = zombie.GetComponent<UltimateHorse>();
-                                    if (horse != null && horse.cursedPlants.Contains(__instance))
-                                    {
-                                        while (horse.cursedPlants.Contains(__instance))
-                                            horse.cursedPlants[horse.cursedPlants.IndexOf(__instance)] = null;
-                                        if (!horse.cursedPlants.Contains(__instance))
-                                            __instance.SetColor(new Color(1f, 1f, 1f));
-                                    }
-                                }
-                                if (zombie.theZombieType == ZombieType.SuperLadderZombie)
-                                {
-                                    var ladder = zombie.transform.GetComponent<SuperLadderZombie>();
-                                    if (ladder != null && ladder.ladder != null && ladder.ladder.theItemRow == __instance.thePlantRow && ladder.ladder.theItemColumn == __instance.thePlantColumn)
-                                    {
-                                        ladder.ladder.Die();
-                                    }
-                                }
-                            }
-                        }
-                        foreach (var zombie in Lawnf.GetAllZombies())
-                        {
-                            if (zombie.theZombieType == ZombieType.UltimateHorse)
-                            {
-                                var horse = zombie.GetComponent<UltimateHorse>();
-                                if (horse != null && horse.cursedPlants.Contains(__instance))
-                                {
-                                    if (horse.cursedPlants.Contains(__instance))
-                                    {
-                                        __instance.SetColor(new Color(1f, 0f, 0f, 1f));
-                                        break;
-                                    }
+                                    ladder.ladder.Die();
                                 }
                             }
                         }
                     }
                 }
-                catch (ArgumentOutOfRangeException) { }
-                yield return null;
             }
         }
     }
@@ -131,18 +91,6 @@ namespace SubspeciesEntry.BepInEx.Plants
                         __instance.UpdateText();
                     }
                     __instance.attributeCountdown = 30f;
-                }
-                if (__instance.GetComponent<UltimatePortalNut>().invincibleTimer > 0f)
-                {
-                    var list = __instance.board.GetComponentsInChildren<UltimateHorse>().ToArray();
-                    if (list.Length > 0)
-                    {
-                        foreach (var zombie in list)
-                        {
-                            if (zombie.cursedPlants.Contains(__instance))
-                                __instance.SetColor(new Color(1f, 0f, 0f, 1f));
-                        }
-                    }
                 }
             }
         }

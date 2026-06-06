@@ -1,11 +1,13 @@
 ﻿using BepInEx;
 using BepInEx.Unity.IL2CPP.Utils.Collections;
 using CustomizeLib.BepInEx;
+using CustomizeLib.BepInEx.ExtensionData.Basic;
 using HarmonyLib;
 using System.Collections;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Rendering;
+using Core;
 
 namespace UltimatePortalSpring.BepInEx
 {
@@ -17,6 +19,8 @@ namespace UltimatePortalSpring.BepInEx
             var ab = CustomCore.GetAssetBundle(Tools.GetAssembly(), "ultimateportalspring");
             CustomCore.RegisterCustomPlant<UltimateSpring, UltimatePortalSpring>(UltimatePortalSpring.PlantID, ab.GetAsset<GameObject>("UltimatePortalSpringPrefab"),
                 ab.GetAsset<GameObject>("UltimatePortalSpringPreview"), [], 0f, 0f, 300, 3000, 7.5f, 500);
+            CustomCore.RegisterCustomPlantSkin<UltimateSpring, UltimatePortalSpring>(UltimatePortalSpring.PlantID, ab.GetAsset<GameObject>("UltimatePortalSpringSkinPrefab"),
+                ab.GetAsset<GameObject>("UltimatePortalSpringSkinPreview"), [], 0f, 0f, 300, 3000, 7.5f, 500);
             CustomCore.AddPlantAlmanacStrings(UltimatePortalSpring.PlantID, $"究极超时空弹弹菇",
                 "投射蕴含时空力量的黑洞，能够持续吸引拉扯僵尸，并赋予传送状态。\n" +
                 "<color=#0000FF>究极火神弹弹菇同人亚种</color>\n\n" +
@@ -26,22 +30,31 @@ namespace UltimatePortalSpring.BepInEx
                 "<color=#3D1400>伤害：</color><color=red>300</color>\n" +
                 "<color=#3D1400>索敌范围：</color><color=red>前方4.5格</color>\n" +
                 "<color=#3D1400>特点：</color><color=red>①可手动点击发射，伤害x2\n" +
-                "②蓄力时，使究极黑洞的持续时间提升（1+持续时间x5%）倍，蓄力上限30秒\n" +
-                "③发射会休息1.5秒，投射究极黑洞种子，命中后生成究极黑洞</color>\n" +
-                "<color=#3D1400>特点：</color><color=red>①持续2.5秒，能吸引半径1.5格的僵尸减速25%-80%，并持续使僵尸移动到黑洞中心，僵尸与黑洞中心的距离越远幅度越高\n" +
-                "②每存在0.5秒，黑洞的大小增加15%，至多200%\n" +
-                "③每1秒对范围内的僵尸施加0.5秒的传送状态\n" +
-                "④持续时间结束或存在7.5秒时坍缩，对半径1.5格范围造成7200的灰烬伤害，若已存在5秒则伤害和范围半径x5</color>\n" +
+                "②蓄力时，使究极黑洞的存在时间提升（1+持续时间x10%）倍，蓄力上限30秒\n" +
+                "③发射后，黑洞大小会增长（1+蓄力时间x10%），最大400%\n" +
+                "④发射会休息1.5秒，投射究极黑洞种子，命中后生成究极黑洞</color>\n" +
+                "<color=#3D1400>究极黑洞：</color><color=red>①持续2.5秒，能吸引半径1.5格的僵尸减速25%-80%，并持续使僵尸移动到黑洞中心，僵尸与黑洞中心的距离越远幅度越高\n" +
+                "②每1秒对范围内的僵尸施加0.5秒的传送状态，若为领袖僵尸时造成300伤害\n" +
+                "③能吸收半径1.5格的究极超时空弹弹菇的子弹，每次吸收子弹会额外增长其10%的大小\n" +
+                "④持续时间结束时坍缩，对半径1.5格范围造成7200的灰烬伤害，若已存在5秒则伤害和范围半径x5</color>\n" +
                 "<color=#3D1400>词条1:</color><color=red>气定神闲：蓄力速度和蓄力上限x3</color>\n" +
-                "<color=#3D1400>词条2:</color><color=red>僵尸试图在火海中游泳：黑洞的吸引效果和存在时间翻倍</color>\n\n" +
-                "<color=#3D1400>宝开鱼</color>"); // 存在时间翻倍：7.5f->15f
+                "<color=#3D1400>词条2:</color><color=red>僵尸试图在火海中游泳：黑洞的吸引效果翻倍</color>\n\n" +
+                "<color=#3D1400>“听说您曾有一份工作，是什么原因离职的呢？”记者询问道，究极超时空弹弹菇回答“其实呢，我很喜欢那份工作的，我喜欢园艺，喜欢睡在花圃中，和修理好的植物生活在一起，可是我无法控制头上的黑洞，如您所见，它无时不刻都在吸引周围的物件，它把我工作搞砸了！”记者不慌不忙，递上了一份申请表，“是这样的，我这里正好有一份工作，尽管不是你自己喜欢的，但是只有你能做。”之后，失物侦探所迎来了他的耶路撒冷。</color>");
             CustomCore.RegisterCustomBullet<Bullet_springMelon>(UltimatePortalSpring.BulletID, ab.GetAsset<GameObject>("Bullet_portalSpringMelon"));
-            CustomCore.RegisterCustomParticle(UltimatePortalSpring.ParticleID, ab.GetAsset<GameObject>("PortalBombCloud"));
+            CustomCore.RegisterCustomParticle(UltimatePortalSpring.BombID, ab.GetAsset<GameObject>("PortalBombCloud"));
             CustomCore.RegisterCustomUseItemOnPlantEvent(PlantType.UltimateSpring, BucketType.PortalHeart, UltimatePortalSpring.PlantID);
+            CustomCore.AddFusion((int)PlantType.UltimateSpring, UltimatePortalSpring.PlantID, (int)PlantType.HelmetPlant);
             CustomCore.RegisterCustomUseItemOnPlantEvent(UltimatePortalSpring.PlantID, BucketType.Helmet, PlantType.UltimateSpring);
+            ab.GetAsset<GameObject>("Doom_portal").AddComponent<PortalDoom>();
+            CustomCore.RegisterCustomParticle(UltimatePortalSpring.DoomID, ab.GetAsset<GameObject>("Doom_portal"));
             UltimatePortalSpring.target = ab.GetAsset<GameObject>("target_portal");
             UltimatePortalSpring.hole = ab.GetAsset<GameObject>("BlackHole_portal");
             UltimatePortalSpring.hole.AddComponent<PortalHole>();
+            CustomCore.TypeMgrExtra.IsMagnetPlants.Add(UltimatePortalSpring.PlantID);
+            CustomCore.TypeMgrExtra.IsFirePlant.Add(UltimatePortalSpring.PlantID);
+            foreach (var item in Enum.GetValues<BucketType>())
+                if (item != BucketType.Helmet)
+                    CustomCore.RegisterCustomUseItemOnPlantEvent(UltimatePortalSpring.PlantID, item, (p) => p.Recover(500f));
         }
 
         public static void SetLayer(Transform transform, string layer)
@@ -62,13 +75,21 @@ namespace UltimatePortalSpring.BepInEx
         }
     }
 
+    public class PortalDoom : MonoBehaviour
+    {
+        public void Die() => Destroy(gameObject);
+    }
+
     public class UltimatePortalSpring : MonoBehaviour
     {
         public static ID PlantID = 1969;
         public static ID BulletID = 1969;
-        public static ID ParticleID = 1969;
+        public static ID BombID = 1969;
+        public static ID DoomID = 1970;
         public static GameObject target = null;
         public static GameObject hole = null;
+
+        public bool registered = false;
 
         public void Awake()
         {
@@ -79,75 +100,40 @@ namespace UltimatePortalSpring.BepInEx
 
         public void Update()
         {
-            if (plant == null || plant.energyText == null || plant.energyTextShadow == null) return;
-            var timer = plant.timer;
-            if (CoreTools.TravelUltimate("气定神闲"))
-                timer *= 3;
-            plant.energyText.text = $"{Math.Round(2.5f * (1 + 0.05f * timer), 2, MidpointRounding.AwayFromZero)}";
-            plant.energyTextShadow.text = plant.energyText.text;
+            if (plant == null) return;
+            if (!registered)
+            {
+                var func = () => $"{Math.Round(GetHoleTime(), 2, MidpointRounding.AwayFromZero)}";
+                plant.ClearAllText();
+                plant.RegisterText(Color.cyan, func);
+                registered = true;
+            }
+            plant.UpdateText();
             if (plant.ThrowerSearchZombie() == null) plant.anim.ResetTrigger("shoot");
         }
 
+        public float GetHoleTime() => 2.5f * (1 + 0.1f * plant.timer);
+
         public void PortalShoot()
         {
-            var tuple = plant.FindUmbrella(plant.shoot.position);
-            var parameters = tuple.Item1;
-            var umbrellaPlant = tuple.Item2;
+            var bullet = CreateBullet.Instance.SetBullet(plant.shoot.position.x, plant.shoot.position.y, plant.thePlantRow, BulletID, BulletMoveWay.Throw);
+            var umbrella = plant.FindUmbrella(plant.shoot.position);
 
-            float x = plant.shoot.position.x;
-            float y = plant.shoot.position.y;
-
-            if (umbrellaPlant == null)
+            if (umbrella != null)
+                bullet.ThrowTo(umbrella, new Il2CppSystem.Nullable<Vector2>(plant.shoot.position), null);
+            else if (plant.targetZombie != null && plant.targetZombie.col != null)
+                bullet.ThrowTo(plant.targetZombie, new Il2CppSystem.Nullable<Vector2>(plant.shoot.position), new Il2CppSystem.Nullable<float>(plant.flightTime));
+            else
             {
-                if (plant.targetZombie != null && plant.targetZombie.col != null)
+                if (plant.board.gridSystem != null)
                 {
-                    Bounds bounds = plant.targetZombie.col.bounds;
-
-                    float targetX = bounds.center.x;
-
-                    parameters = Lawnf.CalculateProjectileParameters(
-                        new Vector2(x, y),
-                        plant.firstTime,
-                        plant.firstPostion,
-                        Time.time,
-                        plant.GetZombiePosition(plant.targetZombie),
-                        plant.flightTime
-                    );
-                    
-                    if (Mathf.Abs(targetX - bounds.center.z) < 1f)
-                    {
-                        x = targetX - bounds.center.z;
-                        y = (bounds.center.y + bounds.extents.y) - 0.1f;
-                    }
-                }
-                else
-                {
-                    parameters = Lawnf.CalculateProjectileParameters(
-                        new Vector2(x, y),
-                        plant.firstTime,
-                        plant.firstPostion,
-                        Time.time,
-                        plant.firstPostion,
-                        plant.flightTime
-                    );
+                    var targetGrid = plant.board.gridSystem.GetGrid(plant.board.columnNum - 1, plant.thePlantRow);
+                    if (targetGrid != null)
+                        bullet.SetSpeed(plant.shoot.position, Vector2.zero, targetGrid.Position, plant.flightTime);
                 }
             }
 
-            var bullet = CreateBullet.Instance.SetBullet(x, y, plant.thePlantRow, BulletID, BulletMoveWay.Throw);
-            if (parameters != null && parameters.Length > 1)
-            {
-                bullet.Vx = parameters[1];
-                if (parameters.Length > 2)
-                {
-                    bullet.Vy = parameters[2];
-                    if (parameters.Length > 3)
-                    {
-                        bullet.detaVy = -parameters[3];
-                    }
-                }
-            }
-
-            bullet.targetPlant = umbrellaPlant;
+            bullet.targetPlant = umbrella;
 
             bullet.Damage = plant.attackDamage;
             bullet.fromType = plant.thePlantType;
@@ -158,10 +144,7 @@ namespace UltimatePortalSpring.BepInEx
             if (plant.PumpkinType == PlantType.MelonPumpkin)
                 plant.MelonShoot();
 
-            var timer = plant.timer;
-            if (CoreTools.TravelUltimate("气定神闲"))
-                timer *= 3;
-            bullet.SetData("UltimatePortalSpring_HoleTime", 2.5f * (1 + 0.05f * timer));
+            bullet.SetData("UltimatePortalSpring_HoleTime", GetHoleTime());
             plant.timer = 0f;
 
             plant.targetZombie = null;
@@ -195,12 +178,9 @@ namespace UltimatePortalSpring.BepInEx
             bullet.melonSputter = plant.melonSputter;
             bullet.fromType = plant.thePlantType;
 
-            var timer = plant.timer;
-            if (CoreTools.TravelUltimate("气定神闲"))
-                timer *= 3;
-            bullet.SetData("UltimatePortalSpring_HoleTime", 2.5f * (1 + 0.05f * timer));
+            bullet.SetData("UltimatePortalSpring_HoleTime", GetHoleTime());
             plant.timer = 0f;
-
+            bullet.Damage = plant.attackDamage;
             bullet.Damage *= 2;
             Extension.StartCoroutine(this, ResetCharge());
         }
@@ -220,38 +200,36 @@ namespace UltimatePortalSpring.BepInEx
 
     public class PortalHole : MonoBehaviour
     {
-        // 静态字段：全局记录所有正在被影响的僵尸及其原始速度
-        private static Dictionary<Zombie, float> affectedZombies = new Dictionary<Zombie, float>();
-        // 存储被吸引的子弹信息
-        private class AttractedBullet
+        public static Dictionary<Zombie, float> affectedZombies = new Dictionary<Zombie, float>();
+        public static Dictionary<Zombie, PortalHole> zombieControllerMap = new Dictionary<Zombie, PortalHole>(); // 新增：记录控制僵尸的黑洞
+
+        public class AttractedBullet
         {
             public Bullet bullet;
-            public float angle;           // 当前角度
-            public float radius;          // 当前轨道半径
-            public float speed;           // 角速度
-            public float attractSpeed;    // 向中心靠近的速度
-            public float startAngle;      // 开始旋转的起始角度
+            public float angle;
+            public float radius;
+            public float angularMomentum;   // 角动量（守恒）
+            public float radialVelocity;    // 径向速度（向内为正）
+            public float startAngle;
         }
-        private List<AttractedBullet> attractedBullets = new List<AttractedBullet>();
+        public List<AttractedBullet> attractedBullets = new List<AttractedBullet>();
 
         public float timer = 2.5f;
         public float live = 0f;
         public float attackCountDown = 1f;
         public Board board;
         public Dictionary<Zombie, float> myAffectedZombies = new();
-        private bool isDying = false;
-        private bool isShrinking = false;
-        private float shrinkDuration = 1f;
-        private float shrinkElapsed = 0f;
-        private Vector3 originalScale;
+        public bool isDying = false;
+        public bool enterDieAnim = false;
+        public float shrinkDuration = 1f;
+        public float shrinkElapsed = 0f;
+        public Vector3 originalScale;
 
-        private int absorbedBulletCount = 0;
-        private Vector3 baseScale;
-        private float maxGrowScale = 2f;
-        private float autoGrowTargetScale = 1f; // 自主增长的目标大小
-
-        // 吸引中心点（向下偏移0.5f）
-        private Vector3 AttractCenter => transform.position - new Vector3(0f, 0.5f, 0f);
+        public int absorbedBulletCount = 0;
+        public Vector3 baseScale;
+        public float maxGrowScale = 4f;
+        public float autoGrowTargetScale = 1f;
+        public Vector3 center => transform.position - new Vector3(0f, 0.5f, 0f);
 
         public static bool IsPortalHoleInRange(Vector3 center, float radius)
         {
@@ -268,7 +246,6 @@ namespace UltimatePortalSpring.BepInEx
 
         public void Start()
         {
-            timer = Mathf.Min(CoreTools.TravelUltimate("僵尸试图在火海中游泳") ? 15f : 7.5f, timer);
             board = Board.Instance;
             if (board == null)
                 Destroy(gameObject);
@@ -280,24 +257,8 @@ namespace UltimatePortalSpring.BepInEx
 
         public void Update()
         {
-            if (isDying) return;
+            if (isDying || enterDieAnim) return;
 
-            if (isShrinking)
-            {
-                shrinkElapsed += Time.deltaTime;
-                float t = Mathf.Clamp01(shrinkElapsed / shrinkDuration);
-                float smoothT = Mathf.SmoothStep(1f, 0f, t);
-                float targetScale = Mathf.Lerp(originalScale.x, 0.2f, 1f - smoothT);
-                transform.localScale = new Vector3(targetScale, targetScale, originalScale.z);
-
-                if (t >= 1f)
-                {
-                    Die();
-                }
-                return;
-            }
-
-            // 检查并恢复离开作用范围的僵尸
             CheckAndRestoreZombies();
 
             attackCountDown -= Time.deltaTime;
@@ -308,10 +269,9 @@ namespace UltimatePortalSpring.BepInEx
                 attack = true;
             }
 
-            // 黑洞自动变大 - 只增不减，且只在未达到目标大小时执行
             if (transform.localScale.x < autoGrowTargetScale)
             {
-                float growthFactor = 1f + (0.5f * (1f - 1f / (1f + live * 2f)));
+                float growthFactor = timer / 2.5f; // 咔咔一顿消
                 float targetScaleX = Mathf.Min(baseScale.x * growthFactor, autoGrowTargetScale);
 
                 if (targetScaleX > transform.localScale.x)
@@ -320,71 +280,90 @@ namespace UltimatePortalSpring.BepInEx
                 }
             }
 
-            // 更新被吸引的子弹
-            UpdateAttractedBullets();
+            UpdateBullets();
 
-            // 吸收新子弹
             AttractBullets();
 
-            // 减速僵尸和吸引效果（使用偏移后的中心点）
-            float maxRadius = CoreTools.ColumnX * 1.5f * transform.localScale.x;
-            Vector3 attractCenter = AttractCenter;
+            float maxRadius = CoreTools.ColumnX * 1.5f * transform.localScale.x * (CoreTools.TravelUltimate("僵尸试图在火海中游泳") ? 1.25f : 1f);
+            Vector3 attractCenter = center;
 
             foreach (var collider in Physics2D.OverlapCircleAll(attractCenter, maxRadius, LayerMask.GetMask("Zombie")))
             {
-                if (collider.IsObjExist() && collider.TryGetComponent<Zombie>(out var zombie) && zombie.IsObjExist())
+                if (!collider.IsObjExist()) continue;
+
+                if (!collider.TryGetComponent<Zombie>(out var zombie) || !zombie.IsObjExist()) continue;
+
+                zombieControllerMap.TryGetValue(zombie, out var currentController);
+
+                if (currentController != null && currentController != this) continue;
+
+                bool isInMyAffected = myAffectedZombies.ContainsKey(zombie);
+                bool isInAffected = affectedZombies.ContainsKey(zombie);
+
+                if (isInMyAffected && !isInAffected) continue;
+
+                float sqrDistance = (zombie.axis.transform.position - attractCenter).sqrMagnitude;
+                float sqrMaxRadius = maxRadius * maxRadius;
+
+                if (sqrDistance > sqrMaxRadius) continue;
+
+                float distance = Mathf.Sqrt(sqrDistance);
+                float normalizedDistance = Mathf.Max(distance / maxRadius, 0.1f);
+                float effectStrength = Mathf.Min(1f / normalizedDistance, 5f);
+
+                float speedMultiplier = Mathf.Lerp(0.3f, 1f, 1f - effectStrength / 5f);
+                float attractionForce = Mathf.Lerp(0.5f, 5f, effectStrength / 5f);
+
+                if (attack)
                 {
-                    if (affectedZombies.ContainsKey(zombie) && !myAffectedZombies.ContainsKey(zombie))
-                        continue;
-
-                    float distance = Vector2.Distance(attractCenter, zombie.axis.transform.position);
-
-                    float normalizedDistance = Mathf.Max(distance / maxRadius, 0.1f);
-                    float effectStrength = 1f / normalizedDistance;
-                    effectStrength = Mathf.Min(effectStrength, 5f);
-
-                    float speedMultiplier = Mathf.Lerp(0.3f, 1f, 1f - Mathf.Clamp01(effectStrength / 5f));
-                    float attractionForce = Mathf.Lerp(0.5f, 5f, effectStrength / 5f);
-
-                    if (attack)
+                    if (!TypeMgr.IsBossZombie(zombie.theZombieType))
                     {
-                        if (zombie.GetAttrTimers().portaledTimer > 0f)
-                            zombie.GetAttrTimers().portaledTimer += 0.5f;
+                        var timers = zombie.GetAttrTimers();
+                        if (timers.portaledTimer > 0f)
+                            timers.portaledTimer += 0.5f;
                         else
                             zombie.SetPortaled(0.5f);
                     }
-
-                    if (!myAffectedZombies.ContainsKey(zombie))
-                    {
-                        if (!affectedZombies.ContainsKey(zombie))
-                        {
-                            affectedZombies.Add(zombie, zombie.theOriginSpeed);
-                        }
-                        myAffectedZombies.Add(zombie, zombie.theOriginSpeed);
-                    }
-
-                    float originalSpeed = myAffectedZombies[zombie];
-                    zombie.theOriginSpeed = originalSpeed * speedMultiplier;
-
-                    float moveDistance = attractionForce * Time.deltaTime;
-                    zombie.SetPosition(Vector3.MoveTowards(zombie.axis.position, attractCenter, moveDistance));
-                    zombie.theZombieRow = Mouse.Instance.GetRowFromY(zombie.axis.position.x, zombie.axis.position.y);
+                    else
+                        zombie.TakeDamage(DmgType.Normal, 300, UltimatePortalSpring.PlantID);
                 }
+
+                // 优化点6：首次影响时，使用更高效的字典操作
+                if (!isInMyAffected)
+                {
+                    // 使用 TryAdd 减少一次查询（.NET Core 3.0+ / .NET 5+）
+                    if (!isInAffected)
+                    {
+                        affectedZombies[zombie] = zombie.theOriginSpeed;
+                    }
+                    myAffectedZombies[zombie] = zombie.theOriginSpeed;
+
+                    // 直接赋值，避免多次查询
+                    zombieControllerMap[zombie] = this;
+                }
+
+                // 优化点7：避免重复索引器查询
+                float originalSpeed = myAffectedZombies[zombie];
+                zombie.theOriginSpeed = originalSpeed * speedMultiplier;
+
+                float moveDistance = attractionForce * Time.deltaTime * (CoreTools.TravelUltimate("僵尸试图在火海中游泳") ? 2f : 1f);
+                Vector3 newPos = Vector3.MoveTowards(zombie.axis.position, attractCenter, moveDistance);
+                zombie.SetPosition(newPos);
+                zombie.theZombieRow = Mouse.Instance.GetRowFromY(newPos.x, newPos.y);
             }
 
             live += Time.deltaTime;
-            if (live >= timer && !isShrinking)
+            if (live >= timer)
             {
-                isShrinking = true;
-                shrinkElapsed = 0f;
-                originalScale = transform.localScale;
+                GetComponent<Animator>().SetTrigger("die");
+                enterDieAnim = true;
             }
         }
 
-        private void CheckAndRestoreZombies()
+        public void CheckAndRestoreZombies()
         {
             float maxRadius = CoreTools.ColumnX * 1.5f * transform.localScale.x;
-            Vector3 attractCenter = AttractCenter;
+            Vector3 attractCenter = center;
             List<Zombie> zombiesToRestore = new List<Zombie>();
 
             foreach (var kvp in myAffectedZombies)
@@ -417,6 +396,28 @@ namespace UltimatePortalSpring.BepInEx
 
                     myAffectedZombies.Remove(zombie);
 
+                    // 移除控制权（如果当前黑洞还控制着这个僵尸）
+                    if (zombieControllerMap.ContainsKey(zombie) && zombieControllerMap[zombie] == this)
+                    {
+                        // 检查是否有其他黑洞在控制这个僵尸
+                        bool hasOtherController = false;
+                        var allPortals = FindObjectsOfType<PortalHole>();
+                        foreach (var portal in allPortals)
+                        {
+                            if (portal != this && portal.myAffectedZombies.ContainsKey(zombie))
+                            {
+                                hasOtherController = true;
+                                zombieControllerMap[zombie] = portal;
+                                break;
+                            }
+                        }
+
+                        if (!hasOtherController)
+                        {
+                            zombieControllerMap.Remove(zombie);
+                        }
+                    }
+
                     if (affectedZombies.ContainsKey(zombie))
                     {
                         bool isAffectedByOther = false;
@@ -441,7 +442,8 @@ namespace UltimatePortalSpring.BepInEx
 
         private void AttractBullets()
         {
-            float attractRadius = CoreTools.ColumnX * 1.7f * transform.localScale.x;
+            // 扩大捕获范围：从原来的 1.7 倍提高到 3.5 倍
+            float attractRadius = CoreTools.ColumnX * 3.5f * transform.localScale.x;
 
             foreach (var collider in Physics2D.OverlapCircleAll(transform.position, attractRadius, LayerMask.GetMask("Bullet")))
             {
@@ -452,35 +454,55 @@ namespace UltimatePortalSpring.BepInEx
 
                     if (bullet.theBulletType == UltimatePortalSpring.BulletID)
                     {
-                        Vector2 direction = bullet.transform.position - transform.position;
-                        float distance = direction.magnitude;
-                        float initialAngle = Mathf.Atan2(direction.y, direction.x);
-
-                        float angularSpeed = 5f / Mathf.Max(distance, 0.5f);
-                        float inwardSpeed = 3f / Mathf.Max(distance, 0.5f);
-
                         bullet.SetData("UltimatePortalSpring_BulletDieByHole", true);
                         foreach (var col in bullet.GetComponents<BoxCollider2D>())
                             col.enabled = false;
 
-                        AttractedBullet attractedBullet = new AttractedBullet
+                        Vector2 dir = bullet.transform.position - transform.position;
+                        float radius = dir.magnitude;
+                        float angle = Mathf.Atan2(dir.y, dir.x);
+
+                        // 获取子弹速度
+                        Vector2 velocity = bullet.GetComponent<Rigidbody2D>()?.velocity ?? Vector2.zero;
+                        float tangentialVel = Vector2.Dot(velocity, new Vector2(-dir.y, dir.x).normalized);
+
+                        // 角动量 L = r * v_t
+                        float angularMomentum = radius * tangentialVel;
+                        // 径向速度（向内为正）
+                        float radialVelocity = -Vector2.Dot(velocity, dir.normalized);
+
+                        AttractedBullet attracted = new AttractedBullet
                         {
                             bullet = bullet,
-                            angle = initialAngle,
-                            radius = distance,
-                            speed = angularSpeed,
-                            attractSpeed = inwardSpeed,
-                            startAngle = initialAngle
+                            angle = angle,
+                            radius = radius,
+                            angularMomentum = angularMomentum,
+                            radialVelocity = radialVelocity,
+                            startAngle = angle
                         };
 
-                        attractedBullets.Add(attractedBullet);
+                        attractedBullets.Add(attracted);
                     }
                 }
             }
         }
 
-        private void UpdateAttractedBullets()
+        private void UpdateBullets()
         {
+            float currentScale = transform.localScale.x;           // 当前黑洞大小
+            float baseScale = 0.35f;                               // 初始大小
+
+            // 引力强度随大小非线性增长
+            float gravityMultiplier = Mathf.Pow(currentScale / baseScale, 2f);
+
+            float baseG = 80f;
+            float G = baseG * gravityMultiplier;
+
+            float baseEscapeThreshold = 1.2f;
+            float escapeThreshold = baseEscapeThreshold * (1f + gravityMultiplier * 0.5f);
+
+            float escapeRadius = CoreTools.ColumnX * 1.0f * currentScale;
+
             for (int i = attractedBullets.Count - 1; i >= 0; i--)
             {
                 AttractedBullet attracted = attractedBullets[i];
@@ -491,44 +513,60 @@ namespace UltimatePortalSpring.BepInEx
                     continue;
                 }
 
-                float angleDelta = attracted.speed * Time.deltaTime;
-                attracted.angle += angleDelta;
+                float r = attracted.radius;
+                float v_r = attracted.radialVelocity;
+                float L = attracted.angularMomentum;
 
-                float rotatedAngle = Mathf.Abs(attracted.angle - attracted.startAngle);
-                float currentRotationCount = rotatedAngle / (2f * Mathf.PI);
+                float gravitationalAcc = G / (r * r);
+                float centrifugalAcc = (L * L) / (r * r * r);
+                float netAcc = gravitationalAcc - centrifugalAcc;
 
-                if (currentRotationCount >= 2f)
+                // 逃逸判定
+                if (centrifugalAcc > gravitationalAcc * escapeThreshold && r > escapeRadius)
+                {
+                    foreach (var col in attracted.bullet.GetComponents<BoxCollider2D>())
+                        col.enabled = true;
+                    attracted.bullet.SetData("UltimatePortalSpring_BulletDieByHole", false);
+                    attractedBullets.RemoveAt(i);
+                    continue;
+                }
+
+                v_r += netAcc * Time.deltaTime;
+                r -= v_r * Time.deltaTime;
+
+                float angularSpeed = L / (r * r);
+                attracted.angle += angularSpeed * Time.deltaTime;
+
+                // 【修复】吸收半径：直接使用黑洞视觉大小乘以系数
+                // 黑洞视觉半径大约是 localScale.x * 0.5（因为 scale 是直径），所以这里用 0.3 倍视觉半径
+                float eventHorizon = 0.5f * CoreTools.ColumnX;
+
+                // 【修复】直接判断，不做下限限制（或者下限设得极低）
+                if (r < eventHorizon || v_r > 20f)
                 {
                     AbsorbBullet(attracted.bullet);
                     attractedBullets.RemoveAt(i);
                     continue;
                 }
 
-                attracted.radius -= attracted.attractSpeed * Time.deltaTime;
-                float minRadius = CoreTools.ColumnX * 0.3f * transform.localScale.x;
-                if (attracted.radius < minRadius)
-                {
-                    attracted.radius = minRadius;
-                }
+                // 【修复】下限设为一个极小的值，不影响吸收判断
+                r = Mathf.Max(r, eventHorizon * 0.5f);
+                attracted.radius = r;
+                attracted.radialVelocity = v_r;
 
-                float currentDistance = Mathf.Max(attracted.radius, 0.3f);
-                attracted.speed = 8f / currentDistance;
-                attracted.attractSpeed = 5f / currentDistance;
-
-                float x = transform.position.x + Mathf.Cos(attracted.angle) * attracted.radius;
-                float y = transform.position.y + Mathf.Sin(attracted.angle) * attracted.radius;
+                float x = transform.position.x + Mathf.Cos(attracted.angle) * r;
+                float y = transform.position.y + Mathf.Sin(attracted.angle) * r;
                 attracted.bullet.transform.position = new Vector3(x, y, attracted.bullet.transform.position.z);
             }
         }
 
-        private void AbsorbBullet(Bullet bullet)
+        public void AbsorbBullet(Bullet bullet)
         {
             if (bullet == null || !bullet.IsObjExist())
                 return;
 
             absorbedBulletCount++;
 
-            // 直接增加scale，不做任何其他修改
             float newScale = transform.localScale.x + 0.1f;
             transform.localScale = new Vector3(newScale, newScale, transform.localScale.z);
 
@@ -540,35 +578,44 @@ namespace UltimatePortalSpring.BepInEx
             if (isDying) return;
             isDying = true;
 
-            // 1. 销毁所有正在圆周运动的子弹（还未被吸收的）
             foreach (var attracted in attractedBullets)
-            {
                 if (attracted.bullet != null && attracted.bullet.IsObjExist())
-                {
-                    // 恢复子弹的碰撞器（如果需要）
-                    // 直接销毁子弹
                     attracted.bullet.Die();
-                }
-            }
             attractedBullets.Clear();
 
-            // 2. 恢复所有受当前黑洞影响的僵尸速度
             foreach (var kvp in myAffectedZombies.ToList())
             {
                 Zombie zombie = kvp.Key;
                 if (zombie != null && zombie.IsObjExist())
                 {
-                    // 恢复原始速度
                     zombie.theOriginSpeed = kvp.Value;
 
-                    // 重置传送门效果标记
                     if (zombie.GetAttrTimers().portaledTimer > 0f)
-                    {
                         zombie.GetAttrTimers().portaledTimer = 0f;
+                }
+
+                // 移除控制权
+                if (zombieControllerMap.ContainsKey(zombie) && zombieControllerMap[zombie] == this)
+                {
+                    // 检查是否有其他黑洞在控制这个僵尸
+                    bool hasOtherController = false;
+                    var allPortals = FindObjectsOfType<PortalHole>();
+                    foreach (var portal in allPortals)
+                    {
+                        if (portal != this && portal.myAffectedZombies.ContainsKey(zombie))
+                        {
+                            hasOtherController = true;
+                            zombieControllerMap[zombie] = portal;
+                            break;
+                        }
+                    }
+
+                    if (!hasOtherController)
+                    {
+                        zombieControllerMap.Remove(zombie);
                     }
                 }
 
-                // 从全局字典中移除
                 if (affectedZombies.ContainsKey(zombie))
                 {
                     bool isAffectedByOther = false;
@@ -590,7 +637,6 @@ namespace UltimatePortalSpring.BepInEx
             }
             myAffectedZombies.Clear();
 
-            // 3. 造成爆炸伤害（使用原始位置，因为爆炸应该以黑洞为中心）
             var buff = live >= 5f ? 5 : 1;
             var damage = 7200 * buff;
             float explosionRadius = CoreTools.ColumnX * 1.5f * transform.localScale.x * buff;
@@ -602,49 +648,18 @@ namespace UltimatePortalSpring.BepInEx
                 }
             }
 
-            // 4. 播放死亡特效和音效
-            CreateParticle.SetParticle(UltimatePortalSpring.ParticleID, transform.position, 11);
-            GameAPP.PlaySound(40, 0.5f, 1.0f);
+            if (timer <= 5f)
+            {
+                CreateParticle.SetParticle(UltimatePortalSpring.BombID, transform.position, 11);
+                GameAPP.PlaySound(40, 0.5f, 1.0f);
+            }
+            else
+            {
+                CreateParticle.SetParticle(UltimatePortalSpring.DoomID, transform.position, 11);
+                GameAPP.PlaySound(SoundType.DoomShroom, 0.5f, 1.0f);
+            }
 
-            // 5. 销毁对象
             Destroy(gameObject);
-        }
-
-        public void OnDestroy()
-        {
-            if (!isDying)
-            {
-                Die();
-            }
-        }
-
-        public void OnApplicationQuit()
-        {
-            // 恢复所有僵尸的原始速度（全局清理）
-            foreach (var kvp in affectedZombies)
-            {
-                if (kvp.Key != null && kvp.Key.IsObjExist())
-                {
-                    kvp.Key.theOriginSpeed = kvp.Value;
-                    if (kvp.Key.GetAttrTimers().portaledTimer > 0f)
-                    {
-                        kvp.Key.GetAttrTimers().portaledTimer = 0f;
-                    }
-                }
-            }
-            affectedZombies.Clear();
-
-            // 清理所有被吸引的子弹
-            foreach (var portal in FindObjectsOfType<PortalHole>())
-            {
-                foreach (var attracted in portal.attractedBullets)
-                {
-                    if (attracted.bullet != null && attracted.bullet.IsObjExist())
-                    {
-                        attracted.bullet.Die();
-                    }
-                }
-            }
         }
     }
 
@@ -657,7 +672,7 @@ namespace UltimatePortalSpring.BepInEx
         {
             if (__instance.theBulletType == UltimatePortalSpring.BulletID)
             {
-                if (!__instance.GetData<bool>("UltimatePortalSpring_BulletDieByHole") && !PortalHole.IsPortalHoleInRange(__instance.transform.position, 1f))
+                if (!__instance.GetData<bool>("UltimatePortalSpring_BulletDieByHole") || !PortalHole.IsPortalHoleInRange(__instance.transform.position, 1f))
                 {
                     zombie.TakeDamage(DmgType.Normal, __instance.Damage, __instance.fromType);
                     zombie.SetJalaed();
@@ -666,7 +681,7 @@ namespace UltimatePortalSpring.BepInEx
                     var hole = UnityEngine.Object.Instantiate(UltimatePortalSpring.hole, effectPos, Quaternion.identity, __instance.board.transform)?.GetComponent<PortalHole>();
                     if (hole != null) hole.timer = __instance.GetData<float>("UltimatePortalSpring_HoleTime");
 
-                    CreateParticle.SetParticle(UltimatePortalSpring.ParticleID, effectPos, 11);
+                    CreateParticle.SetParticle(UltimatePortalSpring.BombID, effectPos, 11);
                     __instance.AttackOtherZombie(zombie, MelonSputterType.RealJala);
 
                     GameAPP.PlaySound(40, 0.5f, 1.0f);
@@ -683,14 +698,14 @@ namespace UltimatePortalSpring.BepInEx
         {
             if (__instance.theBulletType == UltimatePortalSpring.BulletID)
             {
-                if (!__instance.GetData<bool>("UltimatePortalSpring_BulletDieByHole") && !PortalHole.IsPortalHoleInRange(__instance.transform.position, 1f))
+                if (!__instance.GetData<bool>("UltimatePortalSpring_BulletDieByHole") || !PortalHole.IsPortalHoleInRange(__instance.transform.position, 1f))
                 {
                     var effectPos = __instance.transform.position;
 
                     var hole = UnityEngine.Object.Instantiate(UltimatePortalSpring.hole, effectPos, Quaternion.identity, __instance.board.transform)?.GetComponent<PortalHole>();
                     if (hole != null) hole.timer = __instance.GetData<float>("UltimatePortalSpring_HoleTime");
 
-                    CreateParticle.SetParticle(UltimatePortalSpring.ParticleID, effectPos, 11);
+                    CreateParticle.SetParticle(UltimatePortalSpring.BombID, effectPos, 11);
 
                     GameAPP.PlaySound(40, 0.5f, 1.0f);
                     __instance.Die();
@@ -720,31 +735,6 @@ namespace UltimatePortalSpring.BepInEx
     [HarmonyPatch(typeof(Mouse))]
     public static class MousePatch
     {
-        [HarmonyPatch(nameof(Mouse.LeftClickWithNothing))]
-        [HarmonyPostfix]
-        public static void PostLeftClickWithNothing(Mouse __instance)
-        {
-            if (__instance.theItemOnMouse == null)
-            {
-                var hits = Physics2D.RaycastAll(Camera.main.ScreenToWorldPoint(Input.mousePosition), Vector2.zero);
-                foreach (var plant in __instance.GetPlantsOnMouse(hits))
-                {
-                    if (!plant.IsObjExist()) continue;
-                    if (plant.thePlantType == UltimatePortalSpring.PlantID)
-                    {
-                        if (plant.theStatus == PlantStatus.Melonfume_charge)
-                        {
-                            __instance.cannonPlant = plant;
-                            __instance.theItemOnMouse = UnityEngine.Object.Instantiate(UltimatePortalSpring.target, Camera.main.ScreenToWorldPoint(Input.mousePosition),
-                                Quaternion.identity, __instance.transform);
-                            __instance.theItemOnMouse.name = "target_portal";
-                        }
-                        break;
-                    }
-                }
-            }
-        }
-
         [HarmonyPatch(nameof(Mouse.LeftClickWithSomeThing))]
         [HarmonyPostfix]
         public static void PostLeftClickWithSomeThing(Mouse __instance)
@@ -755,6 +745,31 @@ namespace UltimatePortalSpring.BepInEx
                 __instance.cannonPlant.GetComponent<UltimatePortalSpring>().SetShootTarget(Camera.main.ScreenToWorldPoint(Input.mousePosition));
                 __instance.ClearItemOnMouse(true);
             }
+        }
+    }
+
+    [HarmonyPatch(typeof(UltimateSpring))]
+    public static class UltimateSpringPatch
+    {
+        [HarmonyPatch(nameof(UltimateSpring.OnClicked))]
+        [HarmonyPrefix]
+        public static bool PreOnlicked(UltimateSpring __instance, ref Mouse mouse, ref bool __result)
+        {
+            if (__instance.thePlantType == UltimatePortalSpring.PlantID)
+            {
+                if (__instance.theStatus != PlantStatus.Melonfume_charge)
+                {
+                    __result = false;
+                    return false;
+                }
+                mouse.cannonPlant = __instance;
+                mouse.theItemOnMouse = UnityEngine.Object.Instantiate(UltimatePortalSpring.target, mouse.MousePosition,
+                                Quaternion.identity, __instance.board.transform);
+                mouse.theItemOnMouse.name = "target_portal";
+                __result = true;
+                return false;
+            }
+            return true;
         }
     }
 }

@@ -29,7 +29,13 @@ namespace FireSuperThreeGatling.BepInEx
                 }, 1.5f, 0f, 100, 300, 0f, 1000);
             CustomCore.TypeMgrExtra.IsFirePlant.Add((PlantType)PlantID);
             CustomCore.AddPlantAlmanacStrings(PlantID, $"火焰三线超级机枪射手({PlantID})",
-                "向三行发射火焰豌豆的超级机枪射手。\n\n<color=#3D1400>贴图作者：@林秋-AutumnLin</color>\n<color=#3D1400>伤害：</color><color=red>(80/100/120)x6/1.5秒</color>\n<color=#3D1400>特点：</color><color=red>每次攻击有2%概率触发大招，5秒内，每0.02秒向三行各发射1个伤害为3倍的火焰豌豆。</color>\n<color=#3D1400>融合配方：</color><color=red>超级机枪射手（底座）+三线射手+火爆辣椒</color>\n\n<color=#3D1400>“想了解火焰的力量么，想知道火焰是如何燃烧的么，想清楚火焰的起源么”“那就加入我们，”“对加入我们”最先说话的是老大，他是火爆辣椒的首席徒弟，曾经出过《我与火焰》《我在火焰中诞生》等一系列小说，是火爆辣椒最满意的徒弟，第二个说话是老二，他最喜欢的事情就是跟着大哥一起出门做宣传，对于大哥来说，他是可以摆在眼前的宣传标语，对于三弟来说，他是最可靠的哥哥，最后说话的是老三，他最喜欢的，是他的两个哥哥……</color>");
+                "向三行发射火焰豌豆的超级机枪射手。\n\n" +
+                "<color=#3D1400>使用条件：</color><color=red>旅行模式</color>\n" +
+                "<color=#3D1400>贴图作者：@林秋-AutumnLin</color>\n" +
+                "<color=#3D1400>伤害：</color><color=red>（30x6）x3/1.5秒</color>\n" +
+                "<color=#3D1400>特点：</color><color=red>每次攻击有2%概率触发大招，5秒内，每0.02秒前三行各发射1个3倍伤害火辣豌豆</color>\n" +
+                "<color=#3D1400>融合配方：</color><color=red>三线超级机枪射手+火爆辣椒</color>\n\n" +
+                "<color=#3D1400>“想了解火焰的力量么，想知道火焰是如何燃烧的么，想清楚火焰的起源么”“那就加入我们，”“对加入我们”最先说话的是老大，他是火爆辣椒的首席徒弟，曾经出过《我与火焰》《我在火焰中诞生》等一系列小说，是火爆辣椒最满意的徒弟，第二个说话是老二，他最喜欢的事情就是跟着大哥一起出门做宣传，对于大哥来说，他是可以摆在眼前的宣传标语，对于三弟来说，他是最可靠的哥哥，最后说话的是老三，他最喜欢的，是他的两个哥哥……</color>");
 
         }
     }
@@ -51,49 +57,90 @@ namespace FireSuperThreeGatling.BepInEx
         public SuperThreeGatling plant => gameObject.GetComponent<SuperThreeGatling>();
     }
 
-    [HarmonyPatch(typeof(Shooter))]
-    public static class Shooter_GetBulletType
+    [HarmonyPatch(typeof(ThreePeater))]
+    public static class ThreePeaterPatch
     {
-        [HarmonyPatch(nameof(Shooter.GetBulletType))]
+        [HarmonyPatch(nameof(ThreePeater.Shoot1))]
         [HarmonyPrefix]
-        public static bool Prefix(Shooter __instance, ref BulletType __result)
+        public static bool Prefix(ThreePeater __instance)
         {
             if (__instance != null && (int)__instance.thePlantType == Core.PlantID)
             {
-                int random = UnityEngine.Random.RandomRange(0, 6);
-                switch (random)
+                if (__instance.shoot == null) return false;
+
+                var bullet = CreateBullet.Instance.SetBullet(__instance.shoot.position.x, __instance.shoot.position.y, __instance.thePlantRow, 
+                    BulletType.Bullet_pea_jala, BulletMoveWay.MoveRight);
+
+                bullet.Damage = __instance.attackDamage;
+                bullet.fromType = __instance.thePlantType;
+
+                GameAPP.PlaySound(UnityEngine.Random.Range(3, 5), 0.5f, 1f);
+
+                // 三线射手特殊逻辑：根据所在行发射额外子弹
+                if (__instance.thePlantRow == 0)
+                    __instance.ShootLower(__instance.shoot.position.x, __instance.shoot.position.y, __instance.thePlantRow + 1);
+                else if (__instance.thePlantRow == __instance.board.rowNum - 1)
+                    __instance.ShootUpper(__instance.shoot.position.x, __instance.shoot.position.y, __instance.thePlantRow - 1);
+                else
                 {
-                    case 0:
-                    case 1:
-                        __result = BulletType.Bullet_firePea_red;
-                        break;
-                    case 2:
-                    case 3:
-                    case 4:
-                        __result = BulletType.Bullet_firePea_orange;
-                        break;
-                    default:
-                        __result = BulletType.Bullet_firePea_yellow;
-                        break;
+                    __instance.ShootLower(__instance.shoot.position.x, __instance.shoot.position.y, __instance.thePlantRow + 1);
+                    __instance.ShootUpper(__instance.shoot.position.x, __instance.shoot.position.y, __instance.thePlantRow - 1);
+                    return false;
                 }
-                bool isDamageUnChange = __instance.attackDamage == 80 ||
-                    __instance.attackDamage == 100 ||
-                    __instance.attackDamage == 120;
-                if (isDamageUnChange)
-                {
-                    switch (__result)
-                    {
-                        case BulletType.Bullet_firePea_yellow:
-                            __instance.attackDamage = 80;
-                            break;
-                        case BulletType.Bullet_firePea_orange:
-                            __instance.attackDamage = 100;
-                            break;
-                        case BulletType.Bullet_firePea_red:
-                            __instance.attackDamage = 120;
-                            break;
-                    }
-                }
+
+                __instance.Invoke("ExtraBullet", 0.2f);
+                return false;
+            }
+            return true;
+        }
+
+        [HarmonyPatch(nameof(ThreePeater.ExtraBullet))]
+        [HarmonyPrefix]
+        public static bool PreExtraBullet(ThreePeater __instance)
+        {
+            if (__instance != null && (int)__instance.thePlantType == Core.PlantID)
+            {
+                var bullet = CreateBullet.Instance.SetBullet(__instance.shoot.position.x, __instance.shoot.position.y,
+                    __instance.thePlantRow, BulletType.Bullet_pea_jala, BulletMoveWay.MoveRight);
+
+                if (bullet == null) return false;
+
+                bullet.Damage = __instance.attackDamage;
+                bullet.fromType = __instance.thePlantType;
+                return false;
+            }
+            return true;
+        }
+
+        [HarmonyPatch(nameof(ThreePeater.ShootLower))]
+        [HarmonyPrefix]
+        public static bool PreShootLower(ThreePeater __instance, float X, float Y, int row)
+        {
+            if (__instance != null && (int)__instance.thePlantType == Core.PlantID)
+            {
+                var bullet = CreateBullet.Instance.SetBullet(X, Y, row, BulletType.Bullet_pea_jala, BulletMoveWay.Three_down);
+
+                if (bullet == null) return false;
+
+                bullet.Damage = __instance.attackDamage;
+                bullet.fromType = __instance.thePlantType;
+                return false;
+            }
+            return true;
+        }
+
+        [HarmonyPatch(nameof(ThreePeater.ShootUpper))]
+        [HarmonyPrefix]
+        public static bool PreShootUpper(ThreePeater __instance, float X, float Y, int row)
+        {
+            if (__instance != null && (int)__instance.thePlantType == Core.PlantID)
+            {
+                var bullet = CreateBullet.Instance.SetBullet(X, Y, row, BulletType.Bullet_pea_jala, BulletMoveWay.Three_up);
+
+                if (bullet == null) return false;
+
+                bullet.Damage = __instance.attackDamage;
+                bullet.fromType = __instance.thePlantType;
                 return false;
             }
             return true;
@@ -109,9 +156,7 @@ namespace FireSuperThreeGatling.BepInEx
         {
             if (__instance != null && (int)__instance.thePlantType == Core.PlantID)
             {
-                CreateBullet creator = CreateBullet.Instance;
-
-                Bullet bullet = CreateBullet.Instance.SetBullet(x, y, row, __instance.GetBulletType(), bulletMoveWay, false);
+                var bullet = CreateBullet.Instance.SetBullet(x, y, row, BulletType.Bullet_pea_jala, bulletMoveWay, false);
                 // 配置子弹属性
                 if (bullet != null)
                 {

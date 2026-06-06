@@ -6,6 +6,7 @@ using Il2CppInterop.Runtime.Injection;
 using System.Reflection;
 using TMPro;
 using UnityEngine;
+using Core;
 
 namespace SuperShovelLevel.BepInEx
 {
@@ -90,7 +91,7 @@ namespace SuperShovelLevel.BepInEx
                             {
                                 var list = new List<AdvBuff>();
                                 foreach (var (id, _) in TravelDictionary.advancedBuffsText)
-                                    if (!data.advBuffs.Contains(id) && !data.advBuffs_lv2.Contains(id))
+                                    if (!data.advBuffs.Contains(id))
                                         list.Add(id);
                                 var advBuff = list[UnityEngine.Random.Range(0, list.Count)];
                                 data.advBuffs.Add(advBuff);

@@ -57,17 +57,17 @@ public class CustomPlantMonoBehaviour : MonoBehaviour
                 Vector2 secondPlace = firstPlace;
                 float flightTime = 1.5f;
                 //计算抛物线
-                float[] calculate = [.. Lawnf.CalculateProjectileParameters(startPosition, t1, firstPlace, t2, secondPlace, flightTime)];
-                try
-                {
-                    bullet.Vx = calculate[1];
-                    bullet.Vy = calculate[2];
-                    bullet.detaVy = -calculate[3];
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e);
-                }
+                //float[] calculate = [.. Lawnf.CalculateProjectileParameters(startPosition, t1, firstPlace, t2, secondPlace, flightTime)];
+                //try
+                //{
+                //    bullet.Vx = calculate[1];
+                //    bullet.Vy = calculate[2];
+                //    bullet.detaVy = -calculate[3];
+                //}
+                //catch (Exception e)
+                //{
+                //    Console.WriteLine(e);
+                //}
             }
             else
             {

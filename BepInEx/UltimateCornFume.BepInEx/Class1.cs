@@ -3,6 +3,7 @@ using BepInEx.Unity.IL2CPP;
 using CustomizeLib.BepInEx;
 using HarmonyLib;
 using Il2CppInterop.Runtime.Injection;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using UnityEngine;
 using static Il2CppSystem.String;
@@ -35,7 +36,7 @@ namespace UltimateCornFume.BepInEx
                 "④攻击时有25%概率投射黄油窝瓜，对周围的目标施加4秒定身，随后向最近的僵尸跳跃最远1.5格后落地，对压到的每个僵尸施加1秒定身，弹跳6次后消失</color>\n" +
                 "<color=#3D1400>词条1:</color><color=red>尸愁之路II：攻击时固定损失的韧性减至10</color>\n" +
                 "<color=#3D1400>词条2:</color><color=red>滑滑梯：待机回复的韧性x3，黄油窝瓜攻击僵尸时对免疫黄油定身的非车类僵尸强制定身1秒</color>\n\n" +
-                "<color=#3D1400>zzz...</color>");
+                "<color=#3D1400>黄油帝菇不喜欢别人叫他大叔，刚上植物高中的黄油帝菇，年纪轻轻就“一把年纪”，“太糟糕了，和我一起到校的老师问我教务处在哪里，我才第一天到学校！”黄油帝菇气呼呼的，像是一个充满气的气球！</color>");
             CustomCore.RegisterCustomBullet<Bullet_butter>(UltimateCornFume.BulletID, ab.GetAsset<GameObject>("Bullet_superCornSquash"));
             CustomCore.AddFusion((int)PlantType.SuperCaltrop, UltimateCornFume.PlantID, (int)PlantType.Caltrop);
         }
@@ -120,7 +121,7 @@ namespace UltimateCornFume.BepInEx
                         Vector2 zombieVel = zombie.Velocity;
                         Vector2 zombiePos = zombie.ColliderPosition;
                         Vector2 startPos = __instance.shoot.position;
-                        float[] trajectory = Lawnf.CalculateProjectileWithSpeed(
+                        float[] trajectory = global::Core.Lawnf.CalculateProjectileWithSpeed(
                             startPos,
                             zombieVel,
                             zombiePos,

@@ -7,6 +7,7 @@ using BepInEx.Logging;
 using HarmonyLib;
 using Il2CppInterop.Runtime.Injection;
 using Unity.VisualScripting;
+using Core;
 
 namespace CrazySqualourBepInEx
 {

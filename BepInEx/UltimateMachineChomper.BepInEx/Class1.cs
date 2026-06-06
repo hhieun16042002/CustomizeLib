@@ -104,11 +104,9 @@ namespace UltimateMachineChomper.BepInEx
                     damageTimes = (float)Math.Round(damageTimes, 2);
                     plant.jigsawType.Add(JigsawType.Instead);
                     plant.jigsawType.Add(JigsawType.Uncrashable);
-                    if (plant.killingText != null && plant.killingTextShadow != null)
-                    {
-                        plant.killingText.gameObject.SetActive(false);
-                        plant.killingTextShadow.gameObject.SetActive(false);
-                    }
+                    foreach (var kvp in plant.healthSlider.registedTexts)
+                        Destroy(kvp.Key.gameObject);
+                    plant.healthSlider.registedTexts = new();
                     InitText();
                     UpdateText();
                     plant.UpdateText();
@@ -151,13 +149,12 @@ namespace UltimateMachineChomper.BepInEx
             try
             {
                 if (plant == null) return;
-                if (plant.healthSlider == null || plant.healthSlider.textHead == null) return;
-                if (plant.healthSlider.textHead == null && GameAPP.theGameStatus == GameStatus.InGame) plant.healthSlider.textHead = plant.gameObject.transform.FindChild("TextHead");
+                var textHead = plant.gameObject.transform.FindChild("TextHead");
                 if (extraText == null)
                 {
                     GameObject extraTextGO = new GameObject("ExtraText");
                     extraText = extraTextGO.AddComponent<TextMeshPro>();
-                    extraTextGO.transform.SetParent(plant.healthSlider.textHead.transform);
+                    extraTextGO.transform.SetParent(textHead.transform);
                     extraTextGO.transform.localPosition = new Vector3(0f, -0.5f, 0);
                     extraText.font = GameAPP.font;
                     String status = "";
@@ -181,7 +178,7 @@ namespace UltimateMachineChomper.BepInEx
                 {
                     GameObject extraTextShadowGO = new GameObject("ExtraTextShadow");
                     extraTextShadow = extraTextShadowGO.AddComponent<TextMeshPro>();
-                    extraTextShadowGO.transform.SetParent(plant.healthSlider.textHead.transform);
+                    extraTextShadowGO.transform.SetParent(textHead.transform);
                     extraTextShadowGO.transform.localPosition = new Vector3(0.01f, -0.51f, 0);
                     extraTextShadow.font = GameAPP.font;
                     extraTextShadow.text = extraText.text;
@@ -199,8 +196,8 @@ namespace UltimateMachineChomper.BepInEx
         {
             if (extraText != null && extraTextShadow != null)
             {
-                extraText.transform.localPosition = new Vector3(0f, -0.5f, 0);
-                extraTextShadow.transform.localPosition = new Vector3(0.01f, -0.51f, 0);
+                extraText.transform.localPosition = new Vector3(-0.35f, 0.1f, 0);
+                extraTextShadow.transform.localPosition = new Vector3(-0.34f, 0.11f, 0);
             }
         }
 
@@ -211,6 +208,16 @@ namespace UltimateMachineChomper.BepInEx
                 if (extraText == null || extraTextShadow == null)
                     InitText();
                 SetTextPosition();
+                if (plant.board.showPlantHealth == 0)
+                {
+                    extraText.gameObject.SetActive(false);
+                    extraTextShadow.gameObject.SetActive(false);
+                }
+                else
+                {
+                    extraText.gameObject.SetActive(true);
+                    extraTextShadow.gameObject.SetActive(true);
+                }
                 if (plant == null) return;
                 String status = "";
                 if (plant.undeadTimer > 0)
@@ -507,14 +514,15 @@ namespace UltimateMachineChomper.BepInEx
             }
         }
 
-        [HarmonyPatch(nameof(UltimateChomper.UpdateText))]
+        [HarmonyPatch(nameof(UltimateChomper.OnAfterInitText))]
         [HarmonyPostfix]
         public static void Postfix_UpdateText(UltimateChomper __instance)
         {
-            if (__instance != null && (int)__instance.thePlantType == UltimateMachineChomper.PlantID && GameAPP.theGameStatus == GameStatus.InGame && __instance.killingText != null && __instance.killingTextShadow != null)
+            if (__instance != null && (int)__instance.thePlantType == UltimateMachineChomper.PlantID && GameAPP.theGameStatus == GameStatus.InGame)
             {
-                __instance.killingText.gameObject.SetActive(false);
-                __instance.killingTextShadow.gameObject.SetActive(false);
+                foreach (var kvp in __instance.healthSlider.registedTexts)
+                    UnityEngine.Object.Destroy(kvp.Key.gameObject);
+                __instance.healthSlider.registedTexts = new();
                 UltimateMachineChomper component = __instance.GetComponent<UltimateMachineChomper>();
                 if (component != null)
                 {

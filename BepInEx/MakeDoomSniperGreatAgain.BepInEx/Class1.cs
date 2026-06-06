@@ -3,6 +3,7 @@ using BepInEx.Unity.IL2CPP;
 using HarmonyLib;
 using System.Reflection;
 using UnityEngine;
+using Core;
 
 namespace MakeDoomSniperGreatAgain.BepInEx
 {
@@ -108,7 +109,7 @@ namespace MakeDoomSniperGreatAgain.BepInEx
                         float.MaxValue,
                         __instance.zombieLayer);
 
-                    shootFire.transform.rotation = Lawnf.GetRotateFromSpeed(direction);
+                    shootFire.transform.rotation = global::Core.Lawnf.GetRotateFromSpeed(direction);
 
                     int damage = __instance.attackDamage;
                     if (UnityEngine.Random.Range(0, 10) == 5)
@@ -121,7 +122,7 @@ namespace MakeDoomSniperGreatAgain.BepInEx
                         {
                             var hasEmber = zombie.TryGetEffect<EmberEffect>(EffectType.Ember, out var _);
                             int finalDamage = hasEmber ? damage * 6 : damage;
-                            zombie.TakeDamage(DmgType.NormalAll, finalDamage, __instance.thePlantType);
+                            zombie.TakeDamage(finalDamage, null, DamageType.NormalAll, __instance.thePlantType);
                             hitCount++;
 
                             if (__instance.crazeTimer == 0f)

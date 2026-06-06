@@ -77,7 +77,7 @@ namespace UltimateFireSpike.BepInEx
         {
             if (collision == null || collision.IsDestroyed() || collision.gameObject == null || collision.gameObject.IsDestroyed()) return;
             if (!collision.TryGetComponent<Bullet>(out var bullet) || bullet.IsDestroyed() || bullet == null) return;
-            if (bullet.theBulletRow != plant.thePlantRow || bullet.fromEnermy || bullet.torchWood == plant) return;
+            if (bullet.theBulletRow != plant.thePlantRow || bullet.Team != Team.Player || bullet.torchWood == plant) return;
             var damage = bullet.Damage;
             var type = Bullet_firePea_small_red;
             switch (bullet.theBulletType)

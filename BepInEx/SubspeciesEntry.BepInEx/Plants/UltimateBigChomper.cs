@@ -80,7 +80,7 @@ namespace SubspeciesEntry.BepInEx.Plants
                 {
                     var damage = z.TotalAllHealth * timer;
                     damage += CoreTools.GetReducedArmorDamage(z.theArmor, damage, z.theArmor * 0.9f);
-                    z.TakeDamage(DmgType.Normal, (int)damage, PlantType.UltimateBigChomper);
+                    z.TakeDamage((int)damage, __instance.Cast<IDamageMaker>(), DamageType.Normal, PlantType.UltimateBigChomper);
                 }
                 __instance.canToChew = true;
 
@@ -193,7 +193,7 @@ namespace SubspeciesEntry.BepInEx.Plants
                 {
                     var damage = z.TotalAllHealth * timer;
                     damage += CoreTools.GetReducedArmorDamage(z.theArmor, damage, z.theArmor * 0.9f);
-                    z.TakeDamage(DmgType.Normal, (int)damage, PlantType.UltimateBigChomper);
+                    z.TakeDamage((int)damage, __instance.Cast<IDamageMaker>(), DamageType.Normal, PlantType.UltimateBigChomper);
                 }
                 __instance.canToChew = true;
 

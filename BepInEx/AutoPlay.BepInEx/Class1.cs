@@ -8,6 +8,7 @@ using System.Collections;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using UnityEngine;
+using Core;
 
 namespace AutoPlay.BepInEx
 {

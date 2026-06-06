@@ -23,7 +23,7 @@ namespace SubspeciesEntry.BepInEx.Plants
                 foreach (var zombie in Lawnf.GetAllZombies())
                 {
                     if (zombie == null || zombie.IsDestroyed() || zombie.gameObject == null || zombie.gameObject.IsDestroyed()) continue;
-                    zombie.TakeDamage(DmgType.Carred, (int)(zombie.CurrentAllHealth * 0.5f), PlantType.UltimateGloom);
+                    zombie.TakeDamage((int)(zombie.CurrentAllHealth * 0.5f), __instance.Cast<IDamageMaker>(), DamageType.Carred, PlantType.UltimateGloom);
                 }
                 return false;
             }
@@ -32,7 +32,7 @@ namespace SubspeciesEntry.BepInEx.Plants
 
         [HarmonyPatch(nameof(IceDoomGloom.TakeDamage))]
         [HarmonyPrefix]
-        public static bool PreTakeDamage(IceDoomGloom __instance, ref int damageType, ref int damage)
+        public static bool PreTakeDamage(IceDoomGloom __instance, ref DamageType damageType, ref int damage)
         {
             if (CoreTools.TravelUltimate("以爆制爆"))
             {
@@ -47,7 +47,7 @@ namespace SubspeciesEntry.BepInEx.Plants
                     __instance.power = 0;
                 }
 
-                if ((Plant.DamageType)damageType != Plant.DamageType.Default)
+                if (damageType != DamageType.Normal)
                     return false;
             }
             return true;
@@ -74,7 +74,7 @@ namespace SubspeciesEntry.BepInEx.Plants
 
         [HarmonyPatch(nameof(UltimatePlantern.TakeDamage))]
         [HarmonyPrefix]
-        public static bool PreTakeDamage(UltimatePlantern __instance, ref int damageType, ref int damage)
+        public static bool PreTakeDamage(UltimatePlantern __instance, ref DamageType damageType, ref int damage)
         {
             if (CoreTools.TravelUltimate("以爆制爆"))
             {
@@ -89,7 +89,7 @@ namespace SubspeciesEntry.BepInEx.Plants
                     __instance.attributeCount = 0;
                 }
 
-                if ((Plant.DamageType)damageType != Plant.DamageType.Default)
+                if (damageType != DamageType.Normal)
                     return false;
             }
             return true;

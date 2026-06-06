@@ -311,7 +311,7 @@ namespace SolarHypno.BepInEx
         [HarmonyPrefix]
         public static bool Prefix(Zombie __instance)
         {
-            if (__instance != null && __instance.theAttackTarget != null && __instance.theAttackTarget.TryGetComponent<Plant>(out var plant) &&
+            if (__instance != null && __instance.theAttackTarget != null && __instance.theAttackTarget.IsPlant(out var plant) &&
                 plant != null && plant.thePlantType == SolarHypno.PlantID && plant.attributeCount > 0)
             {
                 plant.attributeCount--;

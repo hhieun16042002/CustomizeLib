@@ -28,16 +28,13 @@ namespace SubspeciesEntry.BepInEx
 
     public static class Core
     {
-        public static IEnumerator Init()
+        public static void Init()
         {
-            while (TravelDictionary.advancedBuffsText.Count < Enum.GetValues<AdvBuff>().Length) yield return new WaitForSeconds(1f);
-            while (TravelDictionary.ultimateBuffsText.Count < Enum.GetValues<UltiBuff>().Length) yield return new WaitForSeconds(1f);
-
+            InitCustomBuff();
             CoreTools.Init();
             Load();
             TypeInit.Init();
             CustomBehaviours.Init();
-            yield break;
         }
 
         public static void Load()
@@ -115,16 +112,16 @@ namespace SubspeciesEntry.BepInEx
             }
             #endregion
             #region 珞
-            {
-                // 我是梦珞
-                ReplaceText.ReplaceBuff(BuffType.AdvancedBuff, (int)CoreTools.GetAdvBuffByString("我是梦珞"),
-                    "我是梦珞：魔法浮游炮伤害×3。魔法兔耳葱协助召唤的浮游炮会发射60发平射子弹",
-                    "我是梦珞：魔法浮游炮伤害增加（击杀僵尸韧性x10%）点。魔法兔耳葱协助召唤的浮游炮会发射15发子弹");
-                // 我也是梦珞
-                ReplaceText.ReplaceBuff(BuffType.AdvancedBuff, (int)CoreTools.GetAdvBuffByString("我也是梦珞"),
-                    "我也是梦珞：解锁亚种魔法兔耳葱。魔法猫尾草的追踪子弹伤害×5。魔法兔耳葱造成的伤害×3",
-                    "我也是梦珞：解锁亚种魔法兔耳葱。击杀场上僵尸需要的僵尸数降低至40。魔法兔耳葱造成的伤害x3");
-            }
+            //{
+            //    // 我是梦珞
+            //    ReplaceText.ReplaceBuff(BuffType.AdvancedBuff, (int)CoreTools.GetAdvBuffByString("我是梦珞"),
+            //        "我是梦珞：魔法浮游炮伤害×3。魔法兔耳葱协助召唤的浮游炮会发射60发平射子弹",
+            //        "我是梦珞：魔法浮游炮伤害增加（击杀僵尸韧性x10%）点。魔法兔耳葱协助召唤的浮游炮会发射15发子弹");
+            //    // 我也是梦珞
+            //    ReplaceText.ReplaceBuff(BuffType.AdvancedBuff, (int)CoreTools.GetAdvBuffByString("我也是梦珞"),
+            //        "我也是梦珞：解锁亚种魔法兔耳葱。魔法猫尾草的追踪子弹伤害×5。魔法兔耳葱造成的伤害×3",
+            //        "我也是梦珞：解锁亚种魔法兔耳葱。击杀场上僵尸需要的僵尸数降低至40。魔法兔耳葱造成的伤害x3");
+            //}
             #endregion
             #region 牢樱
             {
@@ -193,30 +190,44 @@ namespace SubspeciesEntry.BepInEx
             }
             #endregion
             #region 珞
-            {
-                // 基础特性
-                ReplaceText.ReplaceAlmanac(PlantType.CattailLour,
-                    "每击杀1个僵尸，召唤1台浮游炮。浮游炮在3秒内发射60发平射子弹（无法对空，160伤害），随后离场",
-                    "每击杀1个僵尸，召唤1台浮游炮。浮游炮在3秒内发射30发子弹（伤害为本体伤害2倍），可对空，随后离场，如果本体已有一个浮游炮，则改为为已存在的浮游炮增加伤害");
-                ReplaceText.ReplaceAlmanac(PlantType.CattailLour,
-                   "<color=#3D1400>③</color><color=red>浮游炮击杀僵尸后也会召唤浮游炮</color>",
-                   "<color=#3D1400>③</color><color=red>当满足以下任意一个条件时，将召唤浮游炮：\n" +
-                   "①浮游炮击杀僵尸后\n" +
-                   "②场上击杀60个僵尸后\n" +
-                   "③出场及出场后每15秒</color>");
-                // 我是梦珞
-                ReplaceText.ReplaceAlmanac(PlantType.CattailLour,
-                    "我是梦珞：浮游炮伤害×3。魔法兔耳葱协助召唤的浮游炮会发射60发平射子弹",
-                    "我是梦珞：魔法浮游炮伤害增加（击杀僵尸韧性x10%）点。魔法兔耳葱协助召唤的浮游炮会发射12发子弹");
-                // 我也是梦珞
-                ReplaceText.ReplaceAlmanac(PlantType.CattailLour,
-                    "我也是梦珞：解锁亚种魔法兔耳葱。魔法猫尾草的追踪子弹伤害×5。魔法兔耳葱造成的伤害×3",
-                    "我也是梦珞：解锁亚种魔法兔耳葱。击杀场上僵尸需要的僵尸数降低至40。魔法兔耳葱造成的伤害x3");
+            //{
+            //    // 基础特性
+            //    ReplaceText.ReplaceAlmanac(PlantType.CattailLour,
+            //        "每击杀1个僵尸，召唤1台浮游炮。浮游炮在3秒内发射60发平射子弹（无法对空，160伤害），随后离场",
+            //        "每击杀1个僵尸，召唤1台浮游炮。浮游炮在3秒内发射30发子弹（伤害为本体伤害2倍），可对空，随后离场，如果本体已有一个浮游炮，则改为为已存在的浮游炮增加子弹发射数量和伤害");
+            //    ReplaceText.ReplaceAlmanac(PlantType.CattailLour,
+            //       "<color=#3D1400>③</color><color=red>浮游炮击杀僵尸后也会召唤浮游炮</color>",
+            //       "<color=#3D1400>③</color><color=red>当满足以下任意一个条件时，将召唤浮游炮：\n" +
+            //       "①浮游炮击杀僵尸后\n" +
+            //       "②场上击杀60个僵尸后\n" +
+            //       "③出场及出场后每15秒</color>");
+            //    // 我是梦珞
+            //    ReplaceText.ReplaceAlmanac(PlantType.CattailLour,
+            //        "我是梦珞：浮游炮伤害×3。魔法兔耳葱协助召唤的浮游炮会发射60发平射子弹",
+            //        "我是梦珞：魔法浮游炮伤害增加（击杀僵尸韧性x10%）点。魔法兔耳葱协助召唤的浮游炮会发射12发子弹");
+            //    // 我也是梦珞
+            //    ReplaceText.ReplaceAlmanac(PlantType.CattailLour,
+            //        "我也是梦珞：解锁亚种魔法兔耳葱。魔法猫尾草的追踪子弹伤害×5。魔法兔耳葱造成的伤害×3",
+            //        "我也是梦珞：解锁亚种魔法兔耳葱。击杀场上僵尸需要的僵尸数降低至40。魔法兔耳葱造成的伤害x3");
 
-                // 亚种图鉴修改
-                ReplaceText.ReplaceAlmanac(PlantType.PinkOnion,
-                    "传递的电流击杀僵尸时，使场上随机一株魔法猫尾草召唤一台只会发射20发平射子弹的浮游炮",
-                    "传递的电流击杀僵尸时，使场上随机一株魔法猫尾草召唤一台只会发射12发平射子弹的浮游炮");
+            //    // 亚种图鉴修改
+            //    ReplaceText.ReplaceAlmanac(PlantType.PinkOnion,
+            //        "传递的电流击杀僵尸时，使场上随机一株魔法猫尾草召唤一台只会发射20发平射子弹的浮游炮",
+            //        "传递的电流击杀僵尸时，使场上随机一株魔法猫尾草召唤一台只会发射12发平射子弹的浮游炮");
+            //}
+            #endregion
+            #region 剑仙
+            {
+                ReplaceText.ReplaceAlmanac(PlantType.AbyssSwordStar,
+                    "旋转仙剑扫荡群敌，并召唤十把从天而降的巨剑",
+                    "旋转杨桃剑扫荡群敌，并召唤从天而降的巨剑");
+                ReplaceText.ReplaceAlmanac(PlantType.AbyssSwordStar,
+                    "<color=red>攻击时将仙剑绕身旋转2圈，对接触的僵尸每0.02秒造成1次伤害。然后召唤10把全场索敌的巨剑，落地时造成范围伤害，可对空</color>",
+                    "<color=red>每6秒释放一次攻击，攻击时对僵尸：\n" +
+                    "·每0.02秒对3x3范围内的僵尸造成一次伤害\n" +
+                    "·召唤10次巨剑（每次1柄），全屏索敌，落地时造成5次范围伤害</color>\n" +
+                    "<color=#3D1400>词条1:</color><color=red>血淬剑芒：究极剑仙杨桃攻击力x3，对无防具目标伤害x5</color>\n" +
+                    "<color=#3D1400>词条2:</color><color=red>无限剑制：究极剑仙杨桃召唤飞剑时有10%概率对场上每个僵尸召唤飞剑</color>");
             }
             #endregion
         }
@@ -258,7 +269,19 @@ namespace SubspeciesEntry.BepInEx
             #region 牢樱
             {
                 // 力大砖飞
-                BuffMgr.SetCustomLevelBuff(CoreTools.GetUltiBuffByString("力大砖飞"));
+                BuffMgr.RegisterCustomLevelBuff(CoreTools.GetUltiBuffByString("力大砖飞"));
+            }
+            #endregion
+        }
+
+        public static void InitCustomBuff()
+        {
+            #region 剑仙
+            {
+                BuffMgr.RegisterCustomAdvBuff("血淬剑芒：究极剑仙杨桃攻击力x3，对无防具目标伤害x5", () => CoreTools.TravelAdvanced("诸神黄昏"),
+                    5000, PlantType.AbyssSwordStar);
+                BuffMgr.RegisterCustomAdvBuff("无限剑制：究极剑仙杨桃召唤飞剑时有10%概率对场上每个僵尸召唤飞剑", () => CoreTools.TravelAdvanced("诸神黄昏"),
+                    5000, PlantType.AbyssSwordStar);
             }
             #endregion
         }
@@ -387,12 +410,23 @@ namespace SubspeciesEntry.BepInEx
     }
     #endregion
 
-    #region 二级词条
+    #region 词条
     public static class BuffMgr
     {
-        public static List<UltiBuff> LevelBuffs = new();
+        public const int CustomBuffStartID = 25000;
+        public static Dictionary<int, (string, Func<bool>, int, PlantType)> CustomAdvBuffs = new(); // (id, (text, unlock, cost, icon))
+        public static List<UltiBuff> CustomLevelBuffs = new();
 
-        public static void SetCustomLevelBuff(UltiBuff id) => LevelBuffs.Add(id);
+        public static void RegisterCustomLevelBuff(UltiBuff id) => CustomLevelBuffs.Add(id);
+
+        public static int RegisterCustomAdvBuff(string text, Func<bool> unlock, int cost, PlantType icon)
+        {
+            var i = CustomBuffStartID + CustomAdvBuffs.Count;
+            CustomAdvBuffs.Add(i, (text, unlock, cost, icon));
+            TravelDictionary.advancedBuffsText.Add((AdvBuff)i, text);
+            TravelDictionary.AdvBuffPlantPairs.Add((AdvBuff)i, icon);
+            return i;
+        }
     }
     #endregion
 
@@ -417,6 +451,17 @@ namespace SubspeciesEntry.BepInEx
         {
             ReplaceText.InitBuff();
         }
+
+        [HarmonyPatch(nameof(TravelLookMenu.GetAdvBuffs))]
+        [HarmonyPostfix]
+        public static void PostGetAdvBuffs(TravelLookMenu __instance, ref Il2CppSystem.Collections.Generic.List<AdvBuff> __result)
+        {
+            if (BuffMgr.CustomAdvBuffs.Count <= 0)
+                return;
+            foreach (var (id, _) in BuffMgr.CustomAdvBuffs)
+                if (__instance.showAll)
+                    __result.Add((AdvBuff)id);
+        }
     }
 
     [HarmonyPatch(typeof(TravelMgr))]
@@ -427,6 +472,26 @@ namespace SubspeciesEntry.BepInEx
         public static void PostOnBoardStart()
         {
             ReplaceText.InitBuff();
+        }
+
+        [HarmonyPatch(nameof(TravelMgr.GetAdvancedBuffPool))]
+        [HarmonyPostfix]
+        public static void PostGetAdvancedBuffPool(ref Il2CppSystem.Collections.Generic.List<AdvBuff> __result)
+        {
+            foreach (var (key, value) in BuffMgr.CustomAdvBuffs)
+            {
+                if (value.Item2.Invoke() && !TravelMgr.Instance.data.advBuffs.Contains((AdvBuff)key))
+                    __result.Add((AdvBuff)key);
+            }
+        }
+
+        [HarmonyPatch(nameof(TravelMgr.GetText))]
+        [HarmonyPostfix]
+        public static void PostGetText(Il2CppSystem.Object buff, ref string __result)
+        {
+            var (type, id) = buff.DestructBuffObject();
+            if (type == BuffType.AdvancedBuff && BuffMgr.CustomAdvBuffs.ContainsKey(id))
+                __result = BuffMgr.CustomAdvBuffs[id].Item1;
         }
     }
 
@@ -497,7 +562,7 @@ namespace SubspeciesEntry.BepInEx
         [HarmonyPostfix]
         public static void PostStart(GameAPP __instance)
         {
-            __instance.StartCoroutine(Core.Init());
+            Core.Init();
             __instance.AddComponent<GameInfo>();
         }
     }
@@ -514,7 +579,7 @@ namespace SubspeciesEntry.BepInEx
                 if (__instance.buff.GetIl2CppType() == Il2CppType.From(typeof(UltiBuff)))
                 {
                     var buff = __instance.buff.Unbox<UltiBuff>();
-                    if (BuffMgr.LevelBuffs.Contains(buff) && CoreTools.TravelAdvanced("升级") && __instance.manager.data.GetBuffLevel(buff) < 2)
+                    if (BuffMgr.CustomLevelBuffs.Contains(buff) && CoreTools.TravelAdvanced("升级") && __instance.manager.data.GetBuffLevel(buff) < 2)
                     {
                         __instance.manager.GetUltiBuff(buff, true);
                         __instance.manager.data.advBuffs.Remove(CoreTools.GetAdvBuffByString("升级"));
@@ -535,7 +600,7 @@ namespace SubspeciesEntry.BepInEx
                 if (__instance.buff.GetIl2CppType() == Il2CppType.From(typeof(UltiBuff)))
                 {
                     var id = __instance.buff.Unbox<UltiBuff>();
-                    if (BuffMgr.LevelBuffs.Contains(id))
+                    if (BuffMgr.CustomLevelBuffs.Contains(id))
                         if (__instance.manager.data.GetBuffLevel(id) < 2)
                             __instance.SetText($"{__instance.manager.data.GetBuffLevel(id)}级");
                         else

@@ -11,7 +11,7 @@ namespace SubspeciesEntry.BepInEx.Plants
     [HarmonyPatch(typeof(BombCherry))]
     public static class BombCherryPatch
     {
-        [HarmonyPatch(nameof(BombCherry.Explode), new Type[] { })]
+        [HarmonyPatch(nameof(BombCherry.Explode), new Type[] { typeof(float) })]
         [HarmonyPrefix]
         public static void PreExplode(BombCherry __instance)
         {

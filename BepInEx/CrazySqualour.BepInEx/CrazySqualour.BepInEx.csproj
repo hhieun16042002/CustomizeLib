@@ -67,6 +67,10 @@
       <HintPath>..\..\lib\BepInEx\core\BepInEx.Unity.IL2CPP.dll</HintPath>
     
   <Private>False</Private></Reference>
+	  <Reference Include="Core">
+		  <HintPath>..\..\lib\BepInEx\interop\Core.dll</HintPath>
+		  <Private>False</Private>
+	  </Reference>
     <Reference Include="Cpp2IL.Core">
       <HintPath>..\..\lib\BepInEx\core\Cpp2IL.Core.dll</HintPath>
     
@@ -486,6 +490,6 @@
   </ItemGroup>
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
   <Exec Command="COPY &quot;$(TargetPath)&quot; &quot;$(BepResPath)&quot;" />
-  <Exec Command="COPY &quot;$(TargetPath)&quot; &quot;$(PluginsPath)&quot;" />
+  <Exec Command="COPY &quot;$(TargetPath)&quot; &quot;$(InnerPath)&quot;" />
 </Target>
 </Project>

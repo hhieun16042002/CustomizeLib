@@ -1,6 +1,7 @@
 ﻿using BepInEx;
 using BepInEx.Unity.IL2CPP;
 using CustomizeLib.BepInEx;
+using CustomizeLib.BepInEx.ExtensionData.Basic;
 using HarmonyLib;
 using Il2CppInterop.Runtime.Injection;
 using System.Reflection;
@@ -56,7 +57,7 @@ namespace UltimateCherryTorch.BepInEx
 
         public void OnTriggerEnter2D(Collider2D collision)
         {
-            if (collision.gameObject.TryGetComponent<Bullet>(out var bullet) && bullet != null && bullet.torchWood != plant && !bullet.fromEnermy)
+            if (collision.gameObject.TryGetComponent<Bullet>(out var bullet) && bullet != null && bullet.torchWood != plant && bullet.Team == Team.Player)
             {
                 if (bullet.theBulletType == BulletType.Bullet_doom || bullet.theBulletType == BulletType.Bullet_doom_big ||
                     bullet.theBulletType == BulletType.Bullet_superCherry || bullet.theBulletType == BulletType.Bullet_cherrySquash ||

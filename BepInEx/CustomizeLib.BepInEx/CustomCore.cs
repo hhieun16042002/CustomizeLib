@@ -3,6 +3,8 @@
 using BepInEx;
 using BepInEx.Logging;
 using BepInEx.Unity.IL2CPP;
+using CustomizeLib.BepInEx.ExtensionData.Basic;
+using CustomizeLib.BepInEx.ExtensionData.Unity;
 using HarmonyLib;
 using Il2CppInterop.Runtime;
 using Il2CppInterop.Runtime.Injection;
@@ -11,14 +13,14 @@ using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Text.RegularExpressions;
 using UnityEngine;
-using static Il2CppSystem.Globalization.TimeSpanFormat;
+using Core;
 
 ///
 ///Credit to likefengzi(https://github.com/likefengzi)(https://space.bilibili.com/237491236)
-///
+///f
 namespace CustomizeLib.BepInEx
 {
-    [BepInPlugin("salmon.inf75.pvzcustomization", "PVZCustomization", "3.4")]
+    [BepInPlugin("salmon.inf75.pvzcustomization", "PVZCustomization", "3.6")]
     public class CustomCore : BasePlugin
     {
         public static class TypeMgrExtra
@@ -136,6 +138,14 @@ namespace CustomizeLib.BepInEx
         /// <param name="item1">亲本（地上长的）</param>
         /// <param name="item2">亲本（后融合上去的）</param>
         public static void AddFusion(int target, int item1, int item2) => CustomFusions.Add((target, item1, item2));
+
+        /// <summary>
+        /// 添加融合配方
+        /// </summary>
+        /// <param name="target">目标植物</param>
+        /// <param name="item1">亲本（地上长的）</param>
+        /// <param name="item2">亲本（后融合上去的）</param>
+        public static void AddFusion(PlantType target, PlantType item1, PlantType item2) => CustomFusions.Add(((int)target, (int)item1, (int)item2));
 
         /// <summary>
         /// 添加植物图鉴
@@ -261,9 +271,20 @@ namespace CustomizeLib.BepInEx
 
             // 设置音量（应用全局音量调整）
             audioSource.volume = volume * GameAPP.config.gameSoundVolume;
-            SoundManager.PlaySound(audio, volume);
-            // 播放音效
-            audioSource.Play();
+            GameAPP.music.PlayOneShot(audio, volume);
+        }
+
+        /// <summary>
+        /// 注册自定义音效
+        /// </summary>
+        /// <param name="audio">音效</param>
+        /// <param name="soundID">ID</param>
+        public static void RegisterCustomSound(AudioClip audio, int soundID)
+        {
+            if (!CustomSounds.ContainsKey(soundID))
+                CustomSounds.Add(soundID, audio);
+            else
+                Instance.Value.Log.LogError($"Duplicate sound id {soundID}");
         }
 
         /// <summary>
@@ -278,7 +299,7 @@ namespace CustomizeLib.BepInEx
         /// <param name="level">最大等级</param>
         /// <param name="bg">背景</param>
         /// <returns>词条ID</returns>
-        public static int RegisterCustomBuff(string text, BuffType buffType, Func<bool> canUnlock, int cost, 
+        public static int RegisterCustomBuff(string text, BuffType buffType, Func<bool> canUnlock, int cost,
             PlantType plantType = PlantType.Nothing, int level = 1, BuffBgType bg = default) =>
             RegisterCustomBuff(text, buffType, canUnlock, cost, PlantType.Nothing, false, plantType, level, bg);
 
@@ -363,13 +384,13 @@ namespace CustomizeLib.BepInEx
                     CustomUnlockBuffs.Add(i, (icon, text, cost));
                     TravelDictionary.unlocksText.Add((TravelUnlocks)i, text);
                     break;
-                //case BuffType.InvestmentBuff: // 投资注册还没写完
-                //    if (ibuff == null) return -1;
-                //    i = CustomBuffStartID + CustomInvestBuffs.Count;
-                //    if (buffID != -1) i = buffID;
-                //    CustomInvestBuffs.Add(i, (icon, canUnlock, ibuff));
-                //    TravelMgr.InvestBuffsData.Add((InvestBuff)i, ibuff);
-                //    break;
+                    //case BuffType.InvestmentBuff: // 投资注册还没写完
+                    //    if (ibuff == null) return -1;
+                    //    i = CustomBuffStartID + CustomInvestBuffs.Count;
+                    //    if (buffID != -1) i = buffID;
+                    //    CustomInvestBuffs.Add(i, (icon, canUnlock, ibuff));
+                    //    TravelMgr.InvestBuffsData.Add((InvestBuff)i, ibuff);
+                    //    break;
             }
             CustomBuffCost.Add((buffType, i), cost);
             CustomBuffText.Add((buffType, i), text);
@@ -388,8 +409,29 @@ namespace CustomizeLib.BepInEx
                 else
                     CustomPlantInfo.Add(plantType, new List<(BuffType, int)> { (buffType, i) });
             }
+            CustomBuffs.Add((buffType, i), (text, icon, zombieType));
             return i;
         }
+
+        /// <summary>
+        /// 设置二创词条在词条图鉴中的类型
+        /// </summary>
+        /// <param name="buffType">词条类型</param>
+        /// <param name="id">词条ID</param>
+        /// <param name="type">类型</param>
+        /// <param name="icon">图标</param>
+        public static void SetCustomBuffAlmanacType(BuffType buffType, int id, AlmanacBuffType type, PlantType icon) =>
+            CustomAlmanacBuffType.Add((buffType, id), (type, icon, (ZombieType)(-1)));
+
+        /// <summary>
+        /// 设置二创词条在词条图鉴中的类型
+        /// </summary>
+        /// <param name="buffType">词条类型</param>
+        /// <param name="id">词条ID</param>
+        /// <param name="type">类型</param>
+        /// <param name="icon">图标</param>
+        public static void SetCustomBuffAlmanacType(BuffType buffType, int id, AlmanacBuffType type, ZombieType icon) =>
+            CustomAlmanacBuffType.Add((buffType, id), (type, (PlantType)(-1), icon));
 
         /// <summary>
         /// 注册自定义子弹
@@ -863,7 +905,7 @@ namespace CustomizeLib.BepInEx
                         var bulletID = (BulletType)(CustomBulletSkinStartID + CustomSkinBullet.Count);
                         if (!CustomSkinBullet.ContainsKey(origin))
                             CustomSkinBullet.Add(origin, new List<(BulletType, GameObject?)> { (bulletID, bullet) });
-                        else 
+                        else
                             CustomSkinBullet[origin].Add((bulletID, bullet));
                         if (!CustomBulletsSkinID.ContainsKey(((PlantType)id, origin)))
                             CustomBulletsSkinID.Add(((PlantType)id, origin), new List<BulletType> { bulletID });
@@ -1057,7 +1099,7 @@ namespace CustomizeLib.BepInEx
         /// <param name="theMaxHealth">本体血量</param>
         /// <param name="theFirstArmorMaxHealth">一类防具血量</param>
         /// <param name="theSecondArmorMaxHealth">二类防具血量</param>
-        public static void RegisterCustomZombie<TBase, TClass>(ZombieType id, GameObject zombie, int spriteId,
+        public static void RegisterCustomZombie<TBase, TClass>(ZombieType id, GameObject zombie, Sprite preview,
             int theAttackDamage, int theMaxHealth, int theFirstArmorMaxHealth, int theSecondArmorMaxHealth)
             where TBase : Zombie where TClass : MonoBehaviour
         {
@@ -1067,7 +1109,7 @@ namespace CustomizeLib.BepInEx
             if (!CustomZombieTypes.Contains(id))
             {
                 CustomZombieTypes.Add(id);
-                CustomZombies.Add(id, (zombie, spriteId, new()
+                CustomZombies.Add(id, (zombie, preview, new()
                 {
                     theAttackDamage = theAttackDamage,
                     theFirstArmorMaxHealth = theFirstArmorMaxHealth,
@@ -1307,14 +1349,33 @@ namespace CustomizeLib.BepInEx
         public static void AddPlantName(PlantType plantType, string name) => CustomPlantNames.Add(plantType, name);
         public static void AddZombieName(ZombieType zombieType, string name) => CustomZombieNames.Add(zombieType, name);
 
+        ///// <summary>
+        ///// 添加无尽保存信息
+        ///// </summary>
+        ///// <param name="type">组件类型</param>
+        ///// <param name="name">组件字段(属性)名</param>
+        //public static void RegisterCustomEndlessData(Type type, string name) => CustomEndlessSaveData.Add(Il2CppType.From(type), name);
+
+        ///// <summary>
+        ///// 添加无尽保存信息
+        ///// </summary>
+        ///// <typeparam name="T">组件类型</typeparam>
+        ///// <param name="name">组件字段(属性)名</param>
+        //public static void RegisterCustomEndlessData<T>(string name) where T : Component => RegisterCustomEndlessData(typeof(T), name);
+
         public override void Load()
         {
             ClassInjector.RegisterTypeInIl2Cpp<CustomPlantMonoBehaviour>();
             ClassInjector.RegisterTypeInIl2Cpp<SelectCustomPlants>();
             ClassInjector.RegisterTypeInIl2Cpp<CheckCardState>();
             ClassInjector.RegisterTypeInIl2Cpp<ExtensionDataComponent>();
+            ClassInjector.RegisterTypeInIl2Cpp<DataComponent>();
             ClassInjector.RegisterTypeInIl2Cpp<CoreBehaviour>();
             ClassInjector.RegisterTypeInIl2Cpp<PositionRecorder>();
+            ClassInjector.RegisterTypeInIl2Cpp<EmptyDoom>();
+            ClassInjector.RegisterTypeInIl2Cpp<InterfaceBehaviour>();
+            ClassInjector.RegisterTypeInIl2Cpp<CustomHealthText>();
+            SkinBehaviourMgr.Init();
             Harmony.CreateAndPatchAll(Assembly.GetExecutingAssembly());
             Instance = new(this);
             CLogger = Log;
@@ -1374,7 +1435,7 @@ namespace CustomizeLib.BepInEx
         /// </summary>
         public static Dictionary<PlantType, (List<Func<Transform?>>, int)> CustomNormalCards { get; set; } = [];
 
-        public static Dictionary<ZombieType, (GameObject, int, ZombieDataManager.ZombieData)> CustomZombies { get; set; } = [];
+        public static Dictionary<ZombieType, (GameObject, Sprite, ZombieDataManager.ZombieData)> CustomZombies { get; set; } = [];
 
         public static List<ZombieType> CustomZombieTypes { get; set; } = [];
 
@@ -1538,6 +1599,23 @@ namespace CustomizeLib.BepInEx
         /// 自定义词条图标
         /// </summary>
         public static Dictionary<(BuffType, int), PlantType> CustomBuffIcon { get; set; } = new();
+
+        /// <summary>
+        /// 自定义音效
+        /// </summary>
+        public static Dictionary<int, AudioClip> CustomSounds { get; set; } = new();
+
+        /// <summary>
+        /// 二创词条
+        /// </summary>
+        public static Dictionary<(BuffType, int), (string, PlantType, ZombieType)> CustomBuffs { get; set; } = new();
+
+        /// <summary>
+        /// 设置词条图鉴内词条类型
+        /// </summary>
+        public static Dictionary<(BuffType, int), (AlmanacBuffType, PlantType, ZombieType)> CustomAlmanacBuffType { get; set; } = new();
+
+        public static Dictionary<Il2CppSystem.Type, string> CustomEndlessSaveData { get; set; } = new();
         // public static List<PlantType> CustomWeakUltimatePlant = new();
     }
 }

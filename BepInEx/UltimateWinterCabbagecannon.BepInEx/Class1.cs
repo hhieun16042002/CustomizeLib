@@ -255,15 +255,13 @@ namespace UltimateWinterCabbagecannon.BepInEx
                 Vector3 shootPos = __instance.shoot.position;
 
                 // 检查是否有雨伞叶保护植物
-                var tuple = __instance.FindUmbrella(shootPos);
-                var umbrellaPos = tuple.Item1;
-                var umbrellaPlant = tuple.Item2;
+                var plant = __instance.FindUmbrella(shootPos);
                 // 存储射击起始位置
                 float startX = shootPos.x;
                 float startY = shootPos.y;
 
                 // 如果有雨伞叶保护
-                if (umbrellaPos != null && umbrellaPlant != null)
+                if (plant != null)
                 {
                     // 再次遍历目标僵尸
                     foreach (var zombie in targetZombies)
@@ -273,14 +271,14 @@ namespace UltimateWinterCabbagecannon.BepInEx
                         float offsetY = startY + UnityEngine.Random.Range(-0.3f, 0.3f);
 
                         // 检查僵尸是否在雨伞叶右侧
-                        if (zombie.axis.position.x > umbrellaPlant.axis.position.x)
+                        if (zombie.axis.position.x > plant.axis.position.x)
                         {
                             // 计算弹道
                             Vector2 mouseClickPos = MousePositionDebug.instance.GetMouseClickPosition(0.3f);
-                            float[] trajectory = Lawnf.CalculateProjectileWithSpeed(
+                            float[] trajectory = global::Core.Lawnf.CalculateProjectileWithSpeed(
                                 new Vector2(offsetX, offsetY),
                                 mouseClickPos,
-                                new Vector2(umbrellaPlant.axis.position.x, umbrellaPlant.axis.position.y),
+                                new Vector2(plant.axis.position.x, plant.axis.position.y),
                                 __instance.flightTime
                             );
 
@@ -298,7 +296,7 @@ namespace UltimateWinterCabbagecannon.BepInEx
                             bullet.Vx = trajectory[1];
                             bullet.Vy = trajectory[2];
                             bullet.detaVy = -trajectory[3];
-                            bullet.targetPlant = umbrellaPlant;
+                            bullet.targetPlant = plant;
                             bullet.Damage = __instance.attackDamage;
                             bullet.fromType = __instance.thePlantType;
                         }
@@ -308,7 +306,7 @@ namespace UltimateWinterCabbagecannon.BepInEx
                             Vector2 zombieVel = zombie.Velocity;
                             Vector2 zombiePos = zombie.ColliderPosition;
 
-                            float[] trajectory = Lawnf.CalculateProjectileWithSpeed(
+                            float[] trajectory = global::Core.Lawnf.CalculateProjectileWithSpeed(
                                 new Vector2(offsetX, offsetY),
                                 zombieVel,
                                 zombiePos,
@@ -327,7 +325,7 @@ namespace UltimateWinterCabbagecannon.BepInEx
                             bullet.Vx = trajectory[1];
                             bullet.Vy = trajectory[2];
                             bullet.detaVy = -trajectory[3];
-                            bullet.targetPlant = umbrellaPlant;
+                            bullet.targetPlant = plant;
                             bullet.Damage = __instance.attackDamage;
                             bullet.fromType = __instance.thePlantType;
                         }
@@ -344,7 +342,7 @@ namespace UltimateWinterCabbagecannon.BepInEx
                         Vector2 zombieVel = zombie.Velocity;
                         Vector2 zombiePos = zombie.ColliderPosition;
 
-                        float[] trajectory = Lawnf.CalculateProjectileWithSpeed(
+                        float[] trajectory = global::Core.Lawnf.CalculateProjectileWithSpeed(
                             new Vector2(offsetX, offsetY),
                             zombieVel,
                             zombiePos,
@@ -363,7 +361,7 @@ namespace UltimateWinterCabbagecannon.BepInEx
                         bullet.Vx = trajectory[1];
                         bullet.Vy = trajectory[2];
                         bullet.detaVy = -trajectory[3];
-                        bullet.targetPlant = umbrellaPlant;
+                        bullet.targetPlant = plant;
                         bullet.Damage = __instance.attackDamage;
                         bullet.fromType = __instance.thePlantType;
                     }

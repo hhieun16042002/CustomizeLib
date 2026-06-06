@@ -19,7 +19,7 @@ namespace MagicZombie.BepInEx
             ClassInjector.RegisterTypeInIl2Cpp<MagicZombie>();
             var ab = CustomCore.GetAssetBundle(Assembly.GetExecutingAssembly(), "magiczombie");
             CustomCore.RegisterCustomZombie<NormalZombie, MagicZombie>((ZombieType)MagicZombie.ZombieID,
-                ab.GetAsset<GameObject>("MagicZombie"), -1, 50, 1350, 0, 0);
+                ab.GetAsset<GameObject>("MagicZombie"), null, 50, 1350, 0, 0);
             CustomCore.AddZombieAlmanacStrings(MagicZombie.ZombieID, $"魔术僵尸({MagicZombie.ZombieID})", "魔术技巧！喜好对植物表演的大魔术师。\n\n<color=#3D1400>贴图作者：@林秋AutumnLin</color>\n<color=#3D1400>韧性：</color><color=red>1350</color>\n<color=#3D1400>特点：</color><color=red>每5秒对在场随机植物进行一次魔术融合，对于无法融合的植物会使魔术失效。小概率会使植物消失并生成小鬼僵尸，若在场无植物时则在自身处生成小鬼。</color>\n\n<color=#3D1400>“我喜欢魔术，更喜欢表演魔术，”魔术僵尸热情高涨，游走在舞台中央，“所有人都会喜欢我的魔术，包括植物！”</color>");
         }
     }
