@@ -1,6 +1,5 @@
 # 标题
 Release（可能）每个大版本更新一次，有想弄最新的可以自己编译一下，想发就发   
-最后纪念伟大的Infinite75
 
 # PVZRHCustomization
 植物大战僵尸融合版二创植物与僵尸 by [@Infinite75](https://space.bilibili.com/672619350)    
