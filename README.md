@@ -45,8 +45,8 @@ Thanks for [@高数带我飞](https://space.bilibili.com/1117414477)(Github:[@Li
 ### 安装
 从Release中找到 Mod.x.zip解压，选择你要安装的二创解压到你的游戏根目录   
 
-（部分植物注册皮肤可能存在bug，需要额外代码来实现效果，由于本人没有时间和精力来对其一个个测试，所以如果有人发现皮肤存在bug可以向SkinPatch, SkinBehaviours, SkinMgr等文件添加代码提交PR，感谢您为这个项目做出的贡献）     
-
 ### 部分说明
 MelonLoader版本已停止维护（不适配最新版）     
 如果我忘记在版本更新时发布Release或Discord，可以帮我发布最新Mod
+
+（部分植物注册皮肤可能存在bug，需要额外代码来实现效果，由于本人没有时间和精力来对其一个个测试，所以如果有人发现皮肤存在bug可以向SkinPatch, SkinBehaviours, SkinMgr等文件添加代码提交PR，感谢您为这个项目做出的贡献）     
