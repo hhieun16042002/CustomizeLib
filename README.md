@@ -1,6 +1,5 @@
 # 标题
 Release（可能）每个大版本更新一次，有想弄最新的可以自己编译一下，想发就发   
-最后纪念伟大的Infinite75
 
 # PVZRHCustomization
 植物大战僵尸融合版二创植物与僵尸 by [@Infinite75](https://space.bilibili.com/672619350)    
@@ -41,8 +40,12 @@ Thanks for [@高数带我飞](https://space.bilibili.com/1117414477)(Github:[@Li
 将你要注册皮肤的植物的预览预制体和植物预制体分别以"Prefab"和"Preview"命名     
 将其打包为AssetBundle包，并放到 游戏目录\BepInEx\plugins\Skin 目录下（如果没有Skin文件夹请自己创建）     
 把AssetBundle包重命名为 "skin_plantID[_int]" 最后一部分的_int为可选项，若要为一个植物添加多个皮肤，添加最后一部分的_int来标记不同的皮肤，int为任意数字     
-（部分植物注册皮肤可能存在bug，需要额外代码来实现效果，由于本人没有时间和精力来对其一个个测试，所以如果有人发现皮肤存在bug可以向SkinPatch, SkinBehaviours, SkinMgr等文件添加代码提交PR，感谢您为这个项目做出的贡献）     
+
+### 安装
+从Release中找到 Mod.x.zip解压，选择你要安装的二创解压到你的游戏根目录   
 
 ### 部分说明
 MelonLoader版本已停止维护（不适配最新版）     
 如果我忘记在版本更新时发布Release或Discord，可以帮我发布最新Mod
+
+（部分植物注册皮肤可能存在bug，需要额外代码来实现效果，由于本人没有时间和精力来对其一个个测试，所以如果有人发现皮肤存在bug可以向SkinPatch, SkinBehaviours, SkinMgr等文件添加代码提交PR，感谢您为这个项目做出的贡献）     
