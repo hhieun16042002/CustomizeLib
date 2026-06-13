@@ -17,7 +17,7 @@ using Core;
 
 ///
 ///Credit to likefengzi(https://github.com/likefengzi)(https://space.bilibili.com/237491236)
-///f
+///
 namespace CustomizeLib.BepInEx
 {
     [BepInPlugin("salmon.inf75.pvzcustomization", "PVZCustomization", "3.6")]
@@ -503,6 +503,27 @@ namespace CustomizeLib.BepInEx
         /// <param name="sun">阳光</param>
         public static void RegisterCustomPlant<TBase, TClass>([NotNull] int id, [NotNull] GameObject prefab,
             [NotNull] GameObject preview,
+            List<(PlantType, PlantType)> fusions, float attackInterval, float produceInterval, int attackDamage, int maxHealth,
+            float cd, int sun)
+            where TBase : Plant where TClass : MonoBehaviour => RegisterCustomPlant<TBase, TClass>(id, prefab, preview, fusions.ToIntegerList(), attackInterval, produceInterval, attackDamage, maxHealth, cd, sun);
+
+        /// <summary>
+        /// 注册自定义植物
+        /// </summary>
+        /// <typeparam name="TBase">植物基类</typeparam>
+        /// <typeparam name="TClass">植物自定义对象类</typeparam>
+        /// <param name="id">植物id</param>
+        /// <param name="prefab">植物预制体</param>
+        /// <param name="preview">植物预览预制体</param>
+        /// <param name="fusions">植物融合配方</param>
+        /// <param name="attackInterval">攻击间隔</param>
+        /// <param name="produceInterval">生产间隔</param>
+        /// <param name="attackDamage">攻击伤害</param>
+        /// <param name="maxHealth">血量</param>
+        /// <param name="cd">卡槽cd</param>
+        /// <param name="sun">阳光</param>
+        public static void RegisterCustomPlant<TBase, TClass>([NotNull] int id, [NotNull] GameObject prefab,
+            [NotNull] GameObject preview,
             List<(int, int)> fusions, float attackInterval, float produceInterval, int attackDamage, int maxHealth,
             float cd, int sun)
             where TBase : Plant where TClass : MonoBehaviour
@@ -538,6 +559,26 @@ namespace CustomizeLib.BepInEx
                 Instance.Value.Log.LogError($"Duplicate Plant ID: {id}");
             }
         }
+
+        /// <summary>
+        /// 注册自定义植物
+        /// </summary>
+        /// <typeparam name="TBase">植物基类</typeparam>
+        /// <param name="id">植物id</param>
+        /// <param name="prefab">植物预制体</param>
+        /// <param name="preview">植物预览预制体</param>
+        /// <param name="fusions">植物融合配方</param>
+        /// <param name="attackInterval">攻击间隔</param>
+        /// <param name="produceInterval">生产间隔</param>
+        /// <param name="attackDamage">攻击伤害</param>
+        /// <param name="maxHealth">血量</param>
+        /// <param name="cd">卡槽cd</param>
+        /// <param name="sun">阳光</param>
+        public static void RegisterCustomPlant<TBase>([NotNull] int id, [NotNull] GameObject prefab,
+            [NotNull] GameObject preview,
+            List<(PlantType, PlantType)> fusions, float attackInterval, float produceInterval, int attackDamage, int maxHealth,
+            float cd, int sun)
+            where TBase : Plant => RegisterCustomPlant<TBase>(id, prefab, prefab, fusions.ToIntegerList(), attackInterval, produceInterval, attackDamage, maxHealth, cd, sun);
 
         /// <summary>
         /// 注册自定义植物

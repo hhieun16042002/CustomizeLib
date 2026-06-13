@@ -15,6 +15,11 @@
     <ProjectReference Include="..\CustomizeLib.BepInEx\CustomizeLib.BepInEx.csproj" />
   </ItemGroup>
   <ItemGroup>
+	  <Reference Include="Core">
+		  <HintPath>..\..\lib\BepInEx\interop\Core.dll</HintPath>
+
+		  <Private>False</Private>
+	  </Reference>
     <Reference Include="0Harmony">
       <HintPath>..\..\lib\BepInEx\core\0Harmony.dll</HintPath>
     

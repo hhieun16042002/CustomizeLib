@@ -235,7 +235,7 @@ namespace SolarEclipseCabbage.BepInEx
                             Lawnf.TravelAdvanced((AdvBuff)SolarEclipseCabbage.BuffID) && trigger)
                             multi += 2f;
                         if (multi != 1f)
-                            plant.ModifyDamage((PlantDamageAdder)1944, multi);
+                            plant.ModifyDamage((PlantDamageAdder)1944, multi, false, float.MaxValue.GetNullable());
                     }
                     if (any && board.theSun > 15000)
                     {

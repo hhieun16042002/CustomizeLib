@@ -19,7 +19,7 @@ namespace EvolveGodSuperSnowGatling.BepInEx
             Console.OutputEncoding = System.Text.Encoding.UTF8;
             Harmony.CreateAndPatchAll(Assembly.GetExecutingAssembly());
 
-            ClassInjector.RegisterTypeInIl2Cpp<CustomGatlingPea>();
+            // ClassInjector.RegisterTypeInIl2Cpp<CustomGatlingPea>();
             ClassInjector.RegisterTypeInIl2Cpp<SnowGatling>();
             ClassInjector.RegisterTypeInIl2Cpp<SuperSnowGatling_Shooting>();
             ClassInjector.RegisterTypeInIl2Cpp<UniqueUpgrade>();
@@ -39,25 +39,25 @@ namespace EvolveGodSuperSnowGatling.BepInEx
         public void Awake() => Instance = this;
     }
 
-    public class CustomGatlingPea : Peashooter
-    {
-        // 实现IntPtr构造方法
-        public CustomGatlingPea(IntPtr ptr) : base(ptr) { }
-        public CustomGatlingPea() : base(ClassInjector.DerivedConstructorPointer<CustomGatlingPea>()) => ClassInjector.DerivedConstructorBody(this);
-        // 实现抽象类的方法
-        public Il2CppSystem.Collections.Generic.List<BaseBuff> Buffs
-        {
-            get
-            {
-                var list = new Il2CppSystem.Collections.Generic.List<BaseBuff>();
-                list.Add(new UpgradeBuff(PlantType.Peashooter, PlantType.SnowGatling));
-                list.Add(new UpgradeBuff(PlantType.Peashooter, PlantType.HelmetGatling));
-                list.Add(new UpgradeBuff(PlantType.Peashooter, PlantType.LanternSplit));
-                list.Add(new UpgradeBuff(PlantType.Peashooter, PlantType.CherryGatling));
-                return list;
-            }
-        }
-    }
+    //public class CustomGatlingPea : Peashooter
+    //{
+    //    // 实现IntPtr构造方法
+    //    public CustomGatlingPea(IntPtr ptr) : base(ptr) { }
+    //    public CustomGatlingPea() : base(ClassInjector.DerivedConstructorPointer<CustomGatlingPea>()) => ClassInjector.DerivedConstructorBody(this);
+    //    // 实现抽象类的方法
+    //    public Il2CppSystem.Collections.Generic.List<BaseBuff> Buffs
+    //    {
+    //        get
+    //        {
+    //            var list = new Il2CppSystem.Collections.Generic.List<BaseBuff>();
+    //            list.Add(new UpgradeBuff(PlantType.Peashooter, PlantType.SnowGatling));
+    //            list.Add(new UpgradeBuff(PlantType.Peashooter, PlantType.HelmetGatling));
+    //            list.Add(new UpgradeBuff(PlantType.Peashooter, PlantType.LanternSplit));
+    //            list.Add(new UpgradeBuff(PlantType.Peashooter, PlantType.CherryGatling));
+    //            return list;
+    //        }
+    //    }
+    //}
 
     public class SnowGatling : BaseConfig
     {
@@ -103,7 +103,7 @@ namespace EvolveGodSuperSnowGatling.BepInEx
         }
         public override void ReinforcePlant(Plant plant)
         {
-            plant.ModifyDamage(PlantDamageAdder.Shooting, 20.0f, false, new Il2CppSystem.Nullable<float>(float.MaxValue));
+            plant.ModifyDamage(PlantDamageAdder.Shooting, 14.0f, false, new Il2CppSystem.Nullable<float>(float.MaxValue));
         }
         // 自定义的方法
 
@@ -154,7 +154,7 @@ namespace EvolveGodSuperSnowGatling.BepInEx
                 Board.Instance.gameObject.GetOrAddComponent<ShootingDataSave>().Explode = true;
         }
         public override int MaxCount => 1;
-        public override float AppearWeight => 0.1f;
+        public override float AppearWeight => 0.05f;
         public override Quality Rarity => Quality.diamond;
     }
 
@@ -175,7 +175,7 @@ namespace EvolveGodSuperSnowGatling.BepInEx
                 TravelMgr.Instance.GetNormalBuff((AdvBuff)1011);
         }
         public override int MaxCount => 1;
-        public override float AppearWeight => 0.1f;
+        public override float AppearWeight => 0.05f;
         public override Quality Rarity => Quality.diamond;
     }
 
@@ -278,7 +278,7 @@ namespace EvolveGodSuperSnowGatling.BepInEx
             {
                 if (!Config.configs.ContainsKey(PlantType.SnowGatling))
                 {
-                    Config.configs[PlantType.Peashooter] = new CustomGatlingPea();
+                    // Config.configs[PlantType.Peashooter] = new CustomGatlingPea();
                     Config.configs.Add(PlantType.SnowGatling, new SnowGatling());
                     Config.configs.Add(PlantType.SuperSnowGatling, new SuperSnowGatling_Shooting());
                 }
@@ -303,6 +303,17 @@ namespace EvolveGodSuperSnowGatling.BepInEx
                 foreach (var text in __instance.infoText)
                     text.text += str;
             }
+        }
+    }
+
+    [HarmonyPatch(typeof(Peashooter))]
+    public static class PeashooterPatch
+    {
+        [HarmonyPatch(nameof(Peashooter.Buffs), MethodType.Getter)]
+        [HarmonyPostfix]
+        public static void PostGetBuffs(ref Il2CppSystem.Collections.Generic.List<BaseBuff> __result)
+        {
+            __result.Add(new UpgradeBuff(PlantType.Peashooter, PlantType.SnowGatling));
         }
     }
 }

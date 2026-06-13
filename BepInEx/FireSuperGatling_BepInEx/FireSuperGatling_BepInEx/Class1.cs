@@ -39,8 +39,8 @@ namespace FireSuperGatling_BepInEx
             var ab_skin1 = CustomCore.GetAssetBundle(Assembly.GetExecutingAssembly(), "skin1");
             CustomCore.RegisterCustomPlantSkin<SuperGatling, FireSuperGatling>(
                 FireSuperGatling.PlantID,
-                ab.GetAsset<GameObject>("FireSuperGatlingPrefab"),
-                ab.GetAsset<GameObject>("FireSuperGatlingPreview"),
+                ab_skin1.GetAsset<GameObject>("FireSuperGatlingPrefab1"),
+                ab_skin1.GetAsset<GameObject>("FireSuperGatlingPreview1"),
                 new List<(int, int)>
                 {
                 ((int)PlantType.SuperGatling, (int)PlantType.Jalapeno),
@@ -99,11 +99,28 @@ namespace FireSuperGatling_BepInEx
     }
 
     [HarmonyPatch(typeof(Bullet_pea_jala))]
-    public static class ZombiePatch
+    public static class Bullet_pea_jalaPatch
     {
         [HarmonyPatch(nameof(Bullet_pea_jala.HitZombie))]
         [HarmonyPrefix]
-        public static void PreTakeDamage(Bullet __instance, ref Zombie zombie)
+        public static void PreTakeDamage(Bullet_pea_jala __instance, ref Zombie zombie)
+        {
+            if ((int)__instance.fromType == FireSuperGatling.PlantID && Lawnf.TravelAdvanced(GameAPP.Instance.GetData<BuffID>("MegaSuperGatling_BuffID").val) && zombie.HasBuff(EffectType.Jala))
+            {
+                if (!CoreTools.TravelAdvanced("怒火攻心"))
+                    __instance.Damage = (int)(__instance.Damage * 11f / 3f);
+                else
+                    __instance.Damage *= 3;
+            }
+        }
+    }
+
+    [HarmonyPatch(typeof(Bullet_firePea_super))]
+    public static class Bullet_firePea_superPatch
+    {
+        [HarmonyPatch(nameof(Bullet_firePea_super.HitZombie))]
+        [HarmonyPrefix]
+        public static void PreTakeDamage(Bullet_firePea_super __instance, ref Zombie zombie)
         {
             if ((int)__instance.fromType == FireSuperGatling.PlantID && Lawnf.TravelAdvanced(GameAPP.Instance.GetData<BuffID>("MegaSuperGatling_BuffID").val) && zombie.HasBuff(EffectType.Jala))
             {

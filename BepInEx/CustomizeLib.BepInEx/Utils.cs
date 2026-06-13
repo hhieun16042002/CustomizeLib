@@ -185,7 +185,11 @@ namespace CustomizeLib.BepInEx
         /// <summary>
         /// 僵尸
         /// </summary>
-        Zombie
+        Zombie,
+        /// <summary>
+        /// 诸神
+        /// </summary>
+        Shooting
     }
 
     public class ZombieAttrTimers
@@ -1108,7 +1112,11 @@ namespace CustomizeLib.BepInEx
             return result;
         }
 
+        public static List<(int, int)> ToIntegerList<T1, T2>(this List<(T1, T2)> list) where T1 : Enum where T2 : Enum =>
+            [.. list.Select(tuple => (tuple.Item1.ToIntVal(), tuple.Item2.ToIntVal()))];
+
         public static T ToEnumVal<T>(this int value) where T : Enum => (T)Enum.ToObject(typeof(T), value);
+        public static int ToIntVal<T>(this T value) where T : Enum => (int)Enum.ToObject(typeof(T), value);
     }
 
     public static class Utils

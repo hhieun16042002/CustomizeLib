@@ -106,8 +106,7 @@ namespace UltimateWinterMelonBepInEx
                 return;
             // plant.healthSlider.textHead = plant.gameObject.transform.GetChild(1);
             var func = () => $"大招概率:{superShoot}";
-            Debug.Log(func.Invoke());
-            plant.healthSlider.RegisterText(Color.cyan, func, new Il2CppSystem.Nullable<Vector2>(new Vector2(2f, 2f)));
+            plant.RegisterText(Color.cyan, func, new Vector2(2f, 2f));
             // InitText();
         }
 

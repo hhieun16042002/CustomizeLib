@@ -1,5 +1,6 @@
 ﻿using BepInEx;
 using BepInEx.Unity.IL2CPP;
+using Core;
 using CustomizeLib.BepInEx;
 using CustomizeLib.BepInEx.ExtensionData.Basic;
 using HarmonyLib;
@@ -58,6 +59,7 @@ namespace GoldImitater.BepInEx
         {
             int total = 0;
             var config = GameAPP.config;
+            if (config == null) return;
             if (config.levelZombieInRandom) total += 2;
             if (config.strongUltiZombieInRandom) total += 2;
             if (config.leaderInRandom) total += 6;
@@ -356,31 +358,31 @@ namespace GoldImitater.BepInEx
         public static void Postfix() => CardUI_Start_Patch.loopCount = 0;
     }*/
 
-    [HarmonyPatch(typeof(ZombieBoss))]
-    public static class ZombieBossStartPatch
-    {
-        [HarmonyPatch(nameof(ZombieBoss.Start))]
-        [HarmonyPostfix]
-        public static void Postfix(ZombieBoss __instance)
-        {
-            {
-                var position = __instance.axis.transform.position;
-                position.y -= Lawnf.GetAllZombies().ToSystemList().Where(z => z.theZombieType == ZombieType.ZombieBoss || z.theZombieType == ZombieType.ZombieBoss2)
-                    .ToList().Count * 0.4f;
-                __instance.healthText.transform.position = position;
-            }
-        }
+    //[HarmonyPatch(typeof(ZombieBoss))]
+    //public static class ZombieBossStartPatch
+    //{
+    //    [HarmonyPatch(nameof(ZombieBoss.Start))]
+    //    [HarmonyPostfix]
+    //    public static void Postfix(ZombieBoss __instance)
+    //    {
+    //        {
+    //            var position = __instance.axis.transform.position;
+    //            position.y -= Lawnf.GetAllZombies().ToSystemList().Where(z => z.theZombieType == ZombieType.ZombieBoss || z.theZombieType == ZombieType.ZombieBoss2)
+    //                .ToList().Count * 0.4f;
+    //            __instance.healthText.transform.position = position;
+    //        }
+    //    }
 
-        [HarmonyPatch(nameof(ZombieBoss.GetDamage))]
-        [HarmonyPostfix]
-        public static void PostGetDamage(ZombieBoss __instance, ref int __result)
-        {
-            if (__instance.GetData<bool>("GoldImitater_SpawnByGold"))
-            {
-                __result = Mathf.Min(__result, 5000);
-            }
-        }
-    }
+    //    [HarmonyPatch(nameof(ZombieBoss.GetDamage))]
+    //    [HarmonyPostfix]
+    //    public static void PostGetDamage(ZombieBoss __instance, ref int __result)
+    //    {
+    //        if (__instance.GetData<bool>("GoldImitater_SpawnByGold"))
+    //        {
+    //            __result = Mathf.Min(__result, 5000);
+    //        }
+    //    }
+    //}
 
     [HarmonyPatch(typeof(GameAPP), nameof(GameAPP.Awake))]
     public static class GameAPPPatch

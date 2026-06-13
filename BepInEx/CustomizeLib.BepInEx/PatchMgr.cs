@@ -535,6 +535,10 @@ namespace CustomizeLib.BepInEx
                             obj = id.BoxEnumToIl2Object<AdvBuff>();
                             list = __instance.zombieBuffs;
                             break;
+                        case AlmanacBuffType.Shooting:
+                            obj = id.BoxEnumToIl2Object<AdvBuff>();
+                            list = __instance.shootingBuffs;
+                            break;
                     }
                     var cardInfo = new AlmanacBuffMenu.CardInfo
                     {

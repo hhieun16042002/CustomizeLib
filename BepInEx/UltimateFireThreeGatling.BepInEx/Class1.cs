@@ -149,8 +149,8 @@ namespace UltimateFireThreeGatling.BepInEx
         }
     }
 
-    [HarmonyPatch(typeof(Plant), nameof(Plant.OnDestroy))]
-    public class Plant_OnDestroy
+    [HarmonyPatch(typeof(Plant), nameof(Plant.Die))]
+    public class Plant_Die
     {
         [HarmonyPostfix]
         public static void Prefix(Plant __instance)

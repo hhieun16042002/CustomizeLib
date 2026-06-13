@@ -241,7 +241,7 @@ namespace UltimateGoldImitater.BepInEx
         {
             float healthMultiplier = UnityEngine.Random.Range(healthMin, healthMax);
             plant.ModifyHealth((PlantHealthAdder)5, healthMultiplier, false);
-            plant.ModifyDamage((PlantDamageAdder)44, healthMultiplier, false);
+            plant.ModifyDamage((PlantDamageAdder)44, healthMultiplier, false, float.MaxValue.GetNullable());
             float speedMultiplier = UnityEngine.Random.Range(speedMin, speedMax);
             plant.attributeSpeed = speedMultiplier;
             plant.attackSpeedAdder = speedMultiplier - 1f;
@@ -639,31 +639,31 @@ namespace UltimateGoldImitater.BepInEx
         }
     }
 
-    [HarmonyPatch(typeof(ZombieBoss))]
-    public static class ZombieBossStartPatch
-    {
-        [HarmonyPatch(nameof(ZombieBoss.Start))]
-        [HarmonyPostfix]
-        public static void Postfix(ZombieBoss __instance)
-        {
-            {
-                var position = __instance.axis.transform.position;
-                position.y -= Lawnf.GetAllZombies().ToSystemList().Where(z => z.theZombieType == ZombieType.ZombieBoss || z.theZombieType == ZombieType.ZombieBoss2)
-                    .ToList().Count * 0.4f;
-                __instance.healthText.transform.position = position;
-            }
-        }
+    //[HarmonyPatch(typeof(ZombieBoss))]
+    //public static class ZombieBossStartPatch
+    //{
+    //    [HarmonyPatch(nameof(ZombieBoss.Start))]
+    //    [HarmonyPostfix]
+    //    public static void Postfix(ZombieBoss __instance)
+    //    {
+    //        {
+    //            var position = __instance.axis.transform.position;
+    //            position.y -= Lawnf.GetAllZombies().ToSystemList().Where(z => z.theZombieType == ZombieType.ZombieBoss || z.theZombieType == ZombieType.ZombieBoss2)
+    //                .ToList().Count * 0.4f;
+    //            __instance.healthText.transform.position = position;
+    //        }
+    //    }
 
-        [HarmonyPatch(nameof(ZombieBoss.GetDamage))]
-        [HarmonyPostfix]
-        public static void PostGetDamage(ZombieBoss __instance, ref int __result)
-        {
-            if (__instance.GetData<bool>("UltimateGoldImitater_SpawnByGold"))
-            {
-                __result = Mathf.Min(__result, 5000);
-            }
-        }
-    }
+    //    [HarmonyPatch(nameof(ZombieBoss.GetDamage))]
+    //    [HarmonyPostfix]
+    //    public static void PostGetDamage(ZombieBoss __instance, ref int __result)
+    //    {
+    //        if (__instance.GetData<bool>("UltimateGoldImitater_SpawnByGold"))
+    //        {
+    //            __result = Mathf.Min(__result, 5000);
+    //        }
+    //    }
+    //}
 
     public class ClearCold : MonoBehaviour
     {
